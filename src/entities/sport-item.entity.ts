@@ -20,7 +20,7 @@ export class SportItemEntity {
   @Column({ type: 'int' })
   price: number;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: 'boolean', default: true, name: 'is_active' })
   isActive: boolean;
 
   @Column({ type: 'varchar', length: 500, nullable: true })

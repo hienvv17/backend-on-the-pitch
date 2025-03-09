@@ -20,13 +20,13 @@ export class StaffEntity {
   @Column({ type: 'varchar', length: 128 })
   uid: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'full_name' })
   fullName?: string;
 
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
 
-  @Column({ type: 'varchar', length: 11 })
+  @Column({ type: 'varchar', length: 11, name: 'phone_number' })
   phoneNumber: string;
 
   @Column({
@@ -37,10 +37,14 @@ export class StaffEntity {
   })
   role: STAFF_ROLE;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ type: 'boolean', default: true, name: 'is_active' })
   isActive: boolean;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    name: 'active_date',
+  })
   activeDate: Date;
 
   @CreateDateColumn({ name: 'created_at' })

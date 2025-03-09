@@ -23,7 +23,11 @@ export class BranchEntity {
   @Column({ type: 'json', nullable: true })
   images?: string[];
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'active_date',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   activeDate: Date;
 
   @CreateDateColumn({ name: 'created_at' })

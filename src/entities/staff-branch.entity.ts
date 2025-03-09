@@ -20,7 +20,7 @@ export class StaffBranchEntity {
   @ManyToOne(() => BranchEntity, { onDelete: 'CASCADE' })
   branch: BranchEntity;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: 'boolean', default: false, name: 'is_deleted' })
   isDeleted: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
