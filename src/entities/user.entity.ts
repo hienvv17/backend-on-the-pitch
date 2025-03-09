@@ -14,10 +14,10 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 128, unique: true })
   uid: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ name: 'full_name', type: 'varchar', length: 255, nullable: true })
   fullName?: string;
 
-  @Column({ type: 'varchar', length: 10, nullable: true })
+  @Column({ name: 'phone_number', type: 'varchar', length: 10, nullable: true })
   phoneNumber?: string;
 
   @Column({ type: 'varchar', length: 255, unique: true })

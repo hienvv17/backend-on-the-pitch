@@ -23,7 +23,7 @@ export class SportItemBranchEntity {
   @Column({ type: 'bigint' })
   quantity: number;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100, name: 'last_modified_by' })
   lastModifiedBy: string;
 
   @CreateDateColumn({ name: 'created_at' })
