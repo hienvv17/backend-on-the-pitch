@@ -34,9 +34,11 @@ export class UserAndBranchMigration1740512017998 implements MigrationInterface {
     await queryRunner.query(`
         CREATE TABLE branch (
             id BIGSERIAL  PRIMARY KEY ,
+            name VARCHAR(255) NOT NULL,
             street VARCHAR(255) NOT NULL,
             ward VARCHAR(100) NOT NULL,
             district VARCHAR(100) NOT NULL,
+            city VARCHAR(100) NOT NULL,
             images JSON,
             active_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
