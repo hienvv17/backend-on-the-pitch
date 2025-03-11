@@ -4,17 +4,39 @@ import { StaffEntity } from '@src/entities/staff.entity';
 import { LessThanOrEqual, Repository } from 'typeorm';
 import { CreateStaffDto } from './dtos/create-staff.dto';
 import * as moment from 'moment';
+import { BranchEntity } from '@src/entities/branch.entity';
+import { StaffBranchEntity } from '@src/entities/staff-branch.entity';
 
 @Injectable()
 export class StaffService {
   constructor(
     @InjectRepository(StaffEntity)
     private readonly staffRepository: Repository<StaffEntity>,
+    @InjectRepository(BranchEntity)
+    private readonly branchRepository: Repository<BranchEntity>,
+    @InjectRepository(StaffBranchEntity)
+    private readonly staffBranchRepository: Repository<StaffBranchEntity>,
   ) {}
 
   async create(createStaffDto: CreateStaffDto): Promise<StaffEntity> {
-    const newStaff = this.staffRepository.create(createStaffDto);
-    return await this.staffRepository.save(newStaff);
+    const branch = await this.branchRepository.findOne({
+      where: { id: createStaffDto.branchId },
+    });
+    if (!branch) {
+      throw new NotFoundException('Branch not found');
+    }
+    delete createStaffDto.branchId;
+    const newStaff = await this.staffRepository.save(
+      this.staffRepository.create(),
+    );
+    await this.staffBranchRepository.save(
+      this.staffBranchRepository.create({
+        staffId: newStaff.id,
+        branchId: branch.id,
+      }),
+    );
+
+    return newStaff;
   }
 
   async findAll(): Promise<StaffEntity[]> {

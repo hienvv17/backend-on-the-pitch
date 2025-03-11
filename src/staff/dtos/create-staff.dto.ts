@@ -5,6 +5,8 @@ import {
   IsEnum,
   IsBoolean,
   IsOptional,
+  IsNotEmpty,
+  IsNumber,
 } from 'class-validator';
 
 export class CreateStaffDto {
@@ -30,4 +32,8 @@ export class CreateStaffDto {
 
   @IsOptional()
   activeDate?: Date;
+
+  @IsNotEmpty()
+  @IsNumber()
+  branchId: number;
 }

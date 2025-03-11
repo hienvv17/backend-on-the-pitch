@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { StaffBranchEntity } from './staff-branch.entity';
 
 export enum STAFF_ROLE {
   ADMIN = 'ADMIN',
@@ -52,4 +54,7 @@ export class StaffEntity {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToMany(() => StaffBranchEntity, (staffBranch) => staffBranch.staff)
+  staffBranches: StaffBranchEntity[];
 }

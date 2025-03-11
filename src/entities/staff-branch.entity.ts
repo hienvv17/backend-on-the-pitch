@@ -5,6 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { StaffEntity } from './staff.entity';
 import { BranchEntity } from './branch.entity';
@@ -14,11 +15,11 @@ export class StaffBranchEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => StaffEntity, { onDelete: 'CASCADE' })
-  staff: StaffEntity;
+  @Column({ type: 'int', name: 'staff_id' })
+  staffId: number;
 
-  @ManyToOne(() => BranchEntity, { onDelete: 'CASCADE' })
-  branch: BranchEntity;
+  @Column({ type: 'int', name: 'branch_id' })
+  branchId: number;
 
   @Column({ type: 'boolean', default: false, name: 'is_deleted' })
   isDeleted: boolean;
@@ -28,4 +29,16 @@ export class StaffBranchEntity {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @ManyToOne(() => StaffEntity, (staff) => staff.staffBranches, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'staff_id' }) // Explicitly maps staffId to staff
+  staff: StaffEntity;
+
+  @ManyToOne(() => BranchEntity, (branch) => branch.staffBranches, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'branch_id' }) // Explicitly maps branchId to branch
+  branch: BranchEntity;
 }
