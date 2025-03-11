@@ -12,6 +12,9 @@ export class BranchEntity {
   id: number;
 
   @Column({ type: 'varchar', length: 255 })
+  name: string;
+
+  @Column({ type: 'varchar', length: 255 })
   street: string;
 
   @Column({ type: 'varchar', length: 100 })
@@ -19,6 +22,9 @@ export class BranchEntity {
 
   @Column({ type: 'varchar', length: 100 })
   district: string;
+
+  @Column({ type: 'varchar', length: 100 })
+  city: string;
 
   @Column({ type: 'json', nullable: true })
   images?: string[];
