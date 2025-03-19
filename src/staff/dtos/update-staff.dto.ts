@@ -1,4 +1,3 @@
-import { STAFF_ROLE } from '@src/entities/staff.entity';
 import {
   IsString,
   IsEmail,
@@ -6,6 +5,7 @@ import {
   IsBoolean,
   IsOptional,
 } from 'class-validator';
+import { STAFF_ROLE } from 'src/entities/staff.entity';
 
 export class CreateStaffDto {
   @IsString()

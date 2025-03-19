@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { StaffService } from './staff.service';
 import { CreateStaffDto } from './dtos/create-staff.dto';
-import { ManagerJwtGuard } from '@src/auth/guard/manager-jwt.guard';
-import { ResponseService } from '@src/response/response.service';
+import { ManagerJwtGuard } from 'src/auth/guard/manager-jwt.guard';
+import { ResponseService } from 'src/response/response.service';
 
 @Controller('staff')
 @UseGuards(ManagerJwtGuard)
