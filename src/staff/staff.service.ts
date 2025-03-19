@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, Repository } from 'typeorm';
 import { CreateStaffDto } from './dtos/create-staff.dto';
-import * as moment from 'moment';
+import moment from 'moment';
 import { StaffEntity } from 'src/entities/staff.entity';
 
 @Injectable()
