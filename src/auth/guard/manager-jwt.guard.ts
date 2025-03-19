@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { STAFF_ROLE } from 'src/entities/staff.entity';
-import { FirebaseAdmin } from 'src/firebase/firebase.service';
+import { FirebaseAdmin } from '../../firebase/firebase.service';
 import { StaffService } from 'src/staff/staff.service';
 
 @Injectable()

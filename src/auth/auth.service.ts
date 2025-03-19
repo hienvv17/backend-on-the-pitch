@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { config as envConfig } from 'dotenv';
-import { FirebaseAdmin } from 'src/firebase/firebase.service';
+import { FirebaseAdmin } from '../firebase/firebase.service';
 import { StaffService } from 'src/staff/staff.service';
 import { UserService } from 'src/user/user.service';
 envConfig();
