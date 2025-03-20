@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { FirebaseAdmin } from '../../firebase/firebase.service';
-import { StaffService } from 'src/staff/staff.service';
+import { StaffService } from '../../staff/staff.service';
 
 @Injectable()
 export class StaffJwtGuard implements CanActivate {

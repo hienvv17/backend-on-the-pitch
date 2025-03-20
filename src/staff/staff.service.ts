@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, Repository } from 'typeorm';
 import { CreateStaffDto } from './dtos/create-staff.dto';
 import moment from 'moment';
-import { StaffEntity } from 'src/entities/staff.entity';
+import { StaffEntity } from '../entities/staff.entity';
 
 @Injectable()
 export class StaffService {

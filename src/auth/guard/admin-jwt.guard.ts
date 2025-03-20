@@ -4,9 +4,9 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
-import { STAFF_ROLE } from 'src/entities/staff.entity';
+import { STAFF_ROLE } from '../../entities/staff.entity';
 import { FirebaseAdmin } from '../../firebase/firebase.service';
-import { StaffService } from 'src/staff/staff.service';
+import { StaffService } from '../../staff/staff.service';
 
 @Injectable()
 export class AdminJwtGuard implements CanActivate {

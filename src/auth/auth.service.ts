@@ -5,8 +5,8 @@ import {
 } from '@nestjs/common';
 import { config as envConfig } from 'dotenv';
 import { FirebaseAdmin } from '../firebase/firebase.service';
-import { StaffService } from 'src/staff/staff.service';
-import { UserService } from 'src/user/user.service';
+import { StaffService } from '../staff/staff.service';
+import { UserService } from '../user/user.service';
 envConfig();
 @Injectable()
 export class AuthService {

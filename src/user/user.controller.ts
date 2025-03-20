@@ -1,7 +1,7 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { ResponseService } from 'src/response/response.service';
+import { ResponseService } from '../response/response.service';
 
 @Controller('user')
 export class UserController {
