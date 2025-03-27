@@ -15,4 +15,9 @@ export default {
     backgroundRetryInterval: 60 * 15, // 15 minutes
     timeout: 30 * 1000, // 30 seconds
   },
+  field: {
+    minBookingTime: 60, // 1 hour booking is min
+    startBookingMinute: ['00', '30'], // booking start or middle hour
+    endBookingMinute: ['00', '30'], // interval 30 mins
+  },
 };

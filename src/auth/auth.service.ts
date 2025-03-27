@@ -36,6 +36,7 @@ export class AuthService {
   }
 
   async staffLogin(access_token: string) {
+    console.log('access_token', access_token);
     const app = this.admin.setup();
     const claims = await app.auth().verifyIdToken(access_token);
     const staff = await this.staffService.findByEmail(claims.email);

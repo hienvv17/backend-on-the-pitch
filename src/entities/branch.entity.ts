@@ -4,7 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { StaffBranchEntity } from './staff_branch.entity';
+import { SportFieldEntity } from './sport-field.entity';
 
 @Entity('branch')
 export class BranchEntity {
@@ -41,4 +44,10 @@ export class BranchEntity {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToMany(() => StaffBranchEntity, (staffBranch) => staffBranch.branch)
+  staffBranches: StaffBranchEntity[];
+
+  @OneToMany(() => SportFieldEntity, (sportField) => sportField.branch)
+  fieldBranches: StaffBranchEntity[];
 }

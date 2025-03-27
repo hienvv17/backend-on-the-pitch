@@ -4,17 +4,39 @@ import { LessThanOrEqual, Repository } from 'typeorm';
 import { CreateStaffDto } from './dtos/create-staff.dto';
 import moment from 'moment';
 import { StaffEntity } from '../entities/staff.entity';
+import { FirebaseAdmin } from '../firebase/firebase.service';
 
 @Injectable()
 export class StaffService {
   constructor(
     @InjectRepository(StaffEntity)
     private readonly staffRepository: Repository<StaffEntity>,
+    private readonly firebaseAdmin: FirebaseAdmin,
   ) {}
 
   async create(createStaffDto: CreateStaffDto): Promise<StaffEntity> {
-    const newStaff = this.staffRepository.create(createStaffDto);
-    return await this.staffRepository.save(newStaff);
+    //admin can create staff all branch
+    // manager can create staff only in his branch
+    const existingStaff = await this.staffRepository.findOne({
+      where: { email: createStaffDto.email },
+    });
+    if (existingStaff) {
+      throw new Error('Staff already exists');
+    }
+    const admin = this.firebaseAdmin.setup();
+    const newStaffData = await admin.auth().createUser({
+      email: createStaffDto.email,
+    });
+
+    console.log('Successfully created new user:', newStaffData);
+    const newStaff = await this.staffRepository.save(
+      this.staffRepository.create({
+        ...createStaffDto,
+        uid: newStaffData.uid,
+      }),
+    );
+
+    return newStaff;
   }
 
   async findAll(): Promise<StaffEntity[]> {
