@@ -1,49 +1,28 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import * as admin from 'firebase-admin';
 import { config as envConfig } from 'dotenv';
-import { FirebaseAdmin } from 'src/firebase/firebase.service';
-import { StaffService } from 'src/staff/staff.service';
-import { UserService } from 'src/user/user.service';
+
 envConfig();
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly admin: FirebaseAdmin,
-    private userService: UserService,
-    private staffService: StaffService,
-  ) {}
-
-  async login(access_token: string) {
-    try {
-      const app = this.admin.setup();
-      const claims = await app.auth().verifyIdToken(access_token);
-      let user = await this.userService.findByEmail(claims.email);
-      if (!user) {
-        user = await this.userService.create({
-          email: claims.email,
-          uid: claims.uid,
-          fullName: claims.name,
-          picture: claims.picture,
-        });
-      }
-      return user;
-    } catch (error) {
-      throw new BadRequestException('Invalid token.');
+  constructor() {
+    if (admin.apps.length === 0) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+        }),
+      });
     }
   }
 
-  async staffLogin(access_token: string) {
-    const app = this.admin.setup();
-    const claims = await app.auth().verifyIdToken(access_token);
-    const staff = await this.staffService.findByEmail(claims.email);
-    if (!staff) {
-      throw new UnauthorizedException(
-        'You have no access permission to this resource.',
-      );
-    }
-    return staff;
+  async login(access_token: string) {
+    // Verify the access token from gg
+    try {
+      const decodedToken = await admin.auth().verifyIdToken(access_token);
+
+      return 'Login';
+    } catch (error) {}
   }
 }
