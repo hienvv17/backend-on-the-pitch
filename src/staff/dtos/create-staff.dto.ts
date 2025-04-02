@@ -4,25 +4,27 @@ import {
   IsEnum,
   IsBoolean,
   IsOptional,
+  IsNotEmpty,
+  IsArray,
 } from 'class-validator';
 import { STAFF_ROLE } from '../../entities/staff.entity';
 
 export class CreateStaffDto {
   @IsString()
-  uid: string;
-
   @IsOptional()
-  @IsString()
   fullName?: string;
 
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   @IsString()
-  phoneNumber: string;
+  @IsOptional()
+  phoneNumber?: string;
 
   @IsEnum(STAFF_ROLE)
-  role?: STAFF_ROLE;
+  @IsOptional()
+  role?: STAFF_ROLE = STAFF_ROLE.STAFF;
 
   @IsOptional()
   @IsBoolean()
@@ -30,4 +32,9 @@ export class CreateStaffDto {
 
   @IsOptional()
   activeDate?: Date;
+
+  @IsString({ each: true })
+  @IsArray()
+  @IsOptional()
+  branchIds?: string[];
 }

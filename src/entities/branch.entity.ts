@@ -4,7 +4,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { StaffBranchEntity } from './staff_branch.entity';
+import { SportFieldEntity } from './sport-field.entity';
 
 @Entity('branch')
 export class BranchEntity {
@@ -29,6 +32,12 @@ export class BranchEntity {
   @Column({ type: 'json', nullable: true })
   images?: string[];
 
+  @Column({ nullable: true, type: 'varchar', length: 30 })
+  longtitude?: string;
+
+  @Column({ nullable: true, type: 'varchar', length: 30 })
+  latitude?: string;
+
   @Column({
     name: 'active_date',
     type: 'timestamp',
@@ -41,4 +50,10 @@ export class BranchEntity {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @OneToMany(() => StaffBranchEntity, (staffBranch) => staffBranch.branch)
+  staffBranches: StaffBranchEntity[];
+
+  @OneToMany(() => SportFieldEntity, (sportField) => sportField.branch)
+  fieldBranches: SportFieldEntity[];
 }

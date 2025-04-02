@@ -20,8 +20,8 @@ export class StaffController {
   // To do : implement the filter
 
   @Get()
-  async findAll() {
-    const staffs = await this.staffService.findAll();
+  async getAll() {
+    const staffs = await this.staffService.getAll();
     return this.responseService.successResponse({ items: staffs });
   }
 }

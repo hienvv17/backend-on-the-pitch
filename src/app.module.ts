@@ -7,6 +7,9 @@ import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
 import { StaffModule } from './staff/staff.module';
+import { BranchModule } from './branch/brach.module';
+import { SportCategoryModule } from './sport-category/sport-category.module';
+import { SportFieldModule } from './sport-field/sport-fields.module';
 
 @Module({
   imports: [
@@ -24,6 +27,9 @@ import { StaffModule } from './staff/staff.module';
     AuthModule,
     UserModule,
     StaffModule,
+    BranchModule,
+    SportCategoryModule,
+    SportFieldModule,
   ],
   controllers: [AppController],
   providers: [AppService],
