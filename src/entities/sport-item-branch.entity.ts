@@ -5,6 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
 import { SportItemEntity } from './sport-item.entity';
 import { BranchEntity } from './branch.entity';
@@ -14,10 +15,18 @@ export class SportItemBranchEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
+  @Column({ type: 'bigint', name: 'sport_item_id' })
+  sportItemId: number;
+
+  @Column({ type: 'bigint', name: 'branch_id' })
+  branchId: number;
+
   @ManyToOne(() => SportItemEntity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'sport_item_id' })
   sportItem: SportItemEntity;
 
   @ManyToOne(() => BranchEntity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'branch_id' })
   branch: BranchEntity;
 
   @Column({ type: 'bigint' })
