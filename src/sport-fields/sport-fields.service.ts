@@ -65,6 +65,7 @@ export class SportFieldService {
   }
 
   async createTimeSlot(sportFieldId: number, timeSlots: TimeSlotInput[]) {
+    console.log('timeSlots', timeSlots);
     if (!timeSlots || timeSlots.length === 0) return;
     const sportField = await this.sportFieldRepo.findOne({
       where: { id: sportFieldId },
@@ -110,10 +111,13 @@ export class SportFieldService {
       throw new BadRequestException(`Sport field with ID ${id} not found`);
     }
 
-    Object.assign(sportField, updateDto);
-    await this.sportFieldRepo.save(sportField);
-    if (!updateDto.timeSlots && updateDto.timeSlots.length > 0) {
-      await this.createTimeSlot(id, updateDto.timeSlots);
+    const { timeSlots } = updateDto;
+    delete updateDto.timeSlots;
+    await this.sportFieldRepo.update(id, {
+      ...updateDto,
+    });
+    if (timeSlots && timeSlots.length > 0) {
+      await this.createTimeSlot(id, timeSlots);
     }
     return;
   }
@@ -132,6 +136,20 @@ export class SportFieldService {
 
   async getAvailable(dto: GetAvailableFieldDto) {
     //to do get available field
+    // get available field from branch with sport category
+    const { branchId, sportCategoryId, date, startTime, endTime } = dto;
+    const branch = await this.branchRepo.findOne({
+      where: { id: branchId },
+    });
+    if (!branch) throw new BadRequestException('Branch do not exist');
+    const sportCategory = await this.sportCategoryRepo.findOne({
+      where: { id: sportCategoryId },
+    });
+    if (!sportCategory)
+      throw new BadRequestException('Sport type do not exist');
+    const sportFields = await this.sportFieldRepo.find({
+      where: { branchId, sportCategoryId },
+    });
     return dto;
   }
 }

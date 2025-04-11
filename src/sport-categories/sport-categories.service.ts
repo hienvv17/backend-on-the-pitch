@@ -6,7 +6,7 @@ import { CreateSportCategoryDto } from './dto/create-sport-category.dto copy';
 import { UpdateSportCategoryDto } from './dto/update-sport-category.dto';
 
 @Injectable()
-export class SportCategoryService {
+export class SportCategoriesService {
   constructor(
     @InjectRepository(SportCategoryEntity)
     private readonly sportCategoryRepo: Repository<SportCategoryEntity>,

@@ -2,19 +2,19 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BranchEntity } from '../entities/branch.entity';
 import { ResponseModule } from '../response/response.module';
-import { BranchController } from './branch.controller';
-import { BranchService } from './branch.service';
+import { BranchesController } from './branches.controller';
+import { BranchesService } from './branches.service';
 import { FirebaseAdmin } from '../firebase/firebase.service';
-import { StaffModule } from 'src/staff/staff.module';
+import { StaffsModule } from 'src/staffs/staffs.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([BranchEntity]),
     ResponseModule,
-    StaffModule,
+    StaffsModule,
   ],
-  controllers: [BranchController],
-  providers: [BranchService, FirebaseAdmin],
-  exports: [BranchService],
+  controllers: [BranchesController],
+  providers: [BranchesService, FirebaseAdmin],
+  exports: [BranchesService],
 })
-export class BranchModule {}
+export class BranchesModule {}

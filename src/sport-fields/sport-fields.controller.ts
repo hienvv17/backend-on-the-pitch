@@ -6,54 +6,58 @@ import {
   Param,
   Delete,
   UseGuards,
+  Put,
 } from '@nestjs/common';
 import { ResponseService } from '../response/response.service';
-import { SportFieldService } from './sport-field.service';
+import { SportFieldService } from './sport-fields.service';
 import { CreateSportFieldDto } from './dtos/create-sport-field.dto';
 import { UpdateSportFieldDto } from './dtos/update-sport-field.dto';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 import { GetAvailableFieldDto } from './dtos/get-available-field.dto';
 
-@Controller('sport-field')
-export class SportFieldController {
+@Controller('sport-fields')
+export class SportFieldsController {
   constructor(
     private responseService: ResponseService,
-    private sportFieldService: SportFieldService,
+    private sportFieldsService: SportFieldService,
   ) {}
 
   @Get()
   async getAll(@Param('branchId') branchId: number) {
-    const fields = await this.sportFieldService.getAll(branchId);
-    return this.responseService.successResponse({ items: fields });
+    const fields = await this.sportFieldsService.getAll(branchId);
+    return this.responseService.successResponse({
+      items: fields[0],
+      count: fields[1],
+    });
   }
 
   @UseGuards(AdminJwtGuard)
-  @Post('create')
+  @Post()
   async create(@Body() dto: CreateSportFieldDto) {
-    await this.sportFieldService.create(dto);
+    await this.sportFieldsService.create(dto);
     return this.responseService.successResponse();
   }
 
   @UseGuards(AdminJwtGuard)
-  @Post('update')
+  @Put(':sportFieldId')
   async update(
     @Param('sportFieldId') id: number,
     @Body() dto: UpdateSportFieldDto,
   ) {
-    await this.sportFieldService.updateSportField(id, dto);
+    await this.sportFieldsService.updateSportField(id, dto);
     return this.responseService.successResponse();
   }
 
   @UseGuards(AdminJwtGuard)
   @Delete()
   async delete(@Param() id: number) {
-    await this.sportFieldService.deleteSportField(id);
+    await this.sportFieldsService.deleteSportField(id);
     return this.responseService.successResponse();
   }
 
   @Post('available')
   async getAvailable(dto: GetAvailableFieldDto) {
-    const availableFields = await this.sportFieldService.getAvailable(dto);
+    const availableFields = await this.sportFieldsService.getAvailable(dto);
     return this.responseService.successResponse({ items: availableFields });
   }
 }

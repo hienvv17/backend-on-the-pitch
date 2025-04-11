@@ -3,13 +3,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
+import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
-import { StaffModule } from './staff/staff.module';
-import { BranchModule } from './branch/brach.module';
-import { SportCategoryModule } from './sport-category/sport-category.module';
-import { SportFieldModule } from './sport-field/sport-fields.module';
+import { StaffsModule } from './staffs/staffs.module';
+import { BranchesModule } from './branches/branches.module';
+import { SportCategoriesModule } from './sport-categories/sport-categories.module';
+import { SportFieldsModule } from './sport-fields/sport-fields.module';
 
 @Module({
   imports: [
@@ -25,11 +25,11 @@ import { SportFieldModule } from './sport-field/sport-fields.module';
       inject: [ConfigService],
     }),
     AuthModule,
-    UserModule,
-    StaffModule,
-    BranchModule,
-    SportCategoryModule,
-    SportFieldModule,
+    UsersModule,
+    StaffsModule,
+    BranchesModule,
+    SportCategoriesModule,
+    SportFieldsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

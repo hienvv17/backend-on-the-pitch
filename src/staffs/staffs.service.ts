@@ -6,9 +6,11 @@ import moment from 'moment';
 import { StaffEntity } from '../entities/staff.entity';
 import { FirebaseAdmin } from '../firebase/firebase.service';
 import { StaffBranchEntity } from 'src/entities/staff_branch.entity';
+import { UserRecord } from 'firebase-admin/lib/auth/user-record';
+import { UpdateStaffDto } from './dtos/update-staff.dto';
 
 @Injectable()
-export class StaffService {
+export class StaffsService {
   constructor(
     @InjectRepository(StaffEntity)
     private staffRepository: Repository<StaffEntity>,
@@ -18,34 +20,61 @@ export class StaffService {
   ) {}
 
   async create(createStaffDto: CreateStaffDto): Promise<StaffEntity> {
+    const admin = this.firebaseAdmin.setup();
+    let existingFirebaseUser: UserRecord = null;
+    try {
+      existingFirebaseUser = await admin
+        .auth()
+        .getUserByEmail(createStaffDto.email);
+    } catch (error) {
+      if (error.code === 'auth/user-not-found') {
+        existingFirebaseUser = await admin.auth().createUser({
+          email: createStaffDto.email,
+        });
+      } else {
+        throw error;
+      }
+    }
     const existingStaff = await this.staffRepository.findOne({
       where: { email: createStaffDto.email },
     });
     if (existingStaff) {
       throw new Error('Staff already exists');
     }
-    const admin = this.firebaseAdmin.setup();
-    const newStaffData = await admin.auth().createUser({
-      email: createStaffDto.email,
-    });
     const newStaff = await this.staffRepository.save(
       this.staffRepository.create({
         ...createStaffDto,
-        uid: newStaffData.uid,
+        uid: existingFirebaseUser.uid,
       }),
     );
     if (createStaffDto.branchIds && createStaffDto.branchIds.length > 0) {
       await this.createStaffBranch(newStaff.id, createStaffDto.branchIds);
     }
-
     return newStaff;
   }
 
-  async createStaffBranch(staffId: number, branchIds: string[]) {
-    /**
-     * check staff has working branches
-     * if not, create new staff branch
-     */
+  async update(
+    id: number,
+    updateStaffDto: UpdateStaffDto,
+  ): Promise<StaffEntity> {
+    const staff = await this.staffRepository.findOne({ where: { id } });
+    if (!staff) {
+      throw new NotFoundException(`Staff with ID ${id} not found`);
+    }
+    await this.staffRepository.update(id, {
+      fullName: updateStaffDto.fullName,
+      phoneNumber: updateStaffDto.phoneNumber,
+      role: updateStaffDto.role,
+      isActive: updateStaffDto.isActive,
+    });
+
+    if (updateStaffDto.branchIds && updateStaffDto.branchIds.length > 0) {
+      await this.createStaffBranch(id, updateStaffDto.branchIds);
+    }
+    return staff;
+  }
+
+  async createStaffBranch(staffId: number, branchIds: string[]): Promise<void> {
     if (branchIds && branchIds.length > 0) {
       const existingStaffBranch = await this.staffBranchRepo.find({
         where: { staffId },
@@ -71,6 +100,7 @@ export class StaffService {
         await this.staffBranchRepo.remove(staffBranchesToRemove);
       }
     }
+    return;
   }
 
   async getAll(): Promise<StaffEntity[]> {

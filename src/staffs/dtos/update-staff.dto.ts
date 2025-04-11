@@ -4,27 +4,29 @@ import {
   IsEnum,
   IsBoolean,
   IsOptional,
+  IsArray,
 } from 'class-validator';
 import { STAFF_ROLE } from '../../entities/staff.entity';
 
-export class CreateStaffDto {
+export class UpdateStaffDto {
   @IsString()
-  uid: string;
-
   @IsOptional()
-  @IsString()
   fullName?: string;
 
-  @IsEmail()
-  email: string;
-
   @IsString()
-  phoneNumber: string;
+  @IsOptional()
+  phoneNumber?: string;
 
   @IsEnum(STAFF_ROLE)
+  @IsOptional()
   role?: STAFF_ROLE;
 
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsString({ each: true })
+  @IsArray()
+  @IsOptional()
+  branchIds?: string[];
 }

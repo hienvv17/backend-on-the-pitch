@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import { STAFF_ROLE } from '../../entities/staff.entity';
 import { FirebaseAdmin } from '../../firebase/firebase.service';
-import { StaffService } from '../../staff/staff.service';
+import { StaffsService } from '../../staffs/staffs.service';
 
 @Injectable()
 export class AdminJwtGuard implements CanActivate {
   constructor(
-    private staffService: StaffService,
+    private staffsService: StaffsService,
     private readonly admin: FirebaseAdmin,
   ) {}
 
@@ -38,7 +38,7 @@ export class AdminJwtGuard implements CanActivate {
       }
       throw new UnauthorizedException('Invalid token.');
     }
-    const admin = await this.staffService.findByEmail(claims.email);
+    const admin = await this.staffsService.findByEmail(claims.email);
     if (!admin) {
       throw new UnauthorizedException('You has not been authorized');
     }

@@ -21,7 +21,7 @@ export class SportFieldEntity {
   @Column({ type: 'varchar', length: 100 })
   name: string;
 
-  @Column({ name: 'brach_id', type: 'bigint' })
+  @Column({ name: 'branch_id', type: 'bigint' })
   branchId: number;
 
   @Column({ name: 'sport_category_id', type: 'bigint' })

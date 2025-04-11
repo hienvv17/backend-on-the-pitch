@@ -6,7 +6,7 @@ import { UpdateBranchDto } from './dto/update-branch.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
-export class BranchService {
+export class BranchesService {
   constructor(
     @InjectRepository(BranchEntity)
     private branchRepo: Repository<BranchEntity>,
