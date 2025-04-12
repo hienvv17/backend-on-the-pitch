@@ -10,6 +10,7 @@ import { StaffsModule } from './staffs/staffs.module';
 import { BranchesModule } from './branches/branches.module';
 import { SportCategoriesModule } from './sport-categories/sport-categories.module';
 import { SportFieldsModule } from './sport-fields/sport-fields.module';
+import { FieldBookingsModule } from './field-bookings/field-bookings.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { SportFieldsModule } from './sport-fields/sport-fields.module';
     BranchesModule,
     SportCategoriesModule,
     SportFieldsModule,
+    FieldBookingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
