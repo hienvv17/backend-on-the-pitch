@@ -11,6 +11,8 @@ import { BranchesModule } from './branches/branches.module';
 import { SportCategoriesModule } from './sport-categories/sport-categories.module';
 import { SportFieldsModule } from './sport-fields/sport-fields.module';
 import { FieldBookingsModule } from './field-bookings/field-bookings.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -25,6 +27,32 @@ import { FieldBookingsModule } from './field-bookings/field-bookings.module';
         configService.get('defaultConnection'),
       inject: [ConfigService],
     }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>('MAILER_HOST'),
+          port: +configService.get<number>('MAILER_PORT'),
+          ignoreTLS: configService.get<string>('MAILER_IGNORE_TLS') === 'true' ? true : false,
+          secure: configService.get<string>('MAILER_SECURE') === 'true' ? true : false,
+          auth: {
+            user: configService.get<string>('MAILER_USER'),
+            pass: configService.get<string>('MAILER_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: configService.get<string>('MAILER_FROM'),
+        },
+        template: {
+          dir: __dirname + '/templates',
+          options: {
+            strict: true,
+          },
+        },
+      }),
+    }),
+
     AuthModule,
     UsersModule,
     StaffsModule,
@@ -36,4 +64,4 @@ import { FieldBookingsModule } from './field-bookings/field-bookings.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
