@@ -9,12 +9,12 @@ import {
   OneToMany,
 } from 'typeorm';
 
-import { BranchEntity } from './branch.entity';
-import { SportCategoryEntity } from './sport-category.entity';
-import { TimeSlotEntity } from './time-slot.entity';
+import { BranchsEntity } from './branchs.entity';
+import { SportCategoriesEntity } from './sport-categories.entity';
+import { TimeSlotsEntity } from './time-slots.entity';
 
-@Entity('sport_field')
-export class SportFieldEntity {
+@Entity('sport_fields')
+export class SportFieldsEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
@@ -42,14 +42,14 @@ export class SportFieldEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @ManyToOne(() => BranchEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => BranchsEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'branch_id' })
-  branch: BranchEntity;
+  branch: BranchsEntity;
 
-  @ManyToOne(() => SportCategoryEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => SportCategoriesEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'sport_category_id' })
-  sportCategory: SportCategoryEntity;
+  sportCategory: SportCategoriesEntity;
 
-  @OneToMany(() => TimeSlotEntity, (timeSlot) => timeSlot.sportField)
-  timeSlots: TimeSlotEntity[];
+  @OneToMany(() => TimeSlotsEntity, (timeSlot) => timeSlot.sportField)
+  timeSlots: TimeSlotsEntity[];
 }

@@ -4,7 +4,7 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
-import { STAFF_ROLE } from '../../entities/staff.entity';
+import { STAFF_ROLE } from '../../entities/staffs.entity';
 import { FirebaseAdmin } from '../../firebase/firebase.service';
 import { StaffsService } from '../../staffs/staffs.service';
 

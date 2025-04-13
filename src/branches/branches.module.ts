@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BranchEntity } from '../entities/branch.entity';
+import { BranchsEntity } from '../entities/branchs.entity';
 import { ResponseModule } from '../response/response.module';
 import { BranchesController } from './branches.controller';
 import { BranchesService } from './branches.service';
@@ -9,7 +9,7 @@ import { StaffsModule } from 'src/staffs/staffs.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([BranchEntity]),
+    TypeOrmModule.forFeature([BranchsEntity]),
     ResponseModule,
     StaffsModule,
   ],

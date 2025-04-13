@@ -4,19 +4,19 @@ import { ResponseModule } from '../response/response.module';
 import { SportFieldService } from './sport-fields.service';
 import { SportFieldsController } from './sport-fields.controller';
 import { FirebaseAdmin } from '../firebase/firebase.service';
-import { BranchEntity } from '../entities/branch.entity';
-import { SportFieldEntity } from '../entities/sport-field.entity';
-import { TimeSlotEntity } from '../entities/time-slot.entity';
-import { SportCategoryEntity } from '../entities/sport-category.entity';
+import { BranchsEntity } from '../entities/branchs.entity';
+import { SportFieldsEntity } from '../entities/sport-fields.entity';
+import { TimeSlotsEntity } from '../entities/time-slots.entity';
+import { SportCategoriesEntity } from '../entities/sport-categories.entity';
 import { StaffsModule } from 'src/staffs/staffs.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      SportFieldEntity,
-      BranchEntity,
-      SportCategoryEntity,
-      TimeSlotEntity,
+      SportFieldsEntity,
+      BranchsEntity,
+      SportCategoriesEntity,
+      TimeSlotsEntity,
     ]),
     ResponseModule,
     StaffsModule,

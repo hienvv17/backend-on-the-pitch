@@ -7,10 +7,10 @@ import {
   OneToMany,
 } from 'typeorm';
 import { StaffBranchEntity } from './staff_branch.entity';
-import { SportFieldEntity } from './sport-field.entity';
+import { SportFieldsEntity } from './sport-fields.entity';
 
-@Entity('branch')
-export class BranchEntity {
+@Entity('branchs')
+export class BranchsEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
@@ -54,6 +54,6 @@ export class BranchEntity {
   @OneToMany(() => StaffBranchEntity, (staffBranch) => staffBranch.branch)
   staffBranches: StaffBranchEntity[];
 
-  @OneToMany(() => SportFieldEntity, (sportField) => sportField.branch)
-  fieldBranches: SportFieldEntity[];
+  @OneToMany(() => SportFieldsEntity, (sportField) => sportField.branch)
+  fieldBranches: SportFieldsEntity[];
 }

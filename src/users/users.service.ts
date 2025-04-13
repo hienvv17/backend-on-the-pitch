@@ -2,15 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from '../entities/user.entity';
+import { UsersEntity } from '../entities/users.entity';
 import { FirebaseAdmin } from 'src/firebase/firebase.service';
 import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepo: Repository<UserEntity>,
+    @InjectRepository(UsersEntity)
+    private userRepo: Repository<UsersEntity>,
     private readonly firebaseAdmin: FirebaseAdmin,
   ) {}
 

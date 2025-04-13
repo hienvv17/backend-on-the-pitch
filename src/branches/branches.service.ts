@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { BranchEntity } from '../entities/branch.entity';
+import { BranchsEntity } from '../entities/branchs.entity';
 import { Repository } from 'typeorm';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
@@ -8,16 +8,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
 export class BranchesService {
   constructor(
-    @InjectRepository(BranchEntity)
-    private branchRepo: Repository<BranchEntity>,
+    @InjectRepository(BranchsEntity)
+    private branchRepo: Repository<BranchsEntity>,
   ) {}
 
-  async getAll(): Promise<BranchEntity[]> {
+  async getAll(): Promise<BranchsEntity[]> {
     //to do: get other info for the and how many field have
     return this.branchRepo.find();
   }
 
-  async getOne(id: number): Promise<BranchEntity> {
+  async getOne(id: number): Promise<BranchsEntity> {
     const branch = await this.branchRepo.findOne({ where: { id } });
     if (!branch) throw new BadRequestException('Branch do not exist');
     return branch;

@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsArray,
 } from 'class-validator';
-import { STAFF_ROLE } from '../../entities/staff.entity';
+import { STAFF_ROLE } from '../../entities/staffs.entity';
 
 export class UpdateStaffDto {
   @IsString()

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SportCategoryEntity } from '../entities/sport-category.entity';
+import { SportCategoriesEntity } from '../entities/sport-categories.entity';
 import { Repository } from 'typeorm';
 import { CreateSportCategoryDto } from './dto/create-sport-category.dto copy';
 import { UpdateSportCategoryDto } from './dto/update-sport-category.dto';
@@ -8,20 +8,20 @@ import { UpdateSportCategoryDto } from './dto/update-sport-category.dto';
 @Injectable()
 export class SportCategoriesService {
   constructor(
-    @InjectRepository(SportCategoryEntity)
-    private readonly sportCategoryRepo: Repository<SportCategoryEntity>,
+    @InjectRepository(SportCategoriesEntity)
+    private readonly sportCategoryRepo: Repository<SportCategoriesEntity>,
   ) {}
 
-  async create(dto: CreateSportCategoryDto): Promise<SportCategoryEntity> {
+  async create(dto: CreateSportCategoryDto): Promise<SportCategoriesEntity> {
     const category = this.sportCategoryRepo.create(dto);
     return this.sportCategoryRepo.save(category);
   }
 
-  async getAll(): Promise<SportCategoryEntity[]> {
+  async getAll(): Promise<SportCategoriesEntity[]> {
     return this.sportCategoryRepo.find();
   }
 
-  async findOne(id: number): Promise<SportCategoryEntity> {
+  async findOne(id: number): Promise<SportCategoriesEntity> {
     const category = await this.sportCategoryRepo.findOne({
       where: { id },
     });
@@ -33,7 +33,7 @@ export class SportCategoriesService {
   async update(
     id: number,
     dto: UpdateSportCategoryDto,
-  ): Promise<SportCategoryEntity> {
+  ): Promise<SportCategoriesEntity> {
     const category = await this.findOne(id);
     Object.assign(category, dto);
     return this.sportCategoryRepo.save(category);

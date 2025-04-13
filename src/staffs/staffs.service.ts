@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, Repository } from 'typeorm';
 import { CreateStaffDto } from './dtos/create-staff.dto';
 import moment from 'moment';
-import { StaffEntity } from '../entities/staff.entity';
+import { StaffsEntity } from '../entities/staffs.entity';
 import { FirebaseAdmin } from '../firebase/firebase.service';
 import { StaffBranchEntity } from 'src/entities/staff_branch.entity';
 import { UserRecord } from 'firebase-admin/lib/auth/user-record';
@@ -12,14 +12,14 @@ import { UpdateStaffDto } from './dtos/update-staff.dto';
 @Injectable()
 export class StaffsService {
   constructor(
-    @InjectRepository(StaffEntity)
-    private staffRepository: Repository<StaffEntity>,
+    @InjectRepository(StaffsEntity)
+    private staffRepository: Repository<StaffsEntity>,
     @InjectRepository(StaffBranchEntity)
     private staffBranchRepo: Repository<StaffBranchEntity>,
     private firebaseAdmin: FirebaseAdmin,
   ) {}
 
-  async create(createStaffDto: CreateStaffDto): Promise<StaffEntity> {
+  async create(createStaffDto: CreateStaffDto): Promise<StaffsEntity> {
     const admin = this.firebaseAdmin.setup();
     let existingFirebaseUser: UserRecord = null;
     try {
@@ -56,7 +56,7 @@ export class StaffsService {
   async update(
     id: number,
     updateStaffDto: UpdateStaffDto,
-  ): Promise<StaffEntity> {
+  ): Promise<StaffsEntity> {
     const staff = await this.staffRepository.findOne({ where: { id } });
     if (!staff) {
       throw new NotFoundException(`Staff with ID ${id} not found`);
@@ -103,7 +103,7 @@ export class StaffsService {
     return;
   }
 
-  async getAll(): Promise<StaffEntity[]> {
+  async getAll(): Promise<StaffsEntity[]> {
     return await this.staffRepository.find();
   }
 
@@ -118,7 +118,7 @@ export class StaffsService {
     return;
   }
 
-  async findByEmail(email: string): Promise<StaffEntity> {
+  async findByEmail(email: string): Promise<StaffsEntity> {
     const activeStaff = await this.staffRepository.findOne({
       where: {
         email: email,

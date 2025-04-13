@@ -7,8 +7,8 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { UserEntity } from './user.entity';
-import { SportFieldEntity } from './sport-field.entity';
+import { UsersEntity } from './users.entity';
+import { SportFieldsEntity } from './sport-fields.entity';
 
 export const FieldBookingStatus = {
   PENDING: 'PENDING',
@@ -19,8 +19,8 @@ export const FieldBookingStatus = {
   REFUND: 'REFUND',
 } as const;
 
-@Entity('field_booking')
-export class FieldBookingEntity {
+@Entity('field_bookings')
+export class FieldBookingsEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
@@ -30,13 +30,13 @@ export class FieldBookingEntity {
   @Column({ type: 'bigint', name: 'sport_field_id' })
   sportFieldId: number;
 
-  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UsersEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user: UserEntity;
+  user: UsersEntity;
 
-  @ManyToOne(() => SportFieldEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => SportFieldsEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'sport_field_id' })
-  sportField: SportFieldEntity;
+  sportField: SportFieldsEntity;
 
   // Other Columns
   @Column({ type: 'date', name: 'booking_date' })

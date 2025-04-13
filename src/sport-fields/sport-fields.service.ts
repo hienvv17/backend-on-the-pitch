@@ -1,27 +1,27 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, QueryRunner } from 'typeorm';
-import { SportFieldEntity } from '../entities/sport-field.entity';
-import { BranchEntity } from '../entities/branch.entity';
-import { SportCategoryEntity } from '../entities/sport-category.entity';
+import { SportFieldsEntity } from '../entities/sport-fields.entity';
+import { BranchsEntity } from '../entities/branchs.entity';
+import { SportCategoriesEntity } from '../entities/sport-categories.entity';
 import {
   CreateSportFieldDto,
   TimeSlotInput,
 } from './dtos/create-sport-field.dto';
 import { UpdateSportFieldDto } from './dtos/update-sport-field.dto';
-import { TimeSlotEntity } from 'src/entities/time-slot.entity';
+import { TimeSlotsEntity } from 'src/entities/time-slots.entity';
 import { GetAvailableFieldDto } from './dtos/get-available-field.dto';
 @Injectable()
 export class SportFieldService {
   constructor(
-    @InjectRepository(SportFieldEntity)
-    private sportFieldRepo: Repository<SportFieldEntity>,
-    @InjectRepository(BranchEntity)
-    private branchRepo: Repository<BranchEntity>,
-    @InjectRepository(SportCategoryEntity)
-    private sportCategoryRepo: Repository<SportCategoryEntity>,
-    @InjectRepository(TimeSlotEntity)
-    private timeSlotRepo: Repository<TimeSlotEntity>,
+    @InjectRepository(SportFieldsEntity)
+    private sportFieldRepo: Repository<SportFieldsEntity>,
+    @InjectRepository(BranchsEntity)
+    private branchRepo: Repository<BranchsEntity>,
+    @InjectRepository(SportCategoriesEntity)
+    private sportCategoryRepo: Repository<SportCategoriesEntity>,
+    @InjectRepository(TimeSlotsEntity)
+    private timeSlotRepo: Repository<TimeSlotsEntity>,
     private readonly dataSource: DataSource,
   ) {}
 

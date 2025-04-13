@@ -7,10 +7,10 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { SportFieldEntity } from './sport-field.entity';
+import { SportFieldsEntity } from './sport-fields.entity';
 
-@Entity('time_slot')
-export class TimeSlotEntity {
+@Entity('time_slots')
+export class TimeSlotsEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
@@ -38,7 +38,7 @@ export class TimeSlotEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @ManyToOne(() => SportFieldEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => SportFieldsEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'sport_field_id' })
-  sportField: SportFieldEntity;
+  sportField: SportFieldsEntity;
 }

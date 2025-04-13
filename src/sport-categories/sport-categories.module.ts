@@ -1,7 +1,7 @@
 import { Module, Res } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SportCategoriesService } from './sport-categories.service';
-import { SportCategoryEntity } from '../entities/sport-category.entity';
+import { SportCategoriesEntity } from '../entities/sport-categories.entity';
 import { SportCategoriesController } from './sport-categories.controller';
 import { FirebaseAdmin } from '../firebase/firebase.service';
 import { ResponseModule } from '../response/response.module';
@@ -9,7 +9,7 @@ import { StaffsModule } from 'src/staffs/staffs.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([SportCategoryEntity]),
+    TypeOrmModule.forFeature([SportCategoriesEntity]),
     ResponseModule,
     StaffsModule,
   ],

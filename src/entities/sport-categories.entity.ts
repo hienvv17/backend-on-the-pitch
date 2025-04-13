@@ -6,9 +6,10 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { SportFieldEntity } from './sport-field.entity';
-@Entity('sport_category')
-export class SportCategoryEntity {
+import { SportFieldsEntity } from './sport-fields.entity';
+
+@Entity('sport_categories')
+export class SportCategoriesEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
@@ -24,6 +25,6 @@ export class SportCategoryEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => SportFieldEntity, (sportField) => sportField.sportCategory)
-  sportFields: SportCategoryEntity[];
+  @OneToMany(() => SportFieldsEntity, (sportField) => sportField.sportCategory)
+  sportFields: SportFieldsEntity[];
 }

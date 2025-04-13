@@ -12,8 +12,8 @@ export enum STAFF_ROLE {
   STAFF = 'STAFF',
 }
 
-@Entity('staff')
-export class StaffEntity {
+@Entity('staffs')
+export class StaffsEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 

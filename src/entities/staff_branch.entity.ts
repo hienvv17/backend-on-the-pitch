@@ -7,8 +7,8 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { StaffEntity } from './staff.entity';
-import { BranchEntity } from './branch.entity';
+import { StaffsEntity } from './staffs.entity';
+import { BranchsEntity } from './branchs.entity';
 
 @Entity('staff_branch')
 export class StaffBranchEntity {
@@ -27,11 +27,11 @@ export class StaffBranchEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @ManyToOne(() => StaffEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => StaffsEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'staff_id' })
-  staff: StaffEntity;
+  staff: StaffsEntity;
 
-  @ManyToOne(() => BranchEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => BranchsEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'branch_id' })
-  branch: BranchEntity;
+  branch: BranchsEntity;
 }

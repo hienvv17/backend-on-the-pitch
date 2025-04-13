@@ -1,25 +1,25 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
-  FieldBookingEntity,
+  FieldBookingsEntity,
   FieldBookingStatus,
-} from '../entities/field-booking.entity';
-import { SportFieldEntity } from '../entities/sport-field.entity';
-import { TimeSlotEntity } from '../entities/time-slot.entity';
-import { UserEntity } from '../entities/user.entity';
+} from '../entities/field-bookings.entity';
+import { SportFieldsEntity } from '../entities/sport-fields.entity';
+import { TimeSlotsEntity } from '../entities/time-slots.entity';
+import { UsersEntity } from '../entities/users.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class FieldBookingsService {
   constructor(
-    @InjectRepository(FieldBookingEntity)
-    private fieldBookingRepo: Repository<FieldBookingEntity>,
-    @InjectRepository(SportFieldEntity)
-    private sportFieldRepo: Repository<SportFieldEntity>,
-    @InjectRepository(TimeSlotEntity)
-    private timeSlotRepo: Repository<TimeSlotEntity>,
-    @InjectRepository(UserEntity)
-    private userRepo: Repository<UserEntity>,
+    @InjectRepository(FieldBookingsEntity)
+    private fieldBookingRepo: Repository<FieldBookingsEntity>,
+    @InjectRepository(SportFieldsEntity)
+    private sportFieldRepo: Repository<SportFieldsEntity>,
+    @InjectRepository(TimeSlotsEntity)
+    private timeSlotRepo: Repository<TimeSlotsEntity>,
+    @InjectRepository(UsersEntity)
+    private userRepo: Repository<UsersEntity>,
   ) {}
 
   async getAllFieldBooking() {

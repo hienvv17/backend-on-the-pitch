@@ -7,11 +7,11 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { UserEntity } from './user.entity';
-import { FieldBookingEntity } from './field-booking.entity';
+import { UsersEntity } from './users.entity';
+import { FieldBookingsEntity } from './field-bookings.entity';
 
-@Entity('review')
-export class ReviewEntity {
+@Entity('reviews')
+export class ReviewsEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
@@ -21,13 +21,13 @@ export class ReviewEntity {
   @Column({ type: 'bigint', name: 'field_booking_id' })
   fieldBookingId: number;
 
-  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UsersEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user: UserEntity;
+  user: UsersEntity;
 
-  @ManyToOne(() => FieldBookingEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => FieldBookingsEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'field_booking_id' })
-  fieldBooking: FieldBookingEntity;
+  fieldBooking: FieldBookingsEntity;
 
   @Column({ type: 'text', nullable: true })
   comment: string;

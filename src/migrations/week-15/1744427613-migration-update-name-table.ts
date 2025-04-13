@@ -1,20 +1,20 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class RenameTable1744427613 implements MigrationInterface {
+export class RenameTable1744427613000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "user" RENAME TO "users"`);
     await queryRunner.query(`ALTER TABLE "branch" RENAME TO "branchs"`);
     await queryRunner.query(
-      `ALTER TABLE "sport-category" RENAME TO "sport-categories"`,
+      `ALTER TABLE "sport_category" RENAME TO "sport_categories"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "sport-field" RENAME TO "sport-fields"`,
+      `ALTER TABLE "sport_field" RENAME TO "sport_fields"`,
     );
-    await queryRunner.query(`ALTER TABLE "sport-item" RENAME TO "sport-items"`);
-    await queryRunner.query(`ALTER TABLE "time-slot" RENAME TO "time-slots"`);
+    await queryRunner.query(`ALTER TABLE "sport_item" RENAME TO "sport_items"`);
+    await queryRunner.query(`ALTER TABLE "time_slot" RENAME TO "time_slots"`);
     await queryRunner.query(`ALTER TABLE "staff" RENAME TO "staffs"`);
     await queryRunner.query(
-      `ALTER TABLE "field_booking" RENAME TO "field-bookings"`,
+      `ALTER TABLE "field_booking" RENAME TO "field_bookings"`,
     );
   }
 
@@ -22,16 +22,16 @@ export class RenameTable1744427613 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "users" RENAME TO "user"`);
     await queryRunner.query(`ALTER TABLE "branchs" RENAME TO "branch"`);
     await queryRunner.query(
-      `ALTER TABLE "sport-categories" RENAME TO "sport-category"`,
+      `ALTER TABLE "sport_categories" RENAME TO "sport_category"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "sport-fields" RENAME TO "sport-field"`,
+      `ALTER TABLE "sport_fields" RENAME TO "sport_field"`,
     );
-    await queryRunner.query(`ALTER TABLE "sport-items" RENAME TO "sport-item"`);
-    await queryRunner.query(`ALTER TABLE "time-slots" RENAME TO "time-slot"`);
+    await queryRunner.query(`ALTER TABLE "sport_items" RENAME TO "sport_item"`);
+    await queryRunner.query(`ALTER TABLE "time_slots" RENAME TO "time_slot"`);
     await queryRunner.query(`ALTER TABLE "staffs" RENAME TO "staff"`);
     await queryRunner.query(
-      `ALTER TABLE "field-bookings" RENAME TO "field_booking"`,
+      `ALTER TABLE "field_bookings" RENAME TO "field_booking"`,
     );
   }
 }
