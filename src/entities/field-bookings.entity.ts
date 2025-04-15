@@ -24,6 +24,9 @@ export class FieldBookingsEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
+  @Column({ type: 'varchar', length: 12 })
+  code: string
+
   @Column({ type: 'bigint', name: 'user_id' })
   userId: number;
 
@@ -42,8 +45,8 @@ export class FieldBookingsEntity {
   @Column({ type: 'date', name: 'booking_date' })
   bookingDate: string; // e.g., '2025-03-22'
 
-  @Column({ type: 'varchar', length: 5, name: 'begin_time' })
-  beginTime: string; // e.g., '05:30'
+  @Column({ type: 'varchar', length: 5, name: 'start_time' })
+  startTime: string; // e.g., '05:30'
 
   @Column({ type: 'varchar', length: 5, name: 'end_time' })
   endTime: string; // e.g., '07:30'

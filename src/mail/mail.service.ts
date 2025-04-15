@@ -9,13 +9,17 @@ export class BookingMailService {
     //todo updat template that can not show
     await this.mailerService.sendMail({
       to,
-      subject: 'Booking Success',
-      template: './booking-success', // e.g., templates/booking-success.hbs
+      subject: `Booking Success - ${bookingData.code}`,
+      template: 'booking-success',
       context: {
+        code: bookingData.code,
         customerName: bookingData.customerName ,
-        serviceName: bookingData.serviceName,
-        bookingDate: bookingData.bookingDate,
+        fieldName: bookingData.fieldName,
         branchName: bookingData.branchName,
+        bookingDate: bookingData.bookingDate,
+        startTime: bookingData.startTime,
+        endTime: bookingData.endTime,
+        paymentMethod: 'VNPay'
       },
     });
     return;

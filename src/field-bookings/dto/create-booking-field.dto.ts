@@ -1,0 +1,36 @@
+import { IsNotEmpty, Matches, IsString, IsEmail, IsOptional } from 'class-validator';
+import { IsEndTimeAtLeastOneHourAfter } from 'src/decorators/IsEndTimeAtLeastOneHourAfter.decorator.ts';
+import { IsTimeString } from 'src/decorators/IsTimeString.decorator';
+import { IsValidDate } from 'src/decorators/IsValidDate.decorator';
+
+export class CreateBookingDto {
+    
+    @IsNotEmpty()
+    sportFieldId: number
+
+    @IsOptional()
+    userId?: number
+
+    @IsEmail()
+    @IsNotEmpty()
+    email: string
+
+
+    @IsValidDate({ message: 'bookingDate must be a valid date in YYYY-MM-DD format' })
+    @IsNotEmpty()
+    bookingDate: string; // e.g., "2025-04-13"
+
+    @IsTimeString()
+    @IsString()
+    @IsNotEmpty()
+    startTime: string;
+
+    @IsEndTimeAtLeastOneHourAfter('startTime')
+    @IsTimeString()
+    @IsString()
+    @IsNotEmpty()
+    endTime: string;
+
+    @IsNotEmpty()
+    totalPrice: number
+}
