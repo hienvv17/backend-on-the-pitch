@@ -1,13 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThanOrEqual, Repository } from 'typeorm';
+import { DataSource, In, LessThanOrEqual, QueryRunner, Repository } from 'typeorm';
 import { CreateStaffDto } from './dtos/create-staff.dto';
 import moment from 'moment';
 import { StaffsEntity } from '../entities/staffs.entity';
 import { FirebaseAdmin } from '../firebase/firebase.service';
-import { StaffBranchEntity } from 'src/entities/staff_branch.entity';
+import { StaffBranchEntity } from '../entities/staff_branch.entity';
 import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 import { UpdateStaffDto } from './dtos/update-staff.dto';
+import { BranchsEntity } from '../entities/branchs.entity';
 
 @Injectable()
 export class StaffsService {
@@ -16,8 +17,11 @@ export class StaffsService {
     private staffRepository: Repository<StaffsEntity>,
     @InjectRepository(StaffBranchEntity)
     private staffBranchRepo: Repository<StaffBranchEntity>,
+    @InjectRepository(BranchsEntity)
+    private branchesRepo: Repository<BranchsEntity>,
     private firebaseAdmin: FirebaseAdmin,
-  ) {}
+    private readonly dataSource: DataSource
+  ) { }
 
   async create(createStaffDto: CreateStaffDto): Promise<StaffsEntity> {
     const admin = this.firebaseAdmin.setup();
@@ -66,6 +70,7 @@ export class StaffsService {
       phoneNumber: updateStaffDto.phoneNumber,
       role: updateStaffDto.role,
       isActive: updateStaffDto.isActive,
+      updatedAt: new Date()
     });
 
     if (updateStaffDto.branchIds && updateStaffDto.branchIds.length > 0) {
@@ -76,29 +81,32 @@ export class StaffsService {
 
   async createStaffBranch(staffId: number, branchIds: string[]): Promise<void> {
     if (branchIds && branchIds.length > 0) {
-      const existingStaffBranch = await this.staffBranchRepo.find({
-        where: { staffId },
-        select: ['branchId'],
-      });
-      const existingBranchIds = existingStaffBranch.map(
-        (branch) => branch.branchId,
-      );
-      const newBranchIds = branchIds.filter(
-        (branchId) => !existingBranchIds.includes(Number(branchId)),
-      );
-      if (newBranchIds.length > 0) {
-        const staffBranches = newBranchIds.map((branchId) => ({
-          staffId,
-          branchId: Number(branchId),
-        }));
-        await this.staffBranchRepo.save(staffBranches);
-      }
-      const staffBranchesToRemove = existingStaffBranch.filter(
-        (branch) => !branchIds.includes(String(branch.branchId)),
-      );
-      if (staffBranchesToRemove.length > 0) {
-        await this.staffBranchRepo.remove(staffBranchesToRemove);
-      }
+      const distinctBranchIds = [...new Set(branchIds)]
+      const checkBranch = await this.branchesRepo.find({ where: { id: In(distinctBranchIds) }, select: { id: true } })
+      if(distinctBranchIds.length != checkBranch.length)
+      { throw new BadRequestException("Invalid branch list")}
+      const queryRunner: QueryRunner = this.dataSource.createQueryRunner();
+          await queryRunner.connect();
+          await queryRunner.startTransaction();
+          try {
+            await queryRunner.query(
+              `UPDATE staff_branch SET is_deleted = true  WHERE staff_id = $1`,
+              [staffId],
+            );
+            for (const branchId of distinctBranchIds) {
+              await queryRunner.query(
+                `INSERT INTO staff_branch (staff_id, branch_id)
+                 VALUES ($1, $2)`,
+                [staffId, branchId]
+              );
+            }
+            await queryRunner.commitTransaction();
+          } catch (error) {
+            await queryRunner.rollbackTransaction();
+            throw new Error(`Transaction failed: ${error.message}`);
+          } finally {
+            await queryRunner.release();
+          }
     }
     return;
   }

@@ -5,7 +5,7 @@ import { SportCategoriesEntity } from '../entities/sport-categories.entity';
 import { SportCategoriesController } from './sport-categories.controller';
 import { FirebaseAdmin } from '../firebase/firebase.service';
 import { ResponseModule } from '../response/response.module';
-import { StaffsModule } from 'src/staffs/staffs.module';
+import { StaffsModule } from '../staffs/staffs.module';
 
 @Module({
   imports: [

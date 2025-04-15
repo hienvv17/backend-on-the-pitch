@@ -5,7 +5,7 @@ import { ResponseModule } from '../response/response.module';
 import { BranchesController } from './branches.controller';
 import { BranchesService } from './branches.service';
 import { FirebaseAdmin } from '../firebase/firebase.service';
-import { StaffsModule } from 'src/staffs/staffs.module';
+import { StaffsModule } from '../staffs/staffs.module';
 
 @Module({
   imports: [

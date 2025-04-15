@@ -36,7 +36,7 @@ export class SportCategoriesService {
   ): Promise<SportCategoriesEntity> {
     const category = await this.findOne(id);
     Object.assign(category, dto);
-    return this.sportCategoryRepo.save(category);
+    return this.sportCategoryRepo.save({... category, updatedAt: new Date()});
   }
 
   async delete(id: number): Promise<void> {

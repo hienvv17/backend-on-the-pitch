@@ -3,7 +3,7 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UsersEntity } from '../entities/users.entity';
-import { FirebaseAdmin } from 'src/firebase/firebase.service';
+import { FirebaseAdmin } from '../firebase/firebase.service';
 import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 
 @Injectable()

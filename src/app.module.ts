@@ -13,6 +13,7 @@ import { SportFieldsModule } from './sport-fields/sport-fields.module';
 import { FieldBookingsModule } from './field-bookings/field-bookings.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -45,13 +46,15 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
           from: configService.get<string>('MAILER_FROM'),
         },
         template: {
-          dir: __dirname + '/templates',
+          dir: 'src/templates',
+          adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
           },
         },
       }),
     }),
+    //to do update the path later
 
     AuthModule,
     UsersModule,

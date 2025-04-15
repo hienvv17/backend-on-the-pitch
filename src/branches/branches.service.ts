@@ -18,6 +18,7 @@ export class BranchesService {
   }
 
   async getOne(id: number): Promise<BranchsEntity> {
+    //to do: get total sportField - average price
     const branch = await this.branchRepo.findOne({ where: { id } });
     if (!branch) throw new BadRequestException('Branch do not exist');
     return branch;
@@ -30,7 +31,7 @@ export class BranchesService {
   async update(id: number, dto: UpdateBranchDto) {
     const branch = await this.branchRepo.findOne({ where: { id } });
     if (!branch) throw new BadRequestException('Branch do not exist');
-    return await this.branchRepo.update(id, dto);
+    return await this.branchRepo.update(id, {...dto, updatedAt: new Date()});
   }
 
   async delete(id: number) {

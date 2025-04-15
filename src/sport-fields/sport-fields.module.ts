@@ -8,7 +8,7 @@ import { BranchsEntity } from '../entities/branchs.entity';
 import { SportFieldsEntity } from '../entities/sport-fields.entity';
 import { TimeSlotsEntity } from '../entities/time-slots.entity';
 import { SportCategoriesEntity } from '../entities/sport-categories.entity';
-import { StaffsModule } from 'src/staffs/staffs.module';
+import { StaffsModule } from '../staffs/staffs.module';
 
 @Module({
   imports: [

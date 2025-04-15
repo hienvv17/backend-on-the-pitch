@@ -9,7 +9,7 @@ import {
   TimeSlotInput,
 } from './dtos/create-sport-field.dto';
 import { UpdateSportFieldDto } from './dtos/update-sport-field.dto';
-import { TimeSlotsEntity } from 'src/entities/time-slots.entity';
+import { TimeSlotsEntity } from '../entities/time-slots.entity';
 import { GetAvailableFieldDto } from './dtos/get-available-field.dto';
 @Injectable()
 export class SportFieldService {
@@ -23,9 +23,17 @@ export class SportFieldService {
     @InjectRepository(TimeSlotsEntity)
     private timeSlotRepo: Repository<TimeSlotsEntity>,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async getAll(bracnhId: number) {
+    return await this.sportFieldRepo.find({
+      where: { isActive: true }, select: {
+        id: true, name: true, images: true, description: true, branchId: true, sportCategoryId: true
+      }
+    })
+  }
+
+  async getMangeAll(bracnhId: number) {
     return await this.sportFieldRepo.findAndCount({ where: { id: bracnhId } });
   }
 
@@ -150,6 +158,7 @@ export class SportFieldService {
     const sportFields = await this.sportFieldRepo.find({
       where: { branchId, sportCategoryId },
     });
+    
     return dto;
   }
 }

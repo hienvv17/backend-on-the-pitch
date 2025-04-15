@@ -5,7 +5,7 @@ import { ManagerJwtGuard } from '../auth/guard/manager-jwt.guard';
 import { ResponseService } from '../response/response.service';
 import { UpdateStaffDto } from './dtos/update-staff.dto';
 
-@Controller('staff')
+@Controller('staffs')
 @UseGuards(ManagerJwtGuard)
 export class StaffsController {
   constructor(

@@ -19,7 +19,7 @@ export class BranchesController {
   constructor(
     private readonly branchesService: BranchesService,
     private readonly responseService: ResponseService,
-  ) {}
+  ) { }
 
   @Get()
   async getAll() {

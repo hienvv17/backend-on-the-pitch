@@ -24,6 +24,7 @@
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/bullmq": "^11.0.2",
+    "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.0.0",
@@ -42,6 +43,7 @@
     "moment-timezone": "^0.5.48",
     "nodemailer": "^6.10.0",
     "pg": "^8.12.0",
+    "redis": "^4.7.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.20",
