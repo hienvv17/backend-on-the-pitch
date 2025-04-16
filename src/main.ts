@@ -13,6 +13,7 @@ async function bootstrap() {
       stopAtFirstError: true,
       whitelist: true,
       forbidNonWhitelisted: true,
+      transform:true
       // exceptionFactory: (errors) => new ValidationException(errors),
     }),
   );

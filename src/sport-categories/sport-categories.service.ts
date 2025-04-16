@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SportCategoriesEntity } from '../entities/sport-categories.entity';
 import { Repository } from 'typeorm';
-import { CreateSportCategoryDto } from './dto/create-sport-category.dto copy';
+import { CreateSportCategoryDto } from './dto/create-sport-category.dto';
 import { UpdateSportCategoryDto } from './dto/update-sport-category.dto';
 
 @Injectable()
