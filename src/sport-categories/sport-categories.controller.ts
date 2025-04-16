@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { SportCategoriesService } from './sport-categories.service';
 import { ResponseService } from '../response/response.service';
-import { CreateSportCategoryDto } from './dto/create-sport-category.dto copy';
+import { CreateSportCategoryDto } from './dto/create-sport-category.dto';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 
 @UseGuards(AdminJwtGuard)
