@@ -29,6 +29,7 @@ export class SportFieldService {
   ) { }
 
   async getAll(bracnhId: number) {
+    console.log(bracnhId, 'service')
     return await this.sportFieldRepo.find({
       where: { isActive: true, branchId: bracnhId }, select: {
         id: true, name: true, images: true, description: true, branchId: true, sportCategoryId: true

@@ -6,7 +6,7 @@ import { ResponseService } from '../response/response.service';
 import { UpdateStaffDto } from './dtos/update-staff.dto';
 
 @Controller('staffs')
-@UseGuards(ManagerJwtGuard)
+//@UseGuards(ManagerJwtGuard)
 export class StaffsController {
   constructor(
     private readonly staffsService: StaffsService,

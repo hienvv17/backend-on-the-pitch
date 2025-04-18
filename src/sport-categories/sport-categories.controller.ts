@@ -4,14 +4,14 @@ import { ResponseService } from '../response/response.service';
 import { CreateSportCategoryDto } from './dto/create-sport-category.dto';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 
-@UseGuards(AdminJwtGuard)
+
 @Controller('sport-categories')
 export class SportCategoriesController {
   constructor(
     private readonly sportCategoriesService: SportCategoriesService,
     private readonly responseService: ResponseService,
   ) {}
-
+  //@UseGuards(AdminJwtGuard)
   @Post()
   async create(@Body() dto: CreateSportCategoryDto) {
     await this.sportCategoriesService.create(dto);

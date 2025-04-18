@@ -23,7 +23,7 @@ export class SportFieldsController {
     private sportFieldsService: SportFieldService,
   ) { }
 
-  @Get()
+  @Get(':branchId')
   async getAll(@Param('branchId') branchId: number) {
     const fields = await this.sportFieldsService.getAll(branchId);
     return this.responseService.successResponse({
@@ -31,7 +31,7 @@ export class SportFieldsController {
     });
   }
 
-  @UseGuards(StaffJwtGuard)
+  //@UseGuards(StaffJwtGuard)
   @Get('get-manage')
   async getManageAll(@Param('branchId') branchId: number) {
     const fields = await this.sportFieldsService.getMangeAll(branchId);
@@ -41,14 +41,14 @@ export class SportFieldsController {
     });
   }
 
-  @UseGuards(AdminJwtGuard)
+  //@UseGuards(AdminJwtGuard)
   @Post()
   async create(@Body() dto: CreateSportFieldDto) {
     await this.sportFieldsService.create(dto);
     return this.responseService.successResponse();
   }
 
-  @UseGuards(AdminJwtGuard)
+  //@UseGuards(AdminJwtGuard)
   @Put(':sportFieldId')
   async update(
     @Param('sportFieldId') id: number,
@@ -58,7 +58,7 @@ export class SportFieldsController {
     return this.responseService.successResponse();
   }
 
-  @UseGuards(AdminJwtGuard)
+  //@UseGuards(AdminJwtGuard)
   @Delete()
   async delete(@Param() id: number) {
     await this.sportFieldsService.deleteSportField(id);
