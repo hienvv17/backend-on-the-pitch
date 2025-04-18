@@ -8,7 +8,7 @@ import { FirebaseAdmin } from '../firebase/firebase.service';
 import { StaffBranchEntity } from '../entities/staff_branch.entity';
 import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 import { UpdateStaffDto } from './dtos/update-staff.dto';
-import { BranchsEntity } from '../entities/branchs.entity';
+import { BranchsEntity } from '../entities/branches.entity';
 
 @Injectable()
 export class StaffsService {

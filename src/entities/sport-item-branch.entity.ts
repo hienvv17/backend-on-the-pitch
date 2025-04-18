@@ -8,7 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { SportItemsEntity } from './sport-items.entity';
-import { BranchsEntity } from './branchs.entity';
+import { BranchsEntity } from './branches.entity';
 
 @Entity('sport_item_branch')
 export class SportItemBranchEntity {

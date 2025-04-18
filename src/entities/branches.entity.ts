@@ -9,7 +9,7 @@ import {
 import { StaffBranchEntity } from './staff_branch.entity';
 import { SportFieldsEntity } from './sport-fields.entity';
 
-@Entity('branchs')
+@Entity('branches')
 export class BranchsEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
@@ -44,6 +44,12 @@ export class BranchsEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   activeDate: Date;
+
+  @Column({name: 'open_time', type:'varchar', length:5})
+  openTime: string
+
+  @Column({name: 'close_time', type:'varchar', length:5})
+  closeTime: string
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

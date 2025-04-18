@@ -6,7 +6,7 @@ import { StaffsEntity } from '../entities/staffs.entity';
 import { ResponseModule } from '../response/response.module';
 import { FirebaseAdmin } from '../firebase/firebase.service';
 import { StaffBranchEntity } from '../entities/staff_branch.entity';
-import { BranchsEntity } from '../entities/branchs.entity';
+import { BranchsEntity } from '../entities/branches.entity';
 
 @Module({
   imports: [

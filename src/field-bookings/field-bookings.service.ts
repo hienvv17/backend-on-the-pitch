@@ -12,7 +12,7 @@ import { UsersService } from '../users/users.service';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateBookingDto } from './dto/create-booking-field.dto';
 import { GetBookedFieldDto } from './dto/get-booked-field.dto';
-import { getCurrentTimeInUTC7 } from '../utils/helper/date-time.helper';
+import { getCurrentTimeInUTC7, isInServiceTime } from '../utils/helper/date-time.helper';
 
 @Injectable()
 export class FieldBookingsService {
@@ -41,20 +41,24 @@ export class FieldBookingsService {
     if (!user) {
       user = await this.userService.create({ email: dto.email })
     }
-
     const selectedDate = new Date(dto.bookingDate + ' ' + dto.startTime);
     const currentTime = getCurrentTimeInUTC7()
     if (selectedDate < new Date(currentTime)) {
       throw new BadRequestException('Invalid booking time');
     }
-    //Can not booking if time_slot has been select
+
     const field = await this.sportFieldRepo.findOne({
       where: { id: dto.sportFieldId, isActive: true },
+      relations: {
+        branch: true,
+      }
     });
+    console.log(field, 'field data')
     if (!field) {
       throw new BadRequestException('Sport field is not exist');
     }
 
+    if (!isInServiceTime(field.branch.openTime, field.branch.closeTime, dto.startTime, dto.endTime)) { throw new BadRequestException('Time booking is out of service time') }
     const bookedField = await this.fieldBookingRepo
       .createQueryBuilder('booking')
       .where('booking.bookingDate = :bookingDate', { bookingDate: dto.bookingDate })
@@ -99,6 +103,8 @@ export class FieldBookingsService {
     // return this.fieldBookingRepo.save(newBooking);
     return {
       ...dto,
+      fieldName: field.name,
+      branchName: field.branch.name,
       userId: user.id,
       code: this.generateBookingCode(),
       status: FieldBookingStatus.PAID

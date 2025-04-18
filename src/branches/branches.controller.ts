@@ -23,7 +23,7 @@ export class BranchesController {
 
   @Get()
   async getAll() {
-    const branches = await this.branchesService.getAll();
+    const branches = await this.branchesService.getPublicAll();
     return this.responseService.successResponse({ items: branches });
   }
 

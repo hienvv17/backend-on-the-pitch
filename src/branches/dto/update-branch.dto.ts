@@ -1,39 +1,54 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsArray, IsDateString } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsDateString, IsNotEmpty } from 'class-validator';
+import { IsEndTimeAtLeastOneHourAfter } from 'src/decorators/IsEndTimeAtLeastOneHourAfter.decorator.ts';
+import { IsTimeString } from 'src/decorators/IsTimeString.decorator';
 
 export class UpdateBranchDto {
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
   name?: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
   street?: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
   ward?: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
   district?: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
   city?: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsArray()
   @IsOptional()
   images?: string[];
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsDateString()
   @IsOptional()
   activeDate?: string;
+
+  @ApiProperty({ nullable: true })
+  @IsTimeString()
+  @IsString()
+  @IsOptional()
+  openTime?: string;
+
+  @ApiProperty({ nullable: true })
+  @IsEndTimeAtLeastOneHourAfter('openTime', { message: 'Close time must after openTime' })
+  @IsTimeString()
+  @IsString()
+  @IsOptional()
+  closeTime?: string;
 }

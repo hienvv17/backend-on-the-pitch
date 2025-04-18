@@ -31,7 +31,7 @@ export class SportFieldsController {
     });
   }
 
-  // @UseGuards(StaffJwtGuard)
+  @UseGuards(StaffJwtGuard)
   @Get('get-manage')
   async getManageAll(@Param('branchId') branchId: number) {
     const fields = await this.sportFieldsService.getMangeAll(branchId);
@@ -66,7 +66,7 @@ export class SportFieldsController {
   }
 
   @Post('available')
-  async getAvailable(dto: GetAvailableFieldDto) {
+  async getAvailable(@Body() dto: GetAvailableFieldDto) {
     const availableFields = await this.sportFieldsService.getAvailable(dto);
     return this.responseService.successResponse({ items: availableFields });
   }

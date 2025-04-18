@@ -8,7 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { StaffsEntity } from './staffs.entity';
-import { BranchsEntity } from './branchs.entity';
+import { BranchsEntity } from './branches.entity';
 
 @Entity('staff_branch')
 export class StaffBranchEntity {

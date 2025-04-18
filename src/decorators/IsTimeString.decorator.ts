@@ -5,7 +5,7 @@ import {
     ValidatorConstraintInterface,
     ValidationArguments,
   } from 'class-validator';
-import { isTimeString } from '../utils/helper/custom-validator';
+import { isTimeString } from '../utils/helper/date-time.helper';
  
   
   @ValidatorConstraint({ name: 'IsTimeString', async: false })

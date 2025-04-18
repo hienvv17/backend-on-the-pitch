@@ -7,31 +7,39 @@ import {
   MaxLength,
 } from 'class-validator';
 import { TimeSlotInput } from './create-sport-field.dto';
+import { ApiProperty } from '@nestjs/swagger';
 export class UpdateSportFieldDto {
+  @ApiProperty({ nullable: true })
   @IsOptional()
-  @IsString()
   @MaxLength(100)
+  @IsString()
   name?: string;
 
-  @IsOptional()
+  @ApiProperty({ nullable: true })
   @IsNumber()
+  @IsOptional()
   branchId?: number;
 
-  @IsOptional()
+  @ApiProperty({ nullable: true })
   @IsNumber()
+  @IsOptional()
   sportCategoryId?: number;
 
-  @IsOptional()
+  @ApiProperty({ nullable: true })
   @IsBoolean()
+  @IsOptional()
   isActive?: boolean;
 
+  @ApiProperty({ nullable: true })
   @IsOptional()
   images?: any;
 
-  @IsOptional()
+  @ApiProperty({ nullable: true })
   @IsString()
+  @IsOptional()
   description?: string;
 
+  @ApiProperty({ nullable: true })
   @IsArray()
   @IsOptional()
   timeSlots?: TimeSlotInput[];

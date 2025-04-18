@@ -15,22 +15,22 @@ export class FieldBookingsController {
   @Post('new')
   async create(@Body() dto: CreateBookingDto) {
     const bookingData = await this.fieldBookingsService.createFieldBooking(dto)
-    // await this.bookingMailService.sendBookingSuccessEmail(
-    //   dto.email,
-    //   {
-    //     code: bookingData.code,
-    //     customerName: dto.email,
-    //     fieldName: 'Sân 1',
-    //     bookingDate: bookingData.bookingDate,
-    //     branchName: 'Quận 11',
-    //     startTime: bookingData.startTime,
-    //     endTime: bookingData.endTime
-    //   }
-    // );
+    await this.bookingMailService.sendBookingSuccessEmail(
+      dto.email,
+      {
+        code: bookingData.code,
+        customerName: dto.email,
+        fieldName: bookingData.fieldName,
+        bookingDate: bookingData.bookingDate,
+        branchName: bookingData.branchName,
+        startTime: bookingData.startTime,
+        endTime: bookingData.endTime
+      }
+    );
     return this.responseService.successResponse({bookingData});
   }
+  //to do
   /**
-   * create booking endpoint
    * creat review endpoint
    * get personal booking
    * manage booking for admin

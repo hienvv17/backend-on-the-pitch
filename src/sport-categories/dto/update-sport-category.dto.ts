@@ -2,14 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, Length } from 'class-validator';
 
 export class UpdateSportCategoryDto {
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
+  @ApiProperty({ nullable: true })
   @Length(1, 100)
+  @IsString()
+  @IsOptional()
   name?: string;
 
-  @ApiProperty()
-  @IsOptional()
+  @ApiProperty({ nullable: true })
   @IsBoolean()
+  @IsOptional()
   isActive?: boolean;
 }

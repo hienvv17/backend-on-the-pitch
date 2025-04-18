@@ -6,6 +6,9 @@ import {
   IsString,
   Matches,
 } from 'class-validator';
+import { IsEndTimeAtLeastOneHourAfter } from 'src/decorators/IsEndTimeAtLeastOneHourAfter.decorator.ts';
+import { IsTimeString } from 'src/decorators/IsTimeString.decorator';
+import { IsValidDate } from 'src/decorators/IsValidDate.decorator';
 
 export class GetAvailableFieldDto {
   @ApiProperty()
@@ -19,21 +22,20 @@ export class GetAvailableFieldDto {
   branchId: number;
 
   @ApiProperty()
-  @Matches(/^\d{2}-\d{2}-\d{2}$/, {
-    message: 'Date must be in format dd-mm-yy',
-  })
+  @IsValidDate()
   @IsString()
   @IsNotEmpty()
   date: string;
 
-  @ApiProperty()
-  @Matches(/^\d{2}:\d{2}$/, { message: 'Start time must be in format hh:mm' })
+  @ApiProperty({ nullable: true })
+  @IsTimeString()
   @IsString()
   @IsOptional()
   startTime?: string;
 
-  @ApiProperty()
-  @Matches(/^\d{2}:\d{2}$/, { message: 'End time must be in format hh:mm' })
+  @ApiProperty({ nullable: true })
+  @IsEndTimeAtLeastOneHourAfter('startTime')
+  @IsTimeString()
   @IsString()
   @IsOptional()
   endTime?: string;

@@ -11,6 +11,7 @@ export class CreateTimeSlotTable1711650000000 implements MigrationInterface {
           is_active BOOLEAN DEFAULT TRUE,
           images JSON,
           description TEXT,
+          default_price BIGINT NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           CONSTRAINT fk_branch FOREIGN KEY (branch_id) REFERENCES branch(id) ON DELETE CASCADE,

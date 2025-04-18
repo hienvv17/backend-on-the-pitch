@@ -5,7 +5,7 @@ import {
     ValidatorConstraintInterface,
     ValidationArguments,
 } from 'class-validator';
-import { isValidDate } from '../utils/helper/custom-validator';
+import { isValidDate } from '../utils/helper/date-time.helper';
 
 
 @ValidatorConstraint({ async: false })

@@ -33,12 +33,12 @@ export class CreateSportFieldDto {
   @IsNotEmpty()
   sportCategoryId: number;
 
-  @ApiProperty()
-  @IsOptional()
+  @ApiProperty({ nullable: true })
   @IsBoolean()
+  @IsOptional()
   isActive?: boolean;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsOptional()
   images?: any;
 
@@ -47,8 +47,8 @@ export class CreateSportFieldDto {
   @IsNotEmpty()
   timeSlots: TimeSlotInput[];
 
-  @ApiProperty()
-  @IsOptional()
+  @ApiProperty({ nullable: true })
   @IsString()
+  @IsOptional()
   description?: string;
 }

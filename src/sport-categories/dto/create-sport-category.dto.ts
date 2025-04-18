@@ -7,7 +7,7 @@ export class CreateSportCategoryDto {
   @Length(1, 100)
   name: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;

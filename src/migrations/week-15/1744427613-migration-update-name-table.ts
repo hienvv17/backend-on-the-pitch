@@ -3,7 +3,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class RenameTable1744427613000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "user" RENAME TO "users"`);
-    await queryRunner.query(`ALTER TABLE "branch" RENAME TO "branchs"`);
+    await queryRunner.query(`ALTER TABLE "branch" RENAME TO "branches"`);
     await queryRunner.query(
       `ALTER TABLE "sport_category" RENAME TO "sport_categories"`,
     );
@@ -20,7 +20,7 @@ export class RenameTable1744427613000000 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "users" RENAME TO "user"`);
-    await queryRunner.query(`ALTER TABLE "branchs" RENAME TO "branch"`);
+    await queryRunner.query(`ALTER TABLE "branches" RENAME TO "branch"`);
     await queryRunner.query(
       `ALTER TABLE "sport_categories" RENAME TO "sport_category"`,
     );

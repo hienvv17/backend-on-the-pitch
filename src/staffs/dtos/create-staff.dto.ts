@@ -11,7 +11,7 @@ import { STAFF_ROLE } from '../../entities/staffs.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateStaffDto {
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
   fullName?: string;
@@ -21,26 +21,26 @@ export class CreateStaffDto {
   @IsNotEmpty()
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
   phoneNumber?: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsEnum(STAFF_ROLE)
   @IsOptional()
   role?: STAFF_ROLE = STAFF_ROLE.STAFF;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsOptional()
   activeDate?: Date;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsString({ each: true })
   @IsArray()
   @IsOptional()

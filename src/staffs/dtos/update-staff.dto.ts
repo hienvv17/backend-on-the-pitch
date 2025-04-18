@@ -10,27 +10,27 @@ import { STAFF_ROLE } from '../../entities/staffs.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateStaffDto {
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
   fullName?: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
   phoneNumber?: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsEnum(STAFF_ROLE)
   @IsOptional()
   role?: STAFF_ROLE;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsString({ each: true })
   @IsArray()
   @IsOptional()

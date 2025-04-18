@@ -6,9 +6,11 @@ import {
   IsDateString,
   IsNotEmpty,
 } from 'class-validator';
+import { IsEndTimeAtLeastOneHourAfter } from 'src/decorators/IsEndTimeAtLeastOneHourAfter.decorator.ts';
+import { IsTimeString } from 'src/decorators/IsTimeString.decorator';
 
 export class CreateBranchDto {
-   @ApiProperty()
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -33,23 +35,36 @@ export class CreateBranchDto {
   @IsNotEmpty()
   city: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
   longtitude?: string;
 
-
+  @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
   latitude?: string;
-  
-  @ApiProperty()
+
+  @ApiProperty({ nullable: true })
   @IsArray()
   @IsOptional()
   images?: string[];
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true })
   @IsDateString()
   @IsOptional()
   activeDate?: string;
+
+  @ApiProperty()
+  @IsTimeString()
+  @IsString()
+  @IsNotEmpty()
+  openTime: string;
+
+  @ApiProperty()
+  @IsEndTimeAtLeastOneHourAfter('openTime', { message: 'Close time must after openTime' })
+  @IsTimeString()
+  @IsString()
+  @IsNotEmpty()
+  closeTime: string;
 }

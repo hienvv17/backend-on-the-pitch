@@ -9,7 +9,7 @@ export class CreateBookingDto {
     @IsNotEmpty()
     sportFieldId: number
 
-    @ApiProperty()
+    @ApiProperty({ nullable: true })
     @IsOptional()
     userId?: number
 
