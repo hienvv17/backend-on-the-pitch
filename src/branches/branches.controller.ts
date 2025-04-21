@@ -22,13 +22,25 @@ export class BranchesController {
   ) { }
 
   @Get()
-  async getAll() {
+  async getPublicAll() {
     const branches = await this.branchesService.getPublicAll();
     return this.responseService.successResponse({ items: branches });
   }
 
+  @Get('manage')
+  async getMangeAll() {
+    const branches = await this.branchesService.getAll();
+    return this.responseService.successResponse({ items: branches });
+  }
+
   @Get(':id')
-  async getOne(@Param('id') id: string) {
+  async getPublicOne(@Param('id') id: string) {
+    const branch = await this.branchesService.getPublicOne(+id);
+    return this.responseService.successResponse({ branch });
+  }
+
+  @Get('manage/:id')
+  async getMangeOne(@Param('id') id: string) {
     const branch = await this.branchesService.getOne(+id);
     return this.responseService.successResponse({ branch });
   }

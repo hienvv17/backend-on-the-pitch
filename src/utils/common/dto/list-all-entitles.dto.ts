@@ -15,7 +15,6 @@ export class ListAllEntities {
 
   @ApiProperty({ nullable: true })
   @Transform(({ value }) => parseInt(value))
-  @IsPositive()
   @IsInt()
   @IsOptional()
   offset?: number = 0;

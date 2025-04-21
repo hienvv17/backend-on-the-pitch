@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import NodeCache from 'node-cache';
+import constants from '../config/constants';
 
 @Injectable()
 export class CacheService {
@@ -11,7 +12,7 @@ export class CacheService {
     }
 
     set<T>(key: string, value: T, ttl?: number): boolean {
-        const success = this.cache.set(key, value, ttl);
+        const success = this.cache.set(key, value, ttl || constants.cache.minutes.default);
         if (success) {
             this.logger.debug(`Cache set: ${key}`);
         }

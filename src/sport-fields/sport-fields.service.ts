@@ -11,7 +11,8 @@ import {
 import { UpdateSportFieldDto } from './dtos/update-sport-field.dto';
 import { TimeSlotsEntity } from '../entities/time-slots.entity';
 import { GetAvailableFieldDto } from './dtos/get-available-field.dto';
-import { FieldBookingsEntity, FieldBookingStatus } from 'src/entities/field-bookings.entity';
+import { FieldBookingsEntity, FieldBookingStatus } from '../entities/field-bookings.entity';
+import { getAvailableTimeSlots, mergeTimeSlots } from '../utils/helper/date-time.helper';
 @Injectable()
 export class SportFieldService {
   constructor(
@@ -28,13 +29,37 @@ export class SportFieldService {
     private readonly dataSource: DataSource,
   ) { }
 
-  async getAll(bracnhId: number) {
+  async getPublicAll(bracnhId: number) {
     console.log(bracnhId, 'service')
-    return await this.sportFieldRepo.find({
-      where: { isActive: true, branchId: bracnhId }, select: {
-        id: true, name: true, images: true, description: true, branchId: true, sportCategoryId: true
-      }
-    })
+    return await this.sportFieldRepo.createQueryBuilder('sf')
+    .leftJoin('time_slots','ts', 'ts.sport_field_id = sf.id')
+    .innerJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id')
+    .where('sf.isActive = :isActive', {isActive: true})
+    .andWhere('ts.isActive = :isActive', {isActive:true})
+    .select('sf.id', 'id')
+    .addSelect('sf.name','name')
+    .addSelect('sc.id','sportCategoryId')
+    .addSelect('sf.defaultPrice', 'defaultPrice')
+    .addSelect('sc.name','sportCategoryName')
+    .addSelect(
+      `COALESCE(
+    json_agg(
+       json_build_object(
+          'id', ts.id,
+          'startTime', ts.start_time,
+          'endTime', ts.end_time,
+          'pricePerHour', ts.price_per_hour
+        )
+  
+    ), '[]'::json
+  )
+  `,
+      'timeSlots'
+    )
+    .groupBy('sf.id')
+    .addGroupBy('sc.id')
+    .getRawMany()
+
   }
 
   async getMangeAll(bracnhId: number) {
@@ -93,12 +118,12 @@ export class SportFieldService {
     await queryRunner.startTransaction();
     try {
       await queryRunner.query(
-        `UPDATE time_slot SET is_deleted = true, is_active = false  WHERE sport_field_id = $1`,
+        `UPDATE time_slots SET is_deleted = true, is_active = false  WHERE sport_field_id = $1`,
         [sportFieldId],
       );
       for (const slot of timeSlots) {
         await queryRunner.query(
-          `INSERT INTO time_slot (sport_field_id, start_time, end_time, price_per_hour, is_active)
+          `INSERT INTO time_slots (sport_field_id, start_time, end_time, price_per_hour, is_active)
            VALUES ($1, $2, $3, $4, $5)`,
           [sportFieldId, slot.startTime, slot.endTime, slot.pricePerHour, true],
         );
@@ -126,9 +151,12 @@ export class SportFieldService {
 
     const { timeSlots } = updateDto;
     delete updateDto.timeSlots;
+    
     await this.sportFieldRepo.update(id, {
       ...updateDto,
+      updatedAt: new Date()
     });
+    console.log(updateDto)
     if (timeSlots && timeSlots.length > 0) {
       await this.createTimeSlot(id, timeSlots);
     }
@@ -173,59 +201,66 @@ export class SportFieldService {
       }
     }
     // from field join to booking , array booking time to 
-    let bookedFieldQuery = this.fieldBookingRepo.createQueryBuilder('booking')
-      .leftJoin('sport_fields', 'sf', 'sf.id = booking.sport_field_id')
-      .where('booking.bookingDate = :bookingDate', { bookingDate: date })
-      .andWhere('sf.branch_id = :branchId', { branchId: branchId })
-      .andWhere('booking.status NOT IN (:...status)', {
-        status: [FieldBookingStatus.CANCELLED, FieldBookingStatus.REFUND]
-      })
+    // let bookedFieldQuery = this.fieldBookingRepo.createQueryBuilder('booking')
+    //   .leftJoin('sport_fields', 'sf', 'sf.id = booking.sport_field_id')
+    //   .where('booking.bookingDate = :bookingDate', { bookingDate: date })
+    //   .andWhere('sf.branch_id = :branchId', { branchId: branchId })
+    //   .andWhere('booking.status NOT IN (:...status)', {
+    //     status: [FieldBookingStatus.CANCELLED, FieldBookingStatus.REFUND]
+    //   })
+    //   .select('sf.id', 'id')
+    //   .addSelect('sf.name', 'name')
+    //   .addSelect(
+    //     `json_agg(json_build_object('start_time', booking.start_time, 'end_time', booking.end_time))`,
+    //     "booked_time_slots"
+    //   )
+    //   .groupBy('sf.id')
+    //   .getRawMany()
+
+    let fieldInfo = await this.sportFieldRepo
+      .createQueryBuilder('sf')
+      .leftJoin('field_bookings', 'fb', 'sf.id = fb.sport_field_id')
       .select('sf.id', 'id')
       .addSelect('sf.name', 'name')
+      .addSelect('sf.defaultPrice', 'defaultPrice')
       .addSelect(
-        `json_agg(json_build_object('start_time', booking.start_time, 'end_time', booking.end_time))`,
-        "booked_time_slots"
+        `COALESCE(
+      json_agg(
+        CASE 
+          WHEN fb.bookingDate = :bookingDate 
+            AND fb.status NOT IN (:...status)
+          THEN json_build_object(
+            'startTime', fb.start_time,
+            'endTime', fb.end_time
+          )
+        END
+      ) FILTER (WHERE fb.bookingDate = :bookingDate), '[]'::json
+    )
+    `,
+        'bookedTimeSlots'
       )
+      .setParameters({
+        bookingDate: date,
+        status: [FieldBookingStatus.CANCELLED, FieldBookingStatus.REFUND],
+      })
       .groupBy('sf.id')
-      .getRawMany()
-    // if (startTime) {
-    //   // filter field with availale have this time range
-    //   bookedFieldQuery = bookedFieldQuery.andWhere(
-    //     new Brackets(qb => {
-    //       qb.where(
-    //         new Brackets(ib => {
-    //           ib.where('booking.startTime < :startTime', { startTime: dto.startTime })
-    //             .andWhere('booking.endTime > :startTime', { startTime: dto.startTime })
-    //         })
-    //       )
-    //         .orWhere(new Brackets(ib => {
-    //           ib.where('booking.startTime < :endTime', { endTime: dto.endTime })
-    //             .andWhere('booking.endTime > :endTime', { endTime: dto.endTime })
-    //         }))
-    //         .orWhere(new Brackets(ib => {
-    //           ib.where('booking.startTime <= :startTime', { startTime: dto.startTime })
-    //             .andWhere('booking.endTime >= :endTime', { endTime: dto.endTime })
-    //         }))
-    //         .orWhere(new Brackets(ib => {
-    //           ib.where('booking.startTime >= :startTime', { startTime: dto.startTime })
-    //             .andWhere('booking.endTime <= :endTime', { endTime: dto.endTime })
-    //         }))
-    //     })
-    //   )
-    // }
+      .orderBy('sf.id')
+      .getRawMany();
 
-    /**
-     * op1: 
-     * get all booking in this day
-     * get time of fieds
-     * write helper and calculate available time
-     */
+    fieldInfo = fieldInfo.map(field => {
+      return {
+        ...field,
+        bookedTimeSlots: mergeTimeSlots(field.bookedTimeSlots)
+      }
+    })
 
-    //to do: 
-    /**
-     * select field not booking in time range setting 
-     */
-
-    return bookedFieldQuery;
+    return fieldInfo.map(field => {
+      return {
+        ...field,
+        availableTimeSlots: getAvailableTimeSlots(field.bookedTimeSlots, branch.openTime, branch.closeTime),
+        openTime: branch.openTime,
+        closeTime: branch.closeTime,
+      }
+    })
   }
 }

@@ -15,7 +15,6 @@ export class BranchesService {
   ) { }
 
   async getPublicAll() {
-    // select sport support
     const cacheKey = 'getPublicAllBraches'
     const cachedData = this.cacheService.get(cacheKey);
     if (cachedData) return cachedData;
@@ -29,13 +28,15 @@ export class BranchesService {
       .addSelect('br.district', 'district')
       .addSelect('br.city', 'city')
       .addSelect('br.openTime', 'openTime')
-      .addSelect('br.closeTime','closeTime')
+      .addSelect('br.closeTime', 'closeTime')
       .addSelect('COUNT(sf.id)', 'total_fields')
+      .addSelect('SUM(sf.default_price) / COUNT(sf.id)', 'averagePrice')
       .addSelect(
         `JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', sc.id, 'name', sc.name)) FILTER (WHERE sc.id IS NOT NULL)`,
         'sport_categories'
       )
       .where('sf.is_active = :active', { active: true })
+      .where('sc.is_active = :active', { active: true })
       .andWhere('br.active_date < NOW()')
       .groupBy('br.id')
       .getRawMany();
@@ -43,23 +44,43 @@ export class BranchesService {
     return branches;
   }
 
-  async getOne(id: number): Promise<BranchsEntity> {
-    // return sport service have
+  async getAll() {
+    return await this.branchRepo.find()
+  }
+
+  async getPublicOne(id: number) {
     const cacheKey = `getPublicBranch-${id}`
-    const branch = await this.branchRepo.findOne({
-      where: { id }, select: {
-        id: true,
-        name: true,
-        street: true, ward: true, district: true, city: true
-      }
-    });
+    const cachedData = this.cacheService.get(cacheKey);
+    if (cachedData) return cachedData;
+    const branch = await this.branchRepo.createQueryBuilder('br')
+      .leftJoin('sport_fields', 'sf', 'sf.branch_id = br.id')
+      .leftJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id')
+      .select('br.id', 'id')
+      .addSelect('br.name', 'name')
+      .addSelect('br.street', 'street')
+      .addSelect('br.ward', 'ward')
+      .addSelect('br.district', 'district')
+      .addSelect('br.city', 'city')
+      .addSelect('br.openTime', 'openTime')
+      .addSelect('br.closeTime', 'closeTime')
+      .addSelect('COUNT(sf.id)', 'total_fields')
+      .addSelect('SUM(sf.default_price) / COUNT(sf.id)', 'averagePrice')
+      .addSelect(
+        `JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', sc.id, 'name', sc.name)) FILTER (WHERE sc.id IS NOT NULL)`,
+        'sport_categories'
+      )
+      .where('sf.is_active = :active', { active: true })
+      .andWhere('sc.is_active = :active', { active: true })
+      .andWhere('br.id =:id', { id: id })
+      .andWhere('br.active_date < NOW()')
+      .groupBy('br.id')
+      .getRawOne();
     if (!branch) throw new BadRequestException('Branch do not exist');
-    // const totalFields = await
+    this.cacheService.set(cacheKey, branch, 300)
     return branch;
   }
 
-  async getPublicOne(id: number): Promise<BranchsEntity> {
-    //to do: get total sportField - average price
+  async getOne(id: number): Promise<BranchsEntity> {
     const branch = await this.branchRepo.findOne({ where: { id } });
     if (!branch) throw new BadRequestException('Branch do not exist');
     return branch;

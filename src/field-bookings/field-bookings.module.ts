@@ -9,6 +9,8 @@ import { SportFieldsEntity } from '../entities/sport-fields.entity';
 import { UsersEntity } from '../entities/users.entity';
 import { UsersModule } from '../users/users.module';
 import { BookingMailService } from '../mail/mail.service';
+import { FirebaseAdmin } from 'src/firebase/firebase.service';
+import { StaffsModule } from 'src/staffs/staffs.module';
 
 @Module({
   imports: [
@@ -19,10 +21,11 @@ import { BookingMailService } from '../mail/mail.service';
       UsersEntity,
     ]),
     ResponseModule,
-    UsersModule
+    UsersModule,
+    StaffsModule
   ],
   controllers: [FieldBookingsController],
-  providers: [FieldBookingsService, BookingMailService],
+  providers: [FieldBookingsService, BookingMailService, FirebaseAdmin],
   exports: [FieldBookingsService],
 })
 export class FieldBookingsModule {}

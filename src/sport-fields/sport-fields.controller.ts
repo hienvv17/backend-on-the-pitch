@@ -24,17 +24,18 @@ export class SportFieldsController {
   ) { }
 
   @Get(':branchId')
-  async getAll(@Param('branchId') branchId: number) {
-    const fields = await this.sportFieldsService.getAll(branchId);
+  async getPublicAll(@Param('branchId') branchId: number) {
+    const fields = await this.sportFieldsService.getPublicAll(branchId);
     return this.responseService.successResponse({
       items: fields,
     });
   }
 
   //@UseGuards(StaffJwtGuard)
-  @Get('get-manage')
+  @Get('get-manage/:branchId')
   async getManageAll(@Param('branchId') branchId: number) {
-    const fields = await this.sportFieldsService.getMangeAll(branchId);
+    console.log( branchId)
+    const fields = await this.sportFieldsService.getMangeAll(+branchId);
     return this.responseService.successResponse({
       items: fields[0],
       count: fields[1],

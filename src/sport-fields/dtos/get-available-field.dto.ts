@@ -6,9 +6,9 @@ import {
   IsString,
   Matches,
 } from 'class-validator';
-import { IsEndTimeAtLeastOneHourAfter } from 'src/decorators/IsEndTimeAtLeastOneHourAfter.decorator.ts';
-import { IsTimeString } from 'src/decorators/IsTimeString.decorator';
-import { IsValidDate } from 'src/decorators/IsValidDate.decorator';
+import { IsEndTimeAtLeastOneHourAfter } from '../../decorators/IsEndTimeAtLeastOneHourAfter.decorator.ts';
+import { IsTimeString } from '../../decorators/IsTimeString.decorator';
+import { IsValidDate } from '../../decorators/IsValidDate.decorator';
 
 export class GetAvailableFieldDto {
   @ApiProperty()

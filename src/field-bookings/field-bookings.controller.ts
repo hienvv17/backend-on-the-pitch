@@ -1,8 +1,14 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ResponseService } from '../response/response.service';
 import { FieldBookingsService } from './field-bookings.service';
 import { CreateBookingDto } from './dto/create-booking-field.dto';
 import { BookingMailService } from '../mail/mail.service';
+import { GetBookingHistoryDto } from './dto/get-booking-history.dto';
+import { ManagerJwtGuard } from '../auth/guard/manager-jwt.guard';
+import { JwtGuard } from '../auth/guard/jwt.guard';
+import { GetUser } from '../auth/decorator/get-user.decorator';
+import { StaffJwtGuard } from '../auth/guard/staff-jwt.guard';
+import { CheckBookingDto } from './dto/check-booking.dto';
 
 @Controller('field-bookings')
 export class FieldBookingsController {
@@ -27,14 +33,34 @@ export class FieldBookingsController {
         endTime: bookingData.endTime
       }
     );
-    return this.responseService.successResponse({bookingData});
+    return this.responseService.successResponse({ bookingData });
   }
+
+  // @UseGuards(ManagerJwtGuard)
+  @Post('manage/history')
+  async getManageHistory(@Body() dto: GetBookingHistoryDto) {
+    const { data, count, limit, offset } = await this.fieldBookingsService.getBookingHistory(dto)
+    return this.responseService.successResponse({ data: data, count: count });
+  }
+
+  // @UseGuards(JwtGuard)
+  @Post('history')
+  async getPersonalHistory(@GetUser('uid') uid: string, @Body() dto: GetBookingHistoryDto) {
+    const bookingHistories = await this.fieldBookingsService.getPersonalBookingHistory(uid, dto)
+    return this.responseService.successResponse({ bookingHistories });
+  }
+
+  // @UseGuards(StaffJwtGuard)
+  @Post('check-booking')
+  async checkBooking(@Body() dto: CheckBookingDto) {
+    const bookingHistories = await this.fieldBookingsService.checkBooking(dto)
+    return this.responseService.successResponse({ bookingHistories });
+  }
+
+
   //to do
   /**
    * creat review endpoint
-   * get personal booking
-   * manage booking for admin
-   * get schedule booking for all staff - have searching by \
-   * update booking have code - generate OTP-nine-number
+   * think again that staff can see all booking history - or showing only today
    */
 }
