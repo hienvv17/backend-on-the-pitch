@@ -4,7 +4,7 @@ export default {
   },
   cache: {
     minutes: {
-      user: 5,
+      default: 5 * 60,
     },
   },
   apiRequest: {

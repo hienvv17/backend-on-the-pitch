@@ -26,7 +26,7 @@ export class UserAndBranchMigration1740512017998 implements MigrationInterface {
             phone_number VARCHAR(11) NOT NULL,
             role staff_role DEFAULT 'STAFF',
             is_active BOOLEAN DEFAULT TRUE,
-            active_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            active_date DATE DEFAULT CURRENT_TIMESTAMP,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ); `);
@@ -40,7 +40,9 @@ export class UserAndBranchMigration1740512017998 implements MigrationInterface {
             district VARCHAR(100) NOT NULL,
             city VARCHAR(100) NOT NULL,
             images JSON,
-            active_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            active_date DATE DEFAULT CURRENT_TIMESTAMP,
+            open_time VARCHAR(5) NOT NULL,
+            close_time VARCHAR(5) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );

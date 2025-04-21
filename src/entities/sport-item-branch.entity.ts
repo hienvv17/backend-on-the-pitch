@@ -7,8 +7,8 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-import { SportItemEntity } from './sport-item.entity';
-import { BranchEntity } from './branch.entity';
+import { SportItemsEntity } from './sport-items.entity';
+import { BranchsEntity } from './branches.entity';
 
 @Entity('sport_item_branch')
 export class SportItemBranchEntity {
@@ -21,13 +21,13 @@ export class SportItemBranchEntity {
   @Column({ type: 'bigint', name: 'branch_id' })
   branchId: number;
 
-  @ManyToOne(() => SportItemEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => SportItemsEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'sport_item_id' })
-  sportItem: SportItemEntity;
+  sportItem: SportItemsEntity;
 
-  @ManyToOne(() => BranchEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => BranchsEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'branch_id' })
-  branch: BranchEntity;
+  branch: BranchsEntity;
 
   @Column({ type: 'bigint' })
   quantity: number;
