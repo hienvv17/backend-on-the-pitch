@@ -15,13 +15,15 @@ import { UpdateSportFieldDto } from './dtos/update-sport-field.dto';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 import { GetAvailableFieldDto } from './dtos/get-available-field.dto';
 import { StaffJwtGuard } from './../auth/guard/staff-jwt.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Sport Field')
 @Controller('sport-fields')
 export class SportFieldsController {
   constructor(
     private responseService: ResponseService,
     private sportFieldsService: SportFieldService,
-  ) { }
+  ) {}
 
   @Get(':branchId')
   async getPublicAll(@Param('branchId') branchId: number) {
@@ -34,7 +36,7 @@ export class SportFieldsController {
   //@UseGuards(StaffJwtGuard)
   @Get('get-manage/:branchId')
   async getManageAll(@Param('branchId') branchId: number) {
-    console.log( branchId)
+    console.log(branchId);
     const fields = await this.sportFieldsService.getMangeAll(+branchId);
     return this.responseService.successResponse({
       items: fields[0],

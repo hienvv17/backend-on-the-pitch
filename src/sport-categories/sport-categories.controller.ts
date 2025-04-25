@@ -3,8 +3,9 @@ import { SportCategoriesService } from './sport-categories.service';
 import { ResponseService } from '../response/response.service';
 import { CreateSportCategoryDto } from './dto/create-sport-category.dto';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
+import { ApiTags } from '@nestjs/swagger';
 
-
+@ApiTags('Sport Category')
 @Controller('sport-categories')
 export class SportCategoriesController {
   constructor(

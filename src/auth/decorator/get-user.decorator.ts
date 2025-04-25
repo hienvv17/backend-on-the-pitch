@@ -1,4 +1,8 @@
-import { BadRequestException, createParamDecorator, ExecutionContext } from '@nestjs/common';
+import {
+  BadRequestException,
+  createParamDecorator,
+  ExecutionContext,
+} from '@nestjs/common';
 
 export interface AuthUser {
   uid: string;
@@ -11,7 +15,7 @@ export const GetUser = createParamDecorator(
     const user = request.user as AuthUser | undefined;
 
     // If no user (public route), return undefined or undefined field
-    if (!user) throw new BadRequestException('You are not login!')
+    if (!user) throw new BadRequestException('You are not login!');
     return user;
   },
 );

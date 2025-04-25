@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsArray, IsDateString, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  IsDateString,
+  IsNotEmpty,
+} from 'class-validator';
 import { IsEndTimeAtLeastOneHourAfter } from '../../decorators/IsEndTimeAtLeastOneHourAfter.decorator.ts';
 import { IsTimeString } from '../../decorators/IsTimeString.decorator';
 
@@ -46,7 +52,9 @@ export class UpdateBranchDto {
   openTime?: string;
 
   @ApiProperty({ nullable: true })
-  @IsEndTimeAtLeastOneHourAfter('openTime', { message: 'Close time must after openTime' })
+  @IsEndTimeAtLeastOneHourAfter('openTime', {
+    message: 'Close time must after openTime',
+  })
   @IsTimeString()
   @IsString()
   @IsOptional()

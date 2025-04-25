@@ -1,10 +1,20 @@
-import { Controller, Get, Post, Body, UseGuards, Put, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Put,
+  Param,
+} from '@nestjs/common';
 import { StaffsService } from './staffs.service';
 import { CreateStaffDto } from './dtos/create-staff.dto';
 import { ManagerJwtGuard } from '../auth/guard/manager-jwt.guard';
 import { ResponseService } from '../response/response.service';
 import { UpdateStaffDto } from './dtos/update-staff.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Staff')
 @Controller('staffs')
 //@UseGuards(ManagerJwtGuard)
 export class StaffsController {

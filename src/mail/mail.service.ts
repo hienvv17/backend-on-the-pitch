@@ -13,13 +13,13 @@ export class BookingMailService {
       template: 'booking-success',
       context: {
         code: bookingData.code,
-        customerName: bookingData.customerName ,
+        customerName: bookingData.customerName,
         fieldName: bookingData.fieldName,
         branchName: bookingData.branchName,
         bookingDate: bookingData.bookingDate,
         startTime: bookingData.startTime,
         endTime: bookingData.endTime,
-        paymentMethod: 'VNPay'
+        paymentMethod: 'VNPay',
       },
     });
     return;

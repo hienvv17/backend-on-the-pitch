@@ -19,7 +19,7 @@ export const isValidDate = (dateStr: string): boolean => {
     date.getMonth() + 1 === month && // getMonth() is 0-based
     date.getDate() === day
   );
-}
+};
 
 export const isTimeString = (value: string): boolean => {
   const regex = /^([01]\d|2[0-3]):(00|30)$/;
@@ -30,13 +30,17 @@ export const isInServiceTime = (
   openTime: string,
   closeTime: string,
   startTime: string,
-  endTime: string
+  endTime: string,
 ): boolean => {
-  return startTime >= openTime && startTime < closeTime && endTime <= closeTime
-}
+  return startTime >= openTime && startTime < closeTime && endTime <= closeTime;
+};
 
-export const generateEndTime = (time: string, addHour: number, addMin: number): string => {
-  const [hours, minutes] = time.split(":").map(Number);
+export const generateEndTime = (
+  time: string,
+  addHour: number,
+  addMin: number,
+): string => {
+  const [hours, minutes] = time.split(':').map(Number);
 
   const date = new Date();
   date.setHours(hours);
@@ -49,17 +53,18 @@ export const generateEndTime = (time: string, addHour: number, addMin: number): 
   date.setMinutes(date.getMinutes() + addMin);
 
   // Format back to "HH:mm"
-  const newHours = String(date.getHours()).padStart(2, "0");
-  const newMinutes = String(date.getMinutes()).padStart(2, "0");
+  const newHours = String(date.getHours()).padStart(2, '0');
+  const newMinutes = String(date.getMinutes()).padStart(2, '0');
 
   return `${newHours}:${newMinutes}`;
-}
-
+};
 
 export const mergeTimeSlots = (slots: TimeSlot[]): TimeSlot[] => {
   if (!slots.length) return [];
   // Sort by startTime
-  const sorted = [...slots].sort((a, b) => a.startTime.localeCompare(b.startTime));
+  const sorted = [...slots].sort((a, b) =>
+    a.startTime.localeCompare(b.startTime),
+  );
   const merged: TimeSlot[] = [sorted[0]];
 
   for (let i = 1; i < sorted.length; i++) {
@@ -76,12 +81,12 @@ export const mergeTimeSlots = (slots: TimeSlot[]): TimeSlot[] => {
   }
 
   return merged;
-}
+};
 
 export const getAvailableTimeSlots = (
   bookedSlots: TimeSlot[],
   openTime: string,
-  closeTime: string
+  closeTime: string,
 ): TimeSlot[] => {
   const toMinutes = (time: string) => {
     const [h, m] = time.split(':').map(Number);
@@ -89,7 +94,9 @@ export const getAvailableTimeSlots = (
   };
 
   const toTime = (mins: number) => {
-    const h = Math.floor(mins / 60).toString().padStart(2, '0');
+    const h = Math.floor(mins / 60)
+      .toString()
+      .padStart(2, '0');
     const m = (mins % 60).toString().padStart(2, '0');
     return `${h}:${m}`;
   };
@@ -99,7 +106,7 @@ export const getAvailableTimeSlots = (
 
   // Sort booked slots by startTime
   const sorted = [...bookedSlots].sort((a, b) =>
-    a.startTime.localeCompare(b.startTime)
+    a.startTime.localeCompare(b.startTime),
   );
 
   const available: TimeSlot[] = [];
@@ -131,7 +138,4 @@ export const getAvailableTimeSlots = (
   }
 
   return available;
-}
-
-
-
+};

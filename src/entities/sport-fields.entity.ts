@@ -30,8 +30,8 @@ export class SportFieldsEntity {
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean;
 
-  @Column({name:'default_price', type: 'bigint'})
-  defaultPrice: number
+  @Column({ name: 'default_price', type: 'bigint' })
+  defaultPrice: number;
 
   @Column({ type: 'json' })
   images?: any;

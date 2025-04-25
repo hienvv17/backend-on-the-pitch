@@ -32,6 +32,12 @@ export class ReviewsEntity {
   @Column({ type: 'text', nullable: true })
   comment: string;
 
+  @Column({ type: 'boolean', nullable: true, name: 'is_deleted' })
+  isDeleted: boolean;
+
+  @Column({ type: 'boolean', nullable: true, name: 'is_hidden' })
+  isHidden: boolean;
+
   @Column({ type: 'int', default: 5 })
   rating: number; // Rating scale (e.g., 1-5)
 

@@ -45,11 +45,11 @@ export class BranchsEntity {
   })
   activeDate: Date;
 
-  @Column({name: 'open_time', type:'varchar', length:5})
-  openTime: string
+  @Column({ name: 'open_time', type: 'varchar', length: 5 })
+  openTime: string;
 
-  @Column({name: 'close_time', type:'varchar', length:5})
-  closeTime: string
+  @Column({ name: 'close_time', type: 'varchar', length: 5 })
+  closeTime: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

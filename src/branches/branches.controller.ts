@@ -13,13 +13,15 @@ import { UpdateBranchDto } from './dto/update-branch.dto';
 import { UseGuards } from '@nestjs/common';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 import { ResponseService } from '../response/response.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Bracnh')
 @Controller('branches')
 export class BranchesController {
   constructor(
     private readonly branchesService: BranchesService,
     private readonly responseService: ResponseService,
-  ) { }
+  ) {}
 
   @Get()
   async getPublicAll() {
