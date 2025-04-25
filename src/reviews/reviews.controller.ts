@@ -6,7 +6,7 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { JwtGuard } from '../auth/guard/jwt.guard';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { ResponseService } from '../response/response.service';
-import { AdminJwtGuard } from 'src/auth/guard/admin-jwt.guard';
+import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 
 @ApiTags('Reviews')
 @Controller('reviews')
@@ -14,7 +14,7 @@ export class ReviewsController {
   constructor(
     private readonly reviewsService: ReviewsService,
     private readonly responseService: ResponseService,
-  ) {}
+  ) { }
 
   @UseGuards(JwtGuard)
   @Post()

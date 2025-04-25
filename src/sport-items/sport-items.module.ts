@@ -3,9 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SportItemsService } from './sport-items.service';
 import { SportItemsController } from './sport-items.controller';
 import { SportItemsEntity } from '../entities/sport-items.entity';
-import { FirebaseAdmin } from 'src/firebase/firebase.service';
-import { StaffsModule } from 'src/staffs/staffs.module';
-import { ResponseModule } from 'src/response/response.module';
+import { FirebaseAdmin } from '../firebase/firebase.service';
+import { StaffsModule } from '../staffs/staffs.module';
+import { ResponseModule } from '../response/response.module';
 
 @Module({
   imports: [
@@ -17,4 +17,4 @@ import { ResponseModule } from 'src/response/response.module';
   providers: [SportItemsService, FirebaseAdmin],
   exports: [SportItemsService],
 })
-export class SportItemsModule {}
+export class SportItemsModule { }

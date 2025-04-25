@@ -6,8 +6,8 @@ import {
   IsDateString,
   IsNotEmpty,
 } from 'class-validator';
-import { IsEndTimeAtLeastOneHourAfter } from 'src/decorators/IsEndTimeAtLeastOneHourAfter.decorator.ts';
-import { IsTimeString } from 'src/decorators/IsTimeString.decorator';
+import { IsEndTimeAtLeastOneHourAfter } from '../../decorators/IsEndTimeAtLeastOneHourAfter.decorator.ts';
+import { IsTimeString } from '../../decorators/IsTimeString.decorator';
 
 export class CreateBranchDto {
   @ApiProperty()

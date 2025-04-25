@@ -7,7 +7,7 @@ import { FirebaseAdmin } from '../firebase/firebase.service';
 import { ResponseModule } from '../response/response.module';
 import { UsersEntity } from '../entities/users.entity';
 import { FieldBookingsEntity } from '../entities/field-bookings.entity';
-import { StaffsModule } from 'src/staffs/staffs.module';
+import { StaffsModule } from '../staffs/staffs.module';
 
 @Module({
   imports: [
@@ -19,4 +19,4 @@ import { StaffsModule } from 'src/staffs/staffs.module';
   providers: [ReviewsService, FirebaseAdmin],
   exports: [ReviewsService],
 })
-export class ReviewsModule {}
+export class ReviewsModule { }

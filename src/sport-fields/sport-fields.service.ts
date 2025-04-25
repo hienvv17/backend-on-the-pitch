@@ -19,7 +19,7 @@ import {
   getAvailableTimeSlots,
   mergeTimeSlots,
 } from '../utils/helper/date-time.helper';
-import { CacheService } from 'src/cache/cache.service';
+import { CacheService } from '../cache/cache.service';
 @Injectable()
 export class SportFieldService {
   constructor(
