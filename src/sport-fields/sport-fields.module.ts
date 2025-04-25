@@ -23,10 +23,10 @@ import { CacheModule } from '../cache/cache.module';
     ]),
     ResponseModule,
     StaffsModule,
-    CacheModule
+    CacheModule,
   ],
   controllers: [SportFieldsController],
   providers: [SportFieldService, FirebaseAdmin],
   exports: [SportFieldService],
 })
-export class SportFieldsModule { }
+export class SportFieldsModule {}

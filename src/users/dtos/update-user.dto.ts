@@ -11,4 +11,9 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   phoneNumber?: string;
+
+  @ApiProperty({ nullable: true })
+  @IsString()
+  @IsOptional()
+  image?: string;
 }

@@ -16,6 +16,6 @@ export const GetUser = createParamDecorator(
 
     // If no user (public route), return undefined or undefined field
     if (!user) throw new BadRequestException('You are not login!');
-    return user;
+    return user[data];
   },
 );

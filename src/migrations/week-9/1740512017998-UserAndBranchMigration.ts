@@ -11,6 +11,7 @@ export class UserAndBranchMigration1740512017998 implements MigrationInterface {
             full_name VARCHAR(255),
             phone_number VARCHAR(10),
             email VARCHAR(255) NOT NULL UNIQUE,
+            image VARCHAR(500),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );`);

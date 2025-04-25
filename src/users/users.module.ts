@@ -5,11 +5,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersEntity } from '../entities/users.entity';
 import { ResponseModule } from '../response/response.module';
 import { FirebaseAdmin } from '../firebase/firebase.service';
+import { StaffsModule } from '../staffs/staffs.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UsersEntity]), ResponseModule],
+  imports: [
+    TypeOrmModule.forFeature([UsersEntity]),
+    ResponseModule,
+    StaffsModule,
+  ],
   controllers: [UserController],
   providers: [UsersService, FirebaseAdmin],
   exports: [UsersService],
 })
-export class UsersModule {}
+export class UsersModule { }

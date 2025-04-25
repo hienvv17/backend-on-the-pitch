@@ -23,6 +23,9 @@ export class UsersEntity {
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
 
+  @Column({ nullable: true })
+  image?: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

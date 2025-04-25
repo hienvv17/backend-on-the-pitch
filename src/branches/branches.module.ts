@@ -13,10 +13,10 @@ import { CacheModule } from '../cache/cache.module';
     TypeOrmModule.forFeature([BranchsEntity]),
     ResponseModule,
     StaffsModule,
-    CacheModule
+    CacheModule,
   ],
   controllers: [BranchesController],
   providers: [BranchesService, FirebaseAdmin],
   exports: [BranchesService],
 })
-export class BranchesModule { }
+export class BranchesModule {}

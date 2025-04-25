@@ -34,13 +34,13 @@ export class SportFieldService {
     @InjectRepository(FieldBookingsEntity)
     private fieldBookingRepo: Repository<FieldBookingsEntity>,
     private readonly dataSource: DataSource,
-    private cacheService: CacheService
-  ) { }
+    private cacheService: CacheService,
+  ) {}
 
   async getPublicAll(bracnhId: number) {
-    const cacheKey = `getPublicSportFieldOnBranch-${bracnhId}`
-    let cachedData = this.cacheService.get(cacheKey)
-    if (cachedData) return cachedData
+    const cacheKey = `getPublicSportFieldOnBranch-${bracnhId}`;
+    let cachedData = this.cacheService.get(cacheKey);
+    if (cachedData) return cachedData;
     const sportFields = await this.sportFieldRepo
       .createQueryBuilder('sf')
       .leftJoin('time_slots', 'ts', 'ts.sport_field_id = sf.id')
@@ -94,7 +94,7 @@ export class SportFieldService {
       .addGroupBy('sc.id')
       .getRawMany();
     this.cacheService.set(cacheKey, sportFields, 300);
-    return sportFields
+    return sportFields;
   }
 
   async getMangeAll(bracnhId: number) {

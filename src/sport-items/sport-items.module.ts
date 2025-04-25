@@ -17,4 +17,4 @@ import { ResponseModule } from '../response/response.module';
   providers: [SportItemsService, FirebaseAdmin],
   exports: [SportItemsService],
 })
-export class SportItemsModule { }
+export class SportItemsModule {}

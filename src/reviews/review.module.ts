@@ -19,4 +19,4 @@ import { StaffsModule } from '../staffs/staffs.module';
   providers: [ReviewsService, FirebaseAdmin],
   exports: [ReviewsService],
 })
-export class ReviewsModule { }
+export class ReviewsModule {}

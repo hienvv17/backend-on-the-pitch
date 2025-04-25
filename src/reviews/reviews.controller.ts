@@ -14,7 +14,7 @@ export class ReviewsController {
   constructor(
     private readonly reviewsService: ReviewsService,
     private readonly responseService: ResponseService,
-  ) { }
+  ) {}
 
   @UseGuards(JwtGuard)
   @Post()

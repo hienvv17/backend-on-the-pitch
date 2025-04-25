@@ -43,7 +43,7 @@ export class FieldBookingsController {
     return this.responseService.successResponse({ data: data, count: count });
   }
 
-  // @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard)
   @Post('history')
   async getPersonalHistory(
     @GetUser('uid') uid: string,

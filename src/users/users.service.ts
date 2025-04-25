@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { UsersEntity } from '../entities/users.entity';
 import { FirebaseAdmin } from '../firebase/firebase.service';
 import { UserRecord } from 'firebase-admin/lib/auth/user-record';
+import { UpdateUserDto } from './dtos/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -12,11 +13,11 @@ export class UsersService {
     @InjectRepository(UsersEntity)
     private usersRepo: Repository<UsersEntity>,
     private readonly firebaseAdmin: FirebaseAdmin,
-  ) {}
+  ) { }
 
   async create(createUserDto: CreateUserDto) {
-    console.log(createUserDto, 'check data create user')
-    console.log('check create user')
+    console.log(createUserDto, 'check data create user');
+    console.log('check create user');
     const admin = this.firebaseAdmin.setup();
     let existingFirebaseUser: UserRecord = null;
     const existingUser = await this.usersRepo.findOne({
@@ -51,11 +52,59 @@ export class UsersService {
     });
   }
 
-  async getOne(email: string) {
+  async getProfile(email: string) {
     return await this.usersRepo.findOne({ where: { email: email } });
+  }
+
+  async updateProfile(uid: string, dto: UpdateUserDto) {
+    return await this.usersRepo.update(uid, { ...dto })
+  }
+
+  async getOne(uid: string) {
+    console.log(uid)
+    return await this.usersRepo.findOne({
+      where: { uid: uid },
+      select: {
+        fullName: true,
+        email: true,
+        phoneNumber: true,
+        image: true,
+      },
+    });
   }
 
   async findByEmail(email: string) {
     return await this.usersRepo.findOne({ where: { email: email } });
+  }
+
+  async getManageUser() {
+    const users = await this.usersRepo
+      .createQueryBuilder('u')
+      .leftJoin('field_bookings', 'fb', 'fb.user_id = u.id')
+      .select('u.id', 'id')
+      .addSelect('u.email', 'email')
+      .addSelect('u.full_name', 'fullName')
+      .addSelect('COUNT(fb.id) "totalBookings"')
+      .addSelect(
+        `COUNT(CASE WHEN fb.status = 'PAID' THEN 1 END)`,
+        'paidBookings',
+      )
+      .addSelect(
+        `COUNT(CASE WHEN fb.status = 'CANCELLED' THEN 1 END)`,
+        'cancelledBookings',
+      )
+      .addSelect('u.created_at', 'createdAt')
+      .addSelect('u.updated_at', 'updatedAt')
+      .groupBy('u.id')
+      .getRawMany();
+
+    const result = users.map((item) => ({
+      ...item,
+      totalBookings: Number(item.totalBookings),
+      pendingBookings: Number(item.totalBookings) - Number(item.paidBookings),
+      paidBookings: Number(item.paidBookings),
+      cancelledBookings: Number(item.cancelledBookings),
+    }));
+    return result;
   }
 }

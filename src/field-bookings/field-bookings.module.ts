@@ -28,4 +28,4 @@ import { StaffsModule } from '../staffs/staffs.module';
   providers: [FieldBookingsService, BookingMailService, FirebaseAdmin],
   exports: [FieldBookingsService],
 })
-export class FieldBookingsModule { }
+export class FieldBookingsModule {}
