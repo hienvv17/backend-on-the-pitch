@@ -16,6 +16,8 @@ export class RenameTable1744427613000000 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "field_booking" RENAME TO "field_bookings"`,
     );
+
+    await queryRunner.query(`ALTER TABLE "review" RENAME TO "reviews"`);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -33,5 +35,6 @@ export class RenameTable1744427613000000 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "field_bookings" RENAME TO "field_booking"`,
     );
+    await queryRunner.query(`ALTER TABLE "reviews" RENAME TO "review"`);
   }
 }

@@ -6,8 +6,8 @@ export class SignInDto {
   @IsString()
   @IsNotEmpty()
   access_token: string;
-  
-  @ApiProperty({nullable: true})
+
+  @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
   result?: any;

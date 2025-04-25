@@ -59,6 +59,8 @@ export class CreateTimeSlotTable1711650000000 implements MigrationInterface {
           field_booking_id BIGINT NOT NULL,
           comment TEXT NULL,
           rating INT DEFAULT 5 CHECK (rating BETWEEN 1 AND 5),
+          is_deleted BOOLEAN DEFAULT FALSE,
+          is_hidden BOOLEAN DEFAULT FALSE,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   

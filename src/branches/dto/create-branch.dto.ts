@@ -62,7 +62,9 @@ export class CreateBranchDto {
   openTime: string;
 
   @ApiProperty()
-  @IsEndTimeAtLeastOneHourAfter('openTime', { message: 'Close time must after openTime' })
+  @IsEndTimeAtLeastOneHourAfter('openTime', {
+    message: 'Close time must after openTime',
+  })
   @IsTimeString()
   @IsString()
   @IsNotEmpty()

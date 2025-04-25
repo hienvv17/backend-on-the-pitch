@@ -10,6 +10,7 @@ import { TimeSlotsEntity } from '../entities/time-slots.entity';
 import { SportCategoriesEntity } from '../entities/sport-categories.entity';
 import { StaffsModule } from '../staffs/staffs.module';
 import { FieldBookingsEntity } from '../entities/field-bookings.entity';
+import { CacheModule } from '../cache/cache.module';
 
 @Module({
   imports: [
@@ -18,13 +19,14 @@ import { FieldBookingsEntity } from '../entities/field-bookings.entity';
       BranchsEntity,
       SportCategoriesEntity,
       TimeSlotsEntity,
-      FieldBookingsEntity
+      FieldBookingsEntity,
     ]),
     ResponseModule,
     StaffsModule,
+    CacheModule
   ],
   controllers: [SportFieldsController],
   providers: [SportFieldService, FirebaseAdmin],
   exports: [SportFieldService],
 })
-export class SportFieldsModule {}
+export class SportFieldsModule { }

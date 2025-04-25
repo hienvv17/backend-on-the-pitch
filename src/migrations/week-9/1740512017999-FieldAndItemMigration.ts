@@ -19,6 +19,7 @@ export class FieldAndItemMigration1740512017999 implements MigrationInterface {
                 images JSON,
                 price INT NOT NULL,
                 is_active BOOLEAN DEFAULT TRUE,
+                is_delete BOOLEAN DEFAULT FALSE,
                 description VARCHAR(500),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

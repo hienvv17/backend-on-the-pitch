@@ -22,7 +22,7 @@ import { StaffsModule } from 'src/staffs/staffs.module';
     ]),
     ResponseModule,
     UsersModule,
-    StaffsModule
+    StaffsModule,
   ],
   controllers: [FieldBookingsController],
   providers: [FieldBookingsService, BookingMailService, FirebaseAdmin],

@@ -14,6 +14,8 @@ import { FieldBookingsModule } from './field-bookings/field-bookings.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { join } from 'path';
+import { SportItemsModule } from './sport-items/sport-items.module';
+import { ReviewsModule } from './reviews/review.module';
 
 @Module({
   imports: [
@@ -35,8 +37,14 @@ import { join } from 'path';
         transport: {
           host: configService.get<string>('MAILER_HOST'),
           port: +configService.get<number>('MAILER_PORT'),
-          ignoreTLS: configService.get<string>('MAILER_IGNORE_TLS') === 'true' ? true : false,
-          secure: configService.get<string>('MAILER_SECURE') === 'true' ? true : false,
+          ignoreTLS:
+            configService.get<string>('MAILER_IGNORE_TLS') === 'true'
+              ? true
+              : false,
+          secure:
+            configService.get<string>('MAILER_SECURE') === 'true'
+              ? true
+              : false,
           auth: {
             user: configService.get<string>('MAILER_USER'),
             pass: configService.get<string>('MAILER_PASSWORD'),
@@ -63,8 +71,10 @@ import { join } from 'path';
     SportCategoriesModule,
     SportFieldsModule,
     FieldBookingsModule,
+    SportItemsModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

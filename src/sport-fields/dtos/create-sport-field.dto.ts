@@ -16,7 +16,6 @@ export type TimeSlotInput = {
 };
 
 export class CreateSportFieldDto {
-  
   @ApiProperty()
   @IsString()
   @IsNotEmpty()

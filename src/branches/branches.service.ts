@@ -11,14 +11,15 @@ export class BranchesService {
   constructor(
     @InjectRepository(BranchsEntity)
     private branchRepo: Repository<BranchsEntity>,
-    private readonly cacheService: CacheService
-  ) { }
+    private readonly cacheService: CacheService,
+  ) {}
 
   async getPublicAll() {
-    const cacheKey = 'getPublicAllBraches'
+    const cacheKey = 'getPublicAllBraches';
     const cachedData = this.cacheService.get(cacheKey);
     if (cachedData) return cachedData;
-    const branches = await this.branchRepo.createQueryBuilder('br')
+    const branches = await this.branchRepo
+      .createQueryBuilder('br')
       .leftJoin('sport_fields', 'sf', 'sf.branch_id = br.id')
       .leftJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id')
       .select('br.id', 'id')
@@ -33,26 +34,27 @@ export class BranchesService {
       .addSelect('SUM(sf.default_price) / COUNT(sf.id)', 'averagePrice')
       .addSelect(
         `JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', sc.id, 'name', sc.name)) FILTER (WHERE sc.id IS NOT NULL)`,
-        'sport_categories'
+        'sport_categories',
       )
       .where('sf.is_active = :active', { active: true })
       .where('sc.is_active = :active', { active: true })
       .andWhere('br.active_date < NOW()')
       .groupBy('br.id')
       .getRawMany();
-    this.cacheService.set(cacheKey, branches, 300)
+    this.cacheService.set(cacheKey, branches, 300);
     return branches;
   }
 
   async getAll() {
-    return await this.branchRepo.find()
+    return await this.branchRepo.find();
   }
 
   async getPublicOne(id: number) {
-    const cacheKey = `getPublicBranch-${id}`
+    const cacheKey = `getPublicBranch-${id}`;
     const cachedData = this.cacheService.get(cacheKey);
     if (cachedData) return cachedData;
-    const branch = await this.branchRepo.createQueryBuilder('br')
+    const branch = await this.branchRepo
+      .createQueryBuilder('br')
       .leftJoin('sport_fields', 'sf', 'sf.branch_id = br.id')
       .leftJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id')
       .select('br.id', 'id')
@@ -67,7 +69,7 @@ export class BranchesService {
       .addSelect('SUM(sf.default_price) / COUNT(sf.id)', 'averagePrice')
       .addSelect(
         `JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', sc.id, 'name', sc.name)) FILTER (WHERE sc.id IS NOT NULL)`,
-        'sport_categories'
+        'sport_categories',
       )
       .where('sf.is_active = :active', { active: true })
       .andWhere('sc.is_active = :active', { active: true })
@@ -76,7 +78,7 @@ export class BranchesService {
       .groupBy('br.id')
       .getRawOne();
     if (!branch) throw new BadRequestException('Branch do not exist');
-    this.cacheService.set(cacheKey, branch, 300)
+    this.cacheService.set(cacheKey, branch, 300);
     return branch;
   }
 

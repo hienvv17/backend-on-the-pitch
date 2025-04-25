@@ -4,7 +4,10 @@ import {
   ValidationArguments,
 } from 'class-validator';
 
-export function IsEndTimeAtLeastOneHourAfter(startTimeProp: string, validationOptions?: ValidationOptions) {
+export function IsEndTimeAtLeastOneHourAfter(
+  startTimeProp: string,
+  validationOptions?: ValidationOptions,
+) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
       name: 'isEndTimeAtLeastOneHourAfter',
@@ -17,7 +20,8 @@ export function IsEndTimeAtLeastOneHourAfter(startTimeProp: string, validationOp
           const [startTimeField] = args.constraints;
           const startTime = (args.object as any)[startTimeField];
 
-          if (typeof startTime !== 'string' || typeof endTime !== 'string') return false;
+          if (typeof startTime !== 'string' || typeof endTime !== 'string')
+            return false;
 
           const [startH, startM] = startTime.split(':').map(Number);
           const [endH, endM] = endTime.split(':').map(Number);

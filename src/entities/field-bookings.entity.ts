@@ -25,7 +25,7 @@ export class FieldBookingsEntity {
   id: number;
 
   @Column({ type: 'varchar', length: 12 })
-  code: string
+  code: string;
 
   @Column({ type: 'bigint', name: 'user_id' })
   userId: number;

@@ -11,8 +11,15 @@ import {
 import { UpdateSportFieldDto } from './dtos/update-sport-field.dto';
 import { TimeSlotsEntity } from '../entities/time-slots.entity';
 import { GetAvailableFieldDto } from './dtos/get-available-field.dto';
-import { FieldBookingsEntity, FieldBookingStatus } from '../entities/field-bookings.entity';
-import { getAvailableTimeSlots, mergeTimeSlots } from '../utils/helper/date-time.helper';
+import {
+  FieldBookingsEntity,
+  FieldBookingStatus,
+} from '../entities/field-bookings.entity';
+import {
+  getAvailableTimeSlots,
+  mergeTimeSlots,
+} from '../utils/helper/date-time.helper';
+import { CacheService } from 'src/cache/cache.service';
 @Injectable()
 export class SportFieldService {
   constructor(
@@ -27,22 +34,26 @@ export class SportFieldService {
     @InjectRepository(FieldBookingsEntity)
     private fieldBookingRepo: Repository<FieldBookingsEntity>,
     private readonly dataSource: DataSource,
+    private cacheService: CacheService
   ) { }
 
   async getPublicAll(bracnhId: number) {
-    console.log(bracnhId, 'service')
-    return await this.sportFieldRepo.createQueryBuilder('sf')
-    .leftJoin('time_slots','ts', 'ts.sport_field_id = sf.id')
-    .innerJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id')
-    .where('sf.isActive = :isActive', {isActive: true})
-    .andWhere('ts.isActive = :isActive', {isActive:true})
-    .select('sf.id', 'id')
-    .addSelect('sf.name','name')
-    .addSelect('sc.id','sportCategoryId')
-    .addSelect('sf.defaultPrice', 'defaultPrice')
-    .addSelect('sc.name','sportCategoryName')
-    .addSelect(
-      `COALESCE(
+    const cacheKey = `getPublicSportFieldOnBranch-${bracnhId}`
+    let cachedData = this.cacheService.get(cacheKey)
+    if (cachedData) return cachedData
+    const sportFields = await this.sportFieldRepo
+      .createQueryBuilder('sf')
+      .leftJoin('time_slots', 'ts', 'ts.sport_field_id = sf.id')
+      .innerJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id')
+      .where('sf.isActive = :isActive', { isActive: true })
+      .andWhere('ts.isActive = :isActive', { isActive: true })
+      .select('sf.id', 'id')
+      .addSelect('sf.name', 'name')
+      .addSelect('sc.id', 'sportCategoryId')
+      .addSelect('sf.defaultPrice', 'defaultPrice')
+      .addSelect('sc.name', 'sportCategoryName')
+      .addSelect(
+        `COALESCE(
     json_agg(
        json_build_object(
           'id', ts.id,
@@ -54,12 +65,36 @@ export class SportFieldService {
     ), '[]'::json
   )
   `,
-      'timeSlots'
-    )
-    .groupBy('sf.id')
-    .addGroupBy('sc.id')
-    .getRawMany()
-
+        'timeSlots',
+      )
+      .addSelect(
+        `COALESCE(
+          (
+            SELECT json_agg(review_obj)
+            FROM (
+              SELECT
+                json_build_object(
+                  'id', r.id,
+                  'comment', r.comment,
+                  'rating', r.rating,
+                  'userId', r.user_id,
+                  'createdAt', r.created_at
+                ) AS review_obj
+              FROM reviews r
+              JOIN field_bookings fb ON fb.id = r.field_booking_id
+              WHERE fb.sport_field_id = sf.id AND r.is_deleted = false
+              ORDER BY r.rating DESC
+              LIMIT 20
+            ) AS top_reviews
+          ), '[]'::json
+        )`,
+        'reviews',
+      )
+      .groupBy('sf.id')
+      .addGroupBy('sc.id')
+      .getRawMany();
+    this.cacheService.set(cacheKey, sportFields, 300);
+    return sportFields
   }
 
   async getMangeAll(bracnhId: number) {
@@ -151,12 +186,12 @@ export class SportFieldService {
 
     const { timeSlots } = updateDto;
     delete updateDto.timeSlots;
-    
+
     await this.sportFieldRepo.update(id, {
       ...updateDto,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
-    console.log(updateDto)
+    console.log(updateDto);
     if (timeSlots && timeSlots.length > 0) {
       await this.createTimeSlot(id, timeSlots);
     }
@@ -193,14 +228,14 @@ export class SportFieldService {
       where: { branchId, sportCategoryId },
     });
 
-    let _endTime = endTime
+    let _endTime = endTime;
     if (startTime) {
       if (!_endTime) {
         //to do : gen endtime from startTime
-        _endTime = startTime
+        _endTime = startTime;
       }
     }
-    // from field join to booking , array booking time to 
+    // from field join to booking , array booking time to
     // let bookedFieldQuery = this.fieldBookingRepo.createQueryBuilder('booking')
     //   .leftJoin('sport_fields', 'sf', 'sf.id = booking.sport_field_id')
     //   .where('booking.bookingDate = :bookingDate', { bookingDate: date })
@@ -237,7 +272,7 @@ export class SportFieldService {
       ) FILTER (WHERE fb.bookingDate = :bookingDate), '[]'::json
     )
     `,
-        'bookedTimeSlots'
+        'bookedTimeSlots',
       )
       .setParameters({
         bookingDate: date,
@@ -247,20 +282,24 @@ export class SportFieldService {
       .orderBy('sf.id')
       .getRawMany();
 
-    fieldInfo = fieldInfo.map(field => {
+    fieldInfo = fieldInfo.map((field) => {
       return {
         ...field,
-        bookedTimeSlots: mergeTimeSlots(field.bookedTimeSlots)
-      }
-    })
+        bookedTimeSlots: mergeTimeSlots(field.bookedTimeSlots),
+      };
+    });
 
-    return fieldInfo.map(field => {
+    return fieldInfo.map((field) => {
       return {
         ...field,
-        availableTimeSlots: getAvailableTimeSlots(field.bookedTimeSlots, branch.openTime, branch.closeTime),
+        availableTimeSlots: getAvailableTimeSlots(
+          field.bookedTimeSlots,
+          branch.openTime,
+          branch.closeTime,
+        ),
         openTime: branch.openTime,
         closeTime: branch.closeTime,
-      }
-    })
+      };
+    });
   }
 }
