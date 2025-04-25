@@ -16,13 +16,14 @@ export class UserController {
     private readonly usersService: UsersService,
   ) { }
 
-
+  @UseGuards(AdminJwtGuard)
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.create(createUserDto);
     return this.responseService.successResponse({ user });
   }
 
+  @UseGuards(AdminJwtGuard)
   @Post('get-by-email')
   async getOne(@Body() body: { email: string }) {
     const user = await this.usersService.getOne(body.email);
