@@ -1,6 +1,6 @@
 import { IsEnum, IsDateString, IsOptional, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { VoucherStatus, VoucherType } from 'src/entities/vouchers.entity';
+import { VoucherStatus, VoucherType } from '../../entities/vouchers.entity';
 
 export class CreateVoucherDto {
     @ApiProperty()

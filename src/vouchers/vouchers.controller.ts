@@ -8,8 +8,8 @@ import { CreateVoucherDto } from './dto/create-voucher.dto';
 import { UpdateVoucherDto } from './dto/update-voucher.dto';
 import { JwtGuard } from '../auth/guard/jwt.guard';
 import { GetUser } from '../auth/decorator/get-user.decorator';
-import { AdminJwtGuard } from 'src/auth/guard/admin-jwt.guard';
-import { ResponseService } from 'src/response/response.service';
+import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
+import { ResponseService } from '../response/response.service';
 
 @ApiTags('Vouchers')
 @Controller('vouchers')
@@ -17,7 +17,13 @@ export class VouchersController {
     constructor(
         private readonly vouchersService: VouchersService,
         private readonly responseService: ResponseService) { }
-
+/**
+ * using voucher to pay, then refund, voucher will be used 
+ * and cannot be used again
+ * at the end of month, check paid in this month - gen voucher for next month
+ * 1 voucher = 1 month
+ * 1 voucher = 1 user
+ */
     @Post()
     create(@Body() dto: CreateVoucherDto) {
         return this.vouchersService.create(dto);

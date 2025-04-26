@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateVoucherDto } from './dto/create-voucher.dto';
-import { VouchersEntity } from 'src/entities/vouchers.entity';
+import { VouchersEntity } from '../entities/vouchers.entity';
 import { UpdateVoucherDto } from './dto/update-voucher.dto';
 
 
@@ -48,7 +48,13 @@ export class VouchersService {
         return voucher;
     }
 
-    async update(id: number, dto: UpdateVoucherDto) {
+    async useVoucher(id: number, dto: UpdateVoucherDto) {
+        await this.findOne(id); // ensures existence
+        await this.voucherRepo.update(id, dto);
+        return this.findOne(id);
+    }
+
+    async unActive(id: number, dto: UpdateVoucherDto) {
         await this.findOne(id); // ensures existence
         await this.voucherRepo.update(id, dto);
         return this.findOne(id);
