@@ -13,7 +13,7 @@ export class UsersService {
     @InjectRepository(UsersEntity)
     private usersRepo: Repository<UsersEntity>,
     private readonly firebaseAdmin: FirebaseAdmin,
-  ) { }
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
     console.log(createUserDto, 'check data create user');
@@ -57,11 +57,11 @@ export class UsersService {
   }
 
   async updateProfile(uid: string, dto: UpdateUserDto) {
-    return await this.usersRepo.update(uid, { ...dto })
+    await this.usersRepo.update({ uid: uid }, { ...dto });
+    return;
   }
 
   async getOne(uid: string) {
-    console.log(uid)
     return await this.usersRepo.findOne({
       where: { uid: uid },
       select: {
