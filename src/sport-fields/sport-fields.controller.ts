@@ -7,6 +7,7 @@ import {
   Delete,
   UseGuards,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ResponseService } from '../response/response.service';
 import { SportFieldService } from './sport-fields.service';
@@ -25,22 +26,21 @@ export class SportFieldsController {
     private sportFieldsService: SportFieldService,
   ) {}
 
-  @Get(':branchId')
-  async getPublicAll(@Param('branchId') branchId: number) {
-    const fields = await this.sportFieldsService.getPublicAll(branchId);
-    return this.responseService.successResponse({
-      items: fields,
-    });
-  }
-
   //@UseGuards(StaffJwtGuard)
-  @Get('get-manage/:branchId')
-  async getManageAll(@Param('branchId') branchId: number) {
-    console.log(branchId);
-    const fields = await this.sportFieldsService.getMangeAll(+branchId);
+  @Get('manage')
+  async getManageAll(
+    @Query('limit') limit: number = 10,
+    @Query('offset') offset: number = 0,
+    @Query('branchId') branchId?: number,
+  ) {
+    const { items, count } = await this.sportFieldsService.getMangeAll(
+      limit,
+      offset,
+      branchId,
+    );
     return this.responseService.successResponse({
-      items: fields[0],
-      count: fields[1],
+      items,
+      count,
     });
   }
 
@@ -52,6 +52,7 @@ export class SportFieldsController {
   }
 
   //@UseGuards(AdminJwtGuard)
+
   @Put(':sportFieldId')
   async update(
     @Param('sportFieldId') id: number,
@@ -72,5 +73,13 @@ export class SportFieldsController {
   async getAvailable(@Body() dto: GetAvailableFieldDto) {
     const availableFields = await this.sportFieldsService.getAvailable(dto);
     return this.responseService.successResponse({ items: availableFields });
+  }
+
+  @Get(':branchId')
+  async getPublicAll(@Param('branchId') branchId: number) {
+    const fields = await this.sportFieldsService.getPublicAll(branchId);
+    return this.responseService.successResponse({
+      items: fields,
+    });
   }
 }

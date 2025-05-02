@@ -43,10 +43,8 @@ export class SportFieldService {
     if (cachedData) return cachedData;
     const sportFields = await this.sportFieldRepo
       .createQueryBuilder('sf')
-      .leftJoin('time_slots', 'ts', 'ts.sport_field_id = sf.id')
       .innerJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id')
       .where('sf.isActive = :isActive', { isActive: true })
-      .andWhere('ts.isActive = :isActive', { isActive: true })
       .select('sf.id', 'id')
       .addSelect('sf.name', 'name')
       .addSelect('sc.id', 'sportCategoryId')
@@ -54,18 +52,23 @@ export class SportFieldService {
       .addSelect('sc.name', 'sportCategoryName')
       .addSelect(
         `COALESCE(
-    json_agg(
-       json_build_object(
-          'id', ts.id,
-          'startTime', ts.start_time,
-          'endTime', ts.end_time,
-          'pricePerHour', ts.price_per_hour
-        )
-  
-    ), '[]'::json
-  )
-  `,
-        'timeSlots',
+          (
+            SELECT json_agg(timSlot_obj)
+            FROM (
+              SELECT
+                json_build_object(
+                  'id', ts.id,
+                  'startTime', ts.start_time,
+                  'endTime', ts.end_time,
+                  'pricePerHour', ts.price_per_hour,
+                  'sportFieldId', ts.sport_field_id
+                ) AS timSlot_obj
+              FROM time_slots ts
+              WHERE sf.id = ts.sport_field_id AND ts.is_active = true
+            ) AS timsSlots
+          ), '[]'::json
+        )`,
+        'timsSlots',
       )
       .addSelect(
         `COALESCE(
@@ -97,13 +100,17 @@ export class SportFieldService {
     return sportFields;
   }
 
-  async getMangeAll(bracnhId: number) {
-    const sportFields = await this.sportFieldRepo
+  async getMangeAll(limit: number, offset: number, bracnhId?: number) {
+    let query = this.sportFieldRepo
       .createQueryBuilder('sf')
       .innerJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id')
       .innerJoin('branches', 'b', 'b.id = sf.branch_id')
       .leftJoin('time_slots', 'ts', 'ts.sport_field_id = sf.id')
-      .select('sf.id', 'id')
+      .select('sf.id', 'id');
+    if (bracnhId) {
+      query = query.where('sf.branchId = :branchId', { branchId: bracnhId });
+    }
+    query = query
       .addSelect('sf.name', 'name')
       .addSelect('sc.id', 'sportCategoryId')
       .addSelect('sf.defaultPrice', 'defaultPrice')
@@ -127,11 +134,19 @@ export class SportFieldService {
       )
       .addSelect('sf.createdAt', 'createdAt')
       .addSelect('sf.updatedAt', 'updatedAt')
+      .addSelect('sf.isActive', 'isActive')
       .groupBy('sf.id')
       .addGroupBy('sc.id')
-      .addGroupBy('b.name')
-      .getRawMany();
-    return sportFields;
+      .addGroupBy('b.name');
+    const [items, count] = await Promise.all([
+      query
+        .orderBy('sf.createdAt', 'DESC')
+        .limit(limit)
+        .offset(offset)
+        .getRawMany(),
+      query.getCount(),
+    ]);
+    return { items, count };
   }
 
   async create(dto: CreateSportFieldDto) {
