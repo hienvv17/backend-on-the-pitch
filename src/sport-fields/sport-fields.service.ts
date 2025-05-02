@@ -39,7 +39,7 @@ export class SportFieldService {
 
   async getPublicAll(bracnhId: number) {
     const cacheKey = `getPublicSportFieldOnBranch-${bracnhId}`;
-    let cachedData = this.cacheService.get(cacheKey);
+    let cachedData: unknown = this.cacheService.get(cacheKey);
     if (cachedData) return cachedData;
     const sportFields = await this.sportFieldRepo
       .createQueryBuilder('sf')
@@ -98,7 +98,40 @@ export class SportFieldService {
   }
 
   async getMangeAll(bracnhId: number) {
-    return await this.sportFieldRepo.findAndCount({ where: { id: bracnhId } });
+    const sportFields = await this.sportFieldRepo
+      .createQueryBuilder('sf')
+      .innerJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id')
+      .innerJoin('branches', 'b', 'b.id = sf.branch_id')
+      .leftJoin('time_slots', 'ts', 'ts.sport_field_id = sf.id')
+      .select('sf.id', 'id')
+      .addSelect('sf.name', 'name')
+      .addSelect('sc.id', 'sportCategoryId')
+      .addSelect('sf.defaultPrice', 'defaultPrice')
+      .addSelect('sc.name', 'sportCategoryName')
+      .addSelect('sf.description', 'description')
+      .addSelect('b.name', 'branchName')
+      .addSelect(
+        `COALESCE(
+    json_agg(
+       json_build_object(
+          'id', ts.id,
+          'startTime', ts.start_time,
+          'endTime', ts.end_time,
+          'pricePerHour', ts.price_per_hour
+        )
+  
+    ), '[]'::json
+  )
+  `,
+        'timeSlots',
+      )
+      .addSelect('sf.createdAt', 'createdAt')
+      .addSelect('sf.updatedAt', 'updatedAt')
+      .groupBy('sf.id')
+      .addGroupBy('sc.id')
+      .addGroupBy('b.name')
+      .getRawMany();
+    return sportFields;
   }
 
   async create(dto: CreateSportFieldDto) {
@@ -211,9 +244,6 @@ export class SportFieldService {
   }
 
   async getAvailable(dto: GetAvailableFieldDto) {
-    //to do: check if time is out of service time
-    //to do get available field
-    // get available field from branch with sport category
     const { branchId, sportCategoryId, date, startTime, endTime } = dto;
     const branch = await this.branchRepo.findOne({
       where: { id: branchId },
@@ -224,9 +254,6 @@ export class SportFieldService {
     });
     if (!sportCategory)
       throw new BadRequestException('Sport type do not exist');
-    const sportFields = await this.sportFieldRepo.find({
-      where: { branchId, sportCategoryId },
-    });
 
     let _endTime = endTime;
     if (startTime) {
@@ -235,22 +262,6 @@ export class SportFieldService {
         _endTime = startTime;
       }
     }
-    // from field join to booking , array booking time to
-    // let bookedFieldQuery = this.fieldBookingRepo.createQueryBuilder('booking')
-    //   .leftJoin('sport_fields', 'sf', 'sf.id = booking.sport_field_id')
-    //   .where('booking.bookingDate = :bookingDate', { bookingDate: date })
-    //   .andWhere('sf.branch_id = :branchId', { branchId: branchId })
-    //   .andWhere('booking.status NOT IN (:...status)', {
-    //     status: [FieldBookingStatus.CANCELLED, FieldBookingStatus.REFUND]
-    //   })
-    //   .select('sf.id', 'id')
-    //   .addSelect('sf.name', 'name')
-    //   .addSelect(
-    //     `json_agg(json_build_object('start_time', booking.start_time, 'end_time', booking.end_time))`,
-    //     "booked_time_slots"
-    //   )
-    //   .groupBy('sf.id')
-    //   .getRawMany()
 
     let fieldInfo = await this.sportFieldRepo
       .createQueryBuilder('sf')
@@ -277,6 +288,11 @@ export class SportFieldService {
       .setParameters({
         bookingDate: date,
         status: [FieldBookingStatus.CANCELLED, FieldBookingStatus.REFUND],
+      })
+      .where('sf.isActive = :isActive', { isActive: true })
+      .andWhere('sf.branchId = :branchId', { branchId })
+      .andWhere('sf.sportCategoryId = :sportCategoryId', {
+        sportCategoryId,
       })
       .groupBy('sf.id')
       .orderBy('sf.id')
