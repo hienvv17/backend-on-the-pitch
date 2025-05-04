@@ -45,6 +45,9 @@ export class BranchsEntity {
   })
   activeDate: Date;
 
+  @Column({ name: 'is_active', type: 'boolean', default: true })
+  isActive: boolean;
+
   @Column({ name: 'open_time', type: 'varchar', length: 5 })
   openTime: string;
 

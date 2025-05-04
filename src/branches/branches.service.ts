@@ -37,7 +37,7 @@ export class BranchesService {
         'sport_categories',
       )
       .where('sf.is_active = :active', { active: true })
-      .where('sc.is_active = :active', { active: true })
+      .andWhere('br.is_active = :active', { active: true })
       .andWhere('br.active_date < NOW()')
       .groupBy('br.id')
       .getRawMany();

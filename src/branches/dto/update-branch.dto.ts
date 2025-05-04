@@ -5,6 +5,7 @@ import {
   IsArray,
   IsDateString,
   IsNotEmpty,
+  IsBoolean,
 } from 'class-validator';
 import { IsEndTimeAtLeastOneHourAfter } from '../../decorators/IsEndTimeAtLeastOneHourAfter.decorator.ts';
 import { IsTimeString } from '../../decorators/IsTimeString.decorator';
@@ -44,6 +45,11 @@ export class UpdateBranchDto {
   @IsDateString()
   @IsOptional()
   activeDate?: string;
+
+  @ApiProperty({ nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 
   @ApiProperty({ nullable: true })
   @IsTimeString()

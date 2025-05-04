@@ -167,6 +167,7 @@ export class SportFieldService {
       images,
       isActive,
       timeSlots,
+      defaultPrice,
     } = dto;
     const branch = await this.branchRepo.findOne({ where: { id: branchId } });
     //to do: validate payload timeSlots later do in FE 1 time
@@ -185,6 +186,7 @@ export class SportFieldService {
         description,
         images,
         isActive,
+        defaultPrice,
       }),
     );
 
