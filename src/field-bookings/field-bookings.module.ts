@@ -11,6 +11,7 @@ import { UsersModule } from '../users/users.module';
 import { BookingMailService } from '../mail/mail.service';
 import { FirebaseAdmin } from '../firebase/firebase.service';
 import { StaffsModule } from '../staffs/staffs.module';
+import { RefundsEntity } from '../entities/refund.entity';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { StaffsModule } from '../staffs/staffs.module';
       TimeSlotsEntity,
       SportFieldsEntity,
       UsersEntity,
+      RefundsEntity,
     ]),
     ResponseModule,
     UsersModule,

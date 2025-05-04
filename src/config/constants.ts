@@ -1,3 +1,5 @@
+
+
 export default {
   default: {
     listItemLimit: 20,
@@ -19,5 +21,8 @@ export default {
     minBookingTime: 60, // 1 hour booking is min
     startBookingMinute: ['00', '30'], // booking start or middle hour
     endBookingMinute: ['00', '30'], // interval 30 mins
+  },
+  refund: {
+    minRefundTime: 72, // 72 hours before booking time
   },
 };

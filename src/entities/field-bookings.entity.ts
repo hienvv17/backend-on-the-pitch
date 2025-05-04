@@ -6,9 +6,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { UsersEntity } from './users.entity';
 import { SportFieldsEntity } from './sport-fields.entity';
+import { RefundsEntity } from './refund.entity';
 
 export const FieldBookingStatus = {
   PENDING: 'PENDING',
@@ -60,6 +62,9 @@ export class FieldBookingsEntity {
     default: FieldBookingStatus.PENDING,
   })
   status: string;
+
+  @OneToMany(() => RefundsEntity, (refund) => refund.fieldBooking)
+  refunds: RefundsEntity[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

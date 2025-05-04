@@ -16,6 +16,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { join } from 'path';
 import { SportItemsModule } from './sport-items/sport-items.module';
 import { ReviewsModule } from './reviews/review.module';
+import { RefundsModule } from './refunds/refunds.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { ReviewsModule } from './reviews/review.module';
     FieldBookingsModule,
     SportItemsModule,
     ReviewsModule,
+    RefundsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
