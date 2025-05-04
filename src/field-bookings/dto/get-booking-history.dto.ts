@@ -48,6 +48,12 @@ export class GetBookingHistoryDto extends ListAllEntities {
   @ApiProperty({ nullable: true })
   @IsNumber()
   @IsOptional()
+  branchId?: number;
+
+
+  @ApiProperty({ nullable: true })
+  @IsNumber()
+  @IsOptional()
   userId?: number;
 
   @ApiProperty({ nullable: true })

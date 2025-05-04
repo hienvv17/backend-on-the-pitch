@@ -43,11 +43,16 @@ export class CreateSportFieldDto {
 
   @ApiProperty()
   @IsArray()
-  @IsNotEmpty()
-  timeSlots: TimeSlotInput[];
+  @IsOptional()
+  timeSlots?: TimeSlotInput[];
 
   @ApiProperty({ nullable: true })
   @IsString()
   @IsOptional()
   description?: string;
+
+  @ApiProperty({})
+  @IsNumber()
+  @IsNotEmpty()
+  defaultPrice: number;
 }

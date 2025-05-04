@@ -18,7 +18,20 @@ export class SportCategoriesService {
   }
 
   async getAll(): Promise<SportCategoriesEntity[]> {
-    return this.sportCategoryRepo.find();
+    return this.sportCategoryRepo.find({
+      where: { isActive: true },
+      order: {
+        id: 'ASC',
+      },
+    });
+  }
+
+  async getManageAll(): Promise<SportCategoriesEntity[]> {
+    return this.sportCategoryRepo.find({
+      order: {
+        id: 'ASC',
+      },
+    });
   }
 
   async findOne(id: number): Promise<SportCategoriesEntity> {

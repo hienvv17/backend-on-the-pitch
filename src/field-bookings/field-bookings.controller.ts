@@ -40,7 +40,7 @@ export class FieldBookingsController {
   async getManageHistory(@Body() dto: GetBookingHistoryDto) {
     const { data, count, limit, offset } =
       await this.fieldBookingsService.getBookingHistory(dto);
-    return this.responseService.successResponse({ data: data, count: count });
+    return this.responseService.successResponse({ items: data, count: count });
   }
 
   @UseGuards(JwtGuard)

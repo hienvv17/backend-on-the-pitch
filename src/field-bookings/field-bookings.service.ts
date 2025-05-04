@@ -40,6 +40,7 @@ export class FieldBookingsService {
       startTime,
       endTime,
       sportCategoryId,
+      branchId,
       userId,
       status,
       limit,
@@ -65,6 +66,9 @@ export class FieldBookingsService {
     if (sportCategoryId) {
       query.andWhere('sc.id = :sportCategoryId', { sportCategoryId });
     }
+    if (branchId) {
+      query.andWhere('sf.branch_id = :branchId', { branchId });
+    }
     if (status) {
       query.andWhere('fb.status = :status', { status });
     }
@@ -79,7 +83,7 @@ export class FieldBookingsService {
         'fb.code "code"',
         'fb.userId "userId"',
         'fb.sportFieldId "sportFieldId"',
-        'fb.bookingDate "bookingDate"',
+        `TO_CHAR(fb.bookingDate, 'YYYY-MM-DD') "bookingDate"`,
         'fb.startTime "startTime"',
         'fb.endTime "endTime"',
         'fb.status "status"',

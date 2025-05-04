@@ -29,21 +29,21 @@ export class UserController {
     return this.responseService.successResponse({ user });
   }
 
-  @UseGuards(JwtGuard)
+  //@UseGuards(JwtGuard)
   @Get('profile')
   async getPofile(@GetUser('uid') uid: string) {
     const user = await this.usersService.getOne(uid);
     return this.responseService.successResponse({ user });
   }
 
-  @UseGuards(JwtGuard)
+ // @UseGuards(JwtGuard)
   @Post('update-profile')
   async updateProfile(@GetUser('uid') uid: string, @Body() dto: UpdateUserDto) {
     const users = await this.usersService.updateProfile(uid, dto);
     return this.responseService.successResponse({ users });
   }
 
-  @UseGuards(AdminJwtGuard)
+  //@UseGuards(AdminJwtGuard)
   @Post('mange')
   async getMangeAll() {
     const users = await this.usersService.getManageUser();

@@ -27,6 +27,9 @@ export class StaffBranchEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
+  @Column({ name: 'is_deleted', default: false })
+  isDeleted: boolean;
+
   @ManyToOne(() => StaffsEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'staff_id' })
   staff: StaffsEntity;

@@ -3,6 +3,7 @@ import {
   IsBoolean,
   IsNumber,
   IsOptional,
+  IsPositive,
   IsString,
   MaxLength,
 } from 'class-validator';
@@ -43,4 +44,10 @@ export class UpdateSportFieldDto {
   @IsArray()
   @IsOptional()
   timeSlots?: TimeSlotInput[];
+
+  @ApiProperty({ nullable: true })
+  @IsPositive()
+  @IsNumber()
+  @IsOptional()
+  defaultPrice?: number;
 }

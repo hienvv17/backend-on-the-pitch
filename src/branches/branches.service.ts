@@ -46,7 +46,30 @@ export class BranchesService {
   }
 
   async getAll() {
-    return await this.branchRepo.find();
+    const branches = await this.branchRepo
+      .createQueryBuilder('branch')
+      .leftJoinAndSelect('branch.fieldBranches', 'fieldBranch')
+      .leftJoinAndSelect('fieldBranch.sportCategory', 'sportCategory') // Join the sportCategory
+      .select([
+        'branch',
+        'fieldBranch.id',
+        'sportCategory.id',
+        'sportCategory.name', // Select sport name (add more if needed)
+      ])
+      .orderBy('branch.id', 'ASC')
+      .getMany();
+
+    return branches.map((branch) => ({
+      ...branch,
+      totalField: branch.fieldBranches.length,
+      sports: [
+        ...new Map(
+          branch.fieldBranches
+            .filter((fb) => fb.sportCategory)
+            .map((fb) => [fb.sportCategory.id, fb.sportCategory]),
+        ).values(), // Deduplicate sports
+      ],
+    }));
   }
 
   async getPublicOne(id: number) {

@@ -1,9 +1,18 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Put,
+} from '@nestjs/common';
 import { SportCategoriesService } from './sport-categories.service';
 import { ResponseService } from '../response/response.service';
 import { CreateSportCategoryDto } from './dto/create-sport-category.dto';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 import { ApiTags } from '@nestjs/swagger';
+import { UpdateSportCategoryDto } from './dto/update-sport-category.dto';
 
 @ApiTags('Sport Category')
 @Controller('sport-categories')
@@ -25,9 +34,22 @@ export class SportCategoriesController {
     return this.responseService.successResponse({ items: sportCategories });
   }
 
+  //@UseGuards(AdminJwtGuard)
+  @Get('manage')
+  async getManageAll() {
+    const sportCategories = await this.sportCategoriesService.getManageAll();
+    return this.responseService.successResponse({ items: sportCategories });
+  }
+
   @Get(':id')
   async getOne(@Param('id') id: number) {
     const sportCategory = await this.sportCategoriesService.findOne(id);
+    return this.responseService.successResponse({ sportCategory });
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: number, @Body() dto: UpdateSportCategoryDto) {
+    const sportCategory = await this.sportCategoriesService.update(id, dto);
     return this.responseService.successResponse({ sportCategory });
   }
 }

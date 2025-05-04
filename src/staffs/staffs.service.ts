@@ -53,7 +53,7 @@ export class StaffsService {
       where: { email: createStaffDto.email },
     });
     if (existingStaff) {
-      throw new Error('Staff already exists');
+      throw new BadRequestException('Staff already exists');
     }
     const newStaff = await this.staffRepository.save(
       this.staffRepository.create({
@@ -80,10 +80,12 @@ export class StaffsService {
       phoneNumber: updateStaffDto.phoneNumber,
       role: updateStaffDto.role,
       isActive: updateStaffDto.isActive,
+      activeDate: updateStaffDto.activeDate,
       updatedAt: new Date(),
     });
 
-    if (updateStaffDto.branchIds && updateStaffDto.branchIds.length > 0) {
+    if (updateStaffDto.branchIds) {
+      //empty array will remove all branches
       await this.createStaffBranch(id, updateStaffDto.branchIds);
     }
     return staff;
@@ -121,12 +123,75 @@ export class StaffsService {
       } finally {
         await queryRunner.release();
       }
+    } else {
+      await this.staffBranchRepo.update(
+        { staffId: staffId },
+        { isDeleted: true },
+      );
     }
     return;
   }
 
-  async getAll(): Promise<StaffsEntity[]> {
-    return await this.staffRepository.find();
+  async getAll(
+    limit: number,
+    offset: number,
+    branchId?: number,
+    search: string = '',
+  ) {
+    let query = this.staffRepository
+      .createQueryBuilder('s')
+      .leftJoin(
+        'staff_branch',
+        'sb',
+        'sb.staff_id = s.id AND sb.is_deleted = false',
+      )
+      .leftJoin('branches', 'b', 'b.id = sb.branch_id') // assuming relation name is `branches`
+      .select([
+        's.id "id"',
+        's.fullName "fullName"',
+        's.email "email"',
+        's.phoneNumber "phoneNumber"',
+        's.role "role"',
+        's.isActive "isActive"',
+        `TO_CHAR(s.activeDate, 'YYYY-MM-DD') "activeDate"`,
+        's.createdAt "createdAt"',
+        's.updatedAt "updatedAt"',
+      ])
+      .addSelect(
+        `COALESCE(
+          json_agg(
+            json_build_object(
+              'id', b.id,
+              'name', b.name
+            )
+          ) FILTER (WHERE b.id IS NOT NULL),
+          '[]'
+        )`,
+        'branches',
+      )
+      .groupBy('s.id')
+      .orderBy('s.id', 'ASC');
+    const count = await query.getCount();
+
+    query = query.limit(limit).offset(offset);
+    if (search) {
+      query = query.andWhere(
+        '(s.fullName ILIKE :search OR s.email ILIKE :search OR s.phoneNumber ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+    if (branchId) {
+      query = query.andWhere('sb.branch_id = :branchId', { branchId });
+    }
+    const staffs = await query.getRawMany();
+    const items = staffs.map((staff) => ({
+      ...staff,
+      branchName: staff.branches.map((item) => `${item.name}`).join(', '),
+    }));
+    return {
+      items,
+      count,
+    };
   }
 
   async remove(id: number): Promise<void> {

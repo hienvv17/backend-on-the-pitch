@@ -6,6 +6,7 @@ import {
   UseGuards,
   Put,
   Param,
+  Query,
 } from '@nestjs/common';
 import { StaffsService } from './staffs.service';
 import { CreateStaffDto } from './dtos/create-staff.dto';
@@ -40,8 +41,21 @@ export class StaffsController {
   }
 
   @Get()
-  async getAll() {
-    const staffs = await this.staffsService.getAll();
-    return this.responseService.successResponse({ items: staffs });
+  async getAll(
+    @Query('limit') limit: number = 10,
+    @Query('offset') offset: number = 0,
+    @Query('search') search?: string,
+    @Query('branchId') branchId?: number,
+  ) {
+    const { items, count } = await this.staffsService.getAll(
+      limit,
+      offset,
+      branchId,
+      search,
+    );
+    return this.responseService.successResponse({
+      items,
+      count,
+    });
   }
 }

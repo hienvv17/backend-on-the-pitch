@@ -39,7 +39,7 @@ export class SportFieldService {
 
   async getPublicAll(bracnhId: number) {
     const cacheKey = `getPublicSportFieldOnBranch-${bracnhId}`;
-    let cachedData: unknown = this.cacheService.get(cacheKey);
+    let cachedData = this.cacheService.get(cacheKey);
     if (cachedData) return cachedData;
     const sportFields = await this.sportFieldRepo
       .createQueryBuilder('sf')
@@ -100,7 +100,12 @@ export class SportFieldService {
     return sportFields;
   }
 
-  async getMangeAll(limit: number, offset: number, bracnhId?: number) {
+  async getMangeAll(
+    limit: number,
+    offset: number,
+    bracnhId?: number,
+    sportCategoryId?: number,
+  ) {
     let query = this.sportFieldRepo
       .createQueryBuilder('sf')
       .innerJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id')
@@ -110,13 +115,20 @@ export class SportFieldService {
     if (bracnhId) {
       query = query.where('sf.branchId = :branchId', { branchId: bracnhId });
     }
+    if (sportCategoryId) {
+      query = query.andWhere('sf.sportCategoryId = :sportCategoryId', {
+        sportCategoryId,
+      });
+    }
     query = query
       .addSelect('sf.name', 'name')
       .addSelect('sc.id', 'sportCategoryId')
       .addSelect('sf.defaultPrice', 'defaultPrice')
       .addSelect('sc.name', 'sportCategoryName')
       .addSelect('sf.description', 'description')
+      .addSelect('sf.images', 'images')
       .addSelect('b.name', 'branchName')
+      .addSelect('b.id', 'branchId')
       .addSelect(
         `COALESCE(
     json_agg(
@@ -137,13 +149,10 @@ export class SportFieldService {
       .addSelect('sf.isActive', 'isActive')
       .groupBy('sf.id')
       .addGroupBy('sc.id')
-      .addGroupBy('b.name');
+      .addGroupBy('b.name')
+      .addGroupBy('b.id');
     const [items, count] = await Promise.all([
-      query
-        .orderBy('sf.createdAt', 'DESC')
-        .limit(limit)
-        .offset(offset)
-        .getRawMany(),
+      query.orderBy('sf.id', 'ASC').limit(limit).offset(offset).getRawMany(),
       query.getCount(),
     ]);
     return { items, count };
@@ -179,7 +188,7 @@ export class SportFieldService {
       }),
     );
 
-    if (!timeSlots && timeSlots.length > 0) {
+    if (!timeSlots && timeSlots?.length > 0) {
       await this.createTimeSlot(newField.id, timeSlots);
     }
     return newField;
@@ -224,7 +233,7 @@ export class SportFieldService {
     id: number,
     updateDto: UpdateSportFieldDto,
   ): Promise<void> {
-    const sportField = await this.sportCategoryRepo.findOne({
+    const sportField = await this.sportFieldRepo.findOne({
       where: { id },
     });
 

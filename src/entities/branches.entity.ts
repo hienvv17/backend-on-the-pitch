@@ -40,7 +40,7 @@ export class BranchsEntity {
 
   @Column({
     name: 'active_date',
-    type: 'timestamp',
+    type: 'date',
     default: () => 'CURRENT_TIMESTAMP',
   })
   activeDate: Date;
