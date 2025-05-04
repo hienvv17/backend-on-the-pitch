@@ -51,7 +51,10 @@ export class FieldBookingsController {
   ) {
     const bookingHistories =
       await this.fieldBookingsService.getPersonalBookingHistory(uid, dto);
-    return this.responseService.successResponse({ bookingHistories });
+    return this.responseService.successResponse({
+      items: bookingHistories[0],
+      count: bookingHistories[1],
+    });
   }
 
   // @UseGuards(StaffJwtGuard)
