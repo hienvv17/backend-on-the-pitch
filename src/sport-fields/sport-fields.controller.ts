@@ -32,7 +32,7 @@ export class SportFieldsController {
     @Query('limit') limit: number = 10,
     @Query('offset') offset: number = 0,
     @Query('branchId') branchId?: number,
-    @Query('search') sportCategoryId?: number,
+    @Query('sportCategoryId') sportCategoryId?: number,
   ) {
     const { items, count } = await this.sportFieldsService.getMangeAll(
       limit,

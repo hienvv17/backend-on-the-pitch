@@ -17,6 +17,7 @@ import {
 } from '../entities/field-bookings.entity';
 import {
   getAvailableTimeSlots,
+  isTimeInRange,
   mergeTimeSlots,
 } from '../utils/helper/date-time.helper';
 import { CacheService } from '../cache/cache.service';
@@ -282,13 +283,44 @@ export class SportFieldService {
       throw new BadRequestException('Sport type do not exist');
 
     let _endTime = endTime;
+
     if (startTime) {
       if (!_endTime) {
-        //to do : gen endtime from startTime
-        _endTime = startTime;
+        // Generate endTime as 1 hour after startTime
+        const [startHour, startMinute] = startTime.split(':').map(Number);
+        const endDate = new Date();
+        endDate.setHours(startHour + 1, startMinute); // Add 1 hour
+        const endHour = endDate.getHours().toString().padStart(2, '0');
+        const endMin = endDate.getMinutes().toString().padStart(2, '0');
+        _endTime = `${endHour}:${endMin}`;
+      } else {
+        // Validate that endTime is at least 1 hour after startTime
+        const [startHour, startMinute] = startTime.split(':').map(Number);
+        const [endHour, endMinute] = _endTime.split(':').map(Number);
+        const startDate = new Date();
+        const endDate = new Date();
+        startDate.setHours(startHour, startMinute, 0);
+        endDate.setHours(endHour, endMinute, 0);
+
+        const diffMs = endDate.getTime() - startDate.getTime();
+        const oneHourMs = 60 * 60 * 1000;
+
+        if (diffMs < oneHourMs) {
+          const adjustedEndDate = new Date(startDate.getTime() + oneHourMs);
+          const adjustedHour = adjustedEndDate
+            .getHours()
+            .toString()
+            .padStart(2, '0');
+          const adjustedMin = adjustedEndDate
+            .getMinutes()
+            .toString()
+            .padStart(2, '0');
+          _endTime = `${adjustedHour}:${adjustedMin}`;
+        }
       }
     }
 
+    console.log('startTime', startTime, endTime);
     let fieldInfo = await this.sportFieldRepo
       .createQueryBuilder('sf')
       .leftJoin('field_bookings', 'fb', 'sf.id = fb.sport_field_id')
@@ -331,7 +363,7 @@ export class SportFieldService {
       };
     });
 
-    return fieldInfo.map((field) => {
+    fieldInfo = fieldInfo.map((field) => {
       return {
         ...field,
         availableTimeSlots: getAvailableTimeSlots(
@@ -343,5 +375,16 @@ export class SportFieldService {
         closeTime: branch.closeTime,
       };
     });
+
+    if (startTime && endTime) {
+      fieldInfo = fieldInfo.filter((field) => {
+        const availableSlots = field.availableTimeSlots.filter((slot) =>
+          isTimeInRange(startTime, endTime, slot),
+        );
+        return availableSlots.length > 0;
+      });
+    }
+
+    return fieldInfo;
   }
 }

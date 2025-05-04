@@ -139,3 +139,22 @@ export const getAvailableTimeSlots = (
 
   return available;
 };
+
+export const isTimeInRange = (
+  startTime: string,
+  endTime: string,
+  slot: { startTime: string; endTime: string },
+) => {
+  const toMinutes = (time: string) => {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
+  };
+
+  const startMin = toMinutes(startTime);
+  const endMin = toMinutes(endTime);
+  const slotStart = toMinutes(slot.startTime);
+  const slotEnd = toMinutes(slot.endTime);
+
+  // Check if the entire interval is within this slot
+  return startMin >= slotStart && endMin <= slotEnd;
+};
