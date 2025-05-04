@@ -35,7 +35,7 @@ export class FieldBookingsController {
     return this.responseService.successResponse({ bookingData });
   }
 
-  // @UseGuards(ManagerJwtGuard)
+  @UseGuards(ManagerJwtGuard)
   @Post('manage/history')
   async getManageHistory(@Body() dto: GetBookingHistoryDto) {
     const { data, count, limit, offset } =

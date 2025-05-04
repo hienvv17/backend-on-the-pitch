@@ -17,7 +17,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Staff')
 @Controller('staffs')
-//@UseGuards(ManagerJwtGuard)
+@UseGuards(ManagerJwtGuard)
 export class StaffsController {
   constructor(
     private readonly staffsService: StaffsService,

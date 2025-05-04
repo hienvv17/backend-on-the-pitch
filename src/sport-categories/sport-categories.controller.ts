@@ -21,7 +21,7 @@ export class SportCategoriesController {
     private readonly sportCategoriesService: SportCategoriesService,
     private readonly responseService: ResponseService,
   ) {}
-  //@UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard)
   @Post()
   async create(@Body() dto: CreateSportCategoryDto) {
     await this.sportCategoriesService.create(dto);
@@ -34,7 +34,7 @@ export class SportCategoriesController {
     return this.responseService.successResponse({ items: sportCategories });
   }
 
-  //@UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard)
   @Get('manage')
   async getManageAll() {
     const sportCategories = await this.sportCategoriesService.getManageAll();

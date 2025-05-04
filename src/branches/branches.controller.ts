@@ -47,14 +47,14 @@ export class BranchesController {
     return this.responseService.successResponse({ branch });
   }
 
-  //@UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard)
   @Post()
   async create(@Body() createBranchDto: CreateBranchDto) {
     await this.branchesService.create(createBranchDto);
     return this.responseService.successResponse();
   }
 
-  //@UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard)
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -64,7 +64,7 @@ export class BranchesController {
     return this.responseService.successResponse();
   }
 
-  //@UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard)
   @Delete(':id')
   async delete(@Param('id') id: string) {
     await this.branchesService.delete(+id);

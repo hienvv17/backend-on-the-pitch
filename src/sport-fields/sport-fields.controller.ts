@@ -26,7 +26,7 @@ export class SportFieldsController {
     private sportFieldsService: SportFieldService,
   ) {}
 
-  //@UseGuards(StaffJwtGuard)
+  @UseGuards(StaffJwtGuard)
   @Get('manage')
   async getManageAll(
     @Query('limit') limit: number = 10,
@@ -46,14 +46,14 @@ export class SportFieldsController {
     });
   }
 
-  //@UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard)
   @Post()
   async create(@Body() dto: CreateSportFieldDto) {
     await this.sportFieldsService.create(dto);
     return this.responseService.successResponse();
   }
 
-  //@UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard)
 
   @Put(':sportFieldId')
   async update(
@@ -64,7 +64,7 @@ export class SportFieldsController {
     return this.responseService.successResponse();
   }
 
-  //@UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard)
   @Delete()
   async delete(@Param() id: number) {
     await this.sportFieldsService.deleteSportField(id);
