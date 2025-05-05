@@ -206,14 +206,29 @@ export class StaffsService {
   }
 
   async findByEmail(email: string): Promise<StaffsEntity> {
-    const activeStaff = await this.staffRepository.findOne({
-      where: {
-        email: email,
-        isActive: true,
-        activeDate: LessThanOrEqual(new Date(moment().format('YYYY-MM-DD'))),
-      },
-      select: ['id', 'uid', 'email', 'phoneNumber', 'role'],
-    });
-    return activeStaff;
+    const staffWithBranchIds = await this.staffRepository
+      .createQueryBuilder('staff')
+      .leftJoin(
+        'staff_branch',
+        'sb',
+        'sb.staffId = staff.id AND sb.isDeleted = false',
+      )
+      .where('staff.email = :email', { email })
+      .andWhere('staff.isActive = true')
+      .andWhere('staff.activeDate <= :today', {
+        today: moment().format('YYYY-MM-DD'),
+      })
+      .select([
+        'staff.id AS id',
+        'staff.uid AS uid',
+        'staff.email AS email',
+        'staff.phoneNumber AS phoneNumber',
+        'staff.role AS role',
+        'ARRAY_AGG(sb.branchId) FILTER (WHERE sb.branchId IS NOT NULL) AS branchIds',
+      ])
+      .groupBy('staff.id')
+      .getRawOne();
+    console.log('staffWithBranchIds', staffWithBranchIds);
+    return staffWithBranchIds;
   }
 }

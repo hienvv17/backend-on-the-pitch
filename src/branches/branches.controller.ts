@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   Put,
+  Req,
 } from '@nestjs/common';
 import { BranchesService } from './branches.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
@@ -14,6 +15,7 @@ import { UseGuards } from '@nestjs/common';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 import { ResponseService } from '../response/response.service';
 import { ApiTags } from '@nestjs/swagger';
+import { StaffJwtGuard } from 'src/auth/guard/staff-jwt.guard';
 
 @ApiTags('Bracnh')
 @Controller('branches')
@@ -29,6 +31,7 @@ export class BranchesController {
     return this.responseService.successResponse({ items: branches });
   }
 
+  @UseGuards(StaffJwtGuard)
   @Get('manage')
   async getMangeAll() {
     const branches = await this.branchesService.getAll();

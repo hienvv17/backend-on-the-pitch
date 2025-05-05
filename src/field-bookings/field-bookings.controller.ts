@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { ResponseService } from '../response/response.service';
 import { FieldBookingsService } from './field-bookings.service';
 import { CreateBookingDto } from './dto/create-booking-field.dto';
@@ -35,11 +35,12 @@ export class FieldBookingsController {
     return this.responseService.successResponse({ bookingData });
   }
 
-  @UseGuards(ManagerJwtGuard)
+  @UseGuards(StaffJwtGuard)
   @Post('manage/history')
-  async getManageHistory(@Body() dto: GetBookingHistoryDto) {
+  async getManageHistory(@Body() dto: GetBookingHistoryDto, @Req() req) {
+    const { branchids, role } = req.staff;
     const { data, count, limit, offset } =
-      await this.fieldBookingsService.getBookingHistory(dto);
+      await this.fieldBookingsService.getBookingHistory(dto, role, branchids);
     return this.responseService.successResponse({ items: data, count: count });
   }
 

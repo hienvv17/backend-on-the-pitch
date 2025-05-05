@@ -18,6 +18,7 @@ import {
 } from '../utils/helper/date-time.helper';
 import { GetPersonalBookingHistoryDto } from './dto/get-personal-booking-history.dto';
 import { CheckBookingDto } from './dto/check-booking.dto';
+import { STAFF_ROLE } from 'src/entities/staffs.entity';
 
 @Injectable()
 export class FieldBookingsService {
@@ -33,7 +34,11 @@ export class FieldBookingsService {
     private userService: UsersService,
   ) {}
 
-  async getBookingHistory(dto: GetBookingHistoryDto) {
+  async getBookingHistory(
+    dto: GetBookingHistoryDto,
+    role: STAFF_ROLE,
+    branchIds: string[],
+  ) {
     const {
       fromDate,
       toDate,
@@ -71,6 +76,11 @@ export class FieldBookingsService {
     }
     if (status) {
       query.andWhere('fb.status = :status', { status });
+    }
+    if (role !== STAFF_ROLE.ADMIN) {
+      query.andWhere('br.id IN (:...branchIds)', {
+        branchIds: branchIds.map(Number),
+      });
     }
     query
       .orderBy('fb.booking_date', 'DESC')

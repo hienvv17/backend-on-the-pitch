@@ -13,6 +13,7 @@ import { CreateSportCategoryDto } from './dto/create-sport-category.dto';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateSportCategoryDto } from './dto/update-sport-category.dto';
+import { StaffJwtGuard } from 'src/auth/guard/staff-jwt.guard';
 
 @ApiTags('Sport Category')
 @Controller('sport-categories')
@@ -34,7 +35,7 @@ export class SportCategoriesController {
     return this.responseService.successResponse({ items: sportCategories });
   }
 
-  @UseGuards(AdminJwtGuard)
+  @UseGuards(StaffJwtGuard)
   @Get('manage')
   async getManageAll() {
     const sportCategories = await this.sportCategoriesService.getManageAll();
