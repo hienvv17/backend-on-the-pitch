@@ -4,7 +4,6 @@ import { FieldBookingsService } from './field-bookings.service';
 import { CreateBookingDto } from './dto/create-booking-field.dto';
 import { BookingMailService } from '../mail/mail.service';
 import { GetBookingHistoryDto } from './dto/get-booking-history.dto';
-import { ManagerJwtGuard } from '../auth/guard/manager-jwt.guard';
 import { JwtGuard } from '../auth/guard/jwt.guard';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { StaffJwtGuard } from '../auth/guard/staff-jwt.guard';

@@ -17,6 +17,7 @@ import { join } from 'path';
 import { SportItemsModule } from './sport-items/sport-items.module';
 import { ReviewsModule } from './reviews/review.module';
 import { RefundsModule } from './refunds/refunds.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { RefundsModule } from './refunds/refunds.module';
     SportItemsModule,
     ReviewsModule,
     RefundsModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
