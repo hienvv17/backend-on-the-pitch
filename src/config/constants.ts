@@ -23,6 +23,6 @@ export default {
     endBookingMinute: ['00', '30'], // interval 30 mins
   },
   refund: {
-    minRefundTime: 72, // 72 hours before booking time
+    minRefundTime: 48, // 48 hours before and after booking time
   },
 };

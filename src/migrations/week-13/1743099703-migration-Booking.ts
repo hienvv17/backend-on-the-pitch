@@ -9,6 +9,7 @@ export class CreateTimeSlotTable1711650000000 implements MigrationInterface {
           branch_id BIGINT NOT NULL,
           sport_category_id BIGINT NOT NULL,
           is_active BOOLEAN DEFAULT TRUE,
+          has_canopy BOOLEAN DEFAULT FALSE,
           images JSON,
           description TEXT,
           default_price BIGINT NOT NULL,

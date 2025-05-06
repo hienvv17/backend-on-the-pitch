@@ -30,6 +30,9 @@ export class SportFieldsEntity {
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean;
 
+  @Column({ name: 'has_canopy', type: 'boolean', default: false })
+  hasCanopy: boolean;
+
   @Column({ name: 'default_price', type: 'bigint' })
   defaultPrice: number;
 

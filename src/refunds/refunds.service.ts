@@ -26,7 +26,7 @@ export class RefundsService {
 
   async create(uid: string, dto: CreateRefundDto) {
     // Check if the field booking exists with PAID status
-    console.log('dto', dto, uid);
+
     const minRefundTime = constants.refund.minRefundTime;
     const fieldBooking = await this.fieldBookingRepo
       .createQueryBuilder('fb')
@@ -54,7 +54,7 @@ export class RefundsService {
     }
     // Check if bookingDate is within refund time configuration
     const currentDate = new Date(getCurrentTimeInUTC7());
-    console.log(fieldBooking.bookingDate, fieldBooking.startTime);
+  
     const base = moment.utc(fieldBooking.bookingDate).tz('Asia/Bangkok');
     // Combine the time
     const [hours, minutes] = fieldBooking.startTime.split(':').map(Number);
@@ -68,7 +68,7 @@ export class RefundsService {
       .toDate();
     const timeDifference = bookingDate.getTime() - currentDate.getTime();
     const hoursDifference = timeDifference / (1000 * 60 * 60);
-    console.log('hoursDifference', currentDate, bookingDate, hoursDifference);
+  
     if (hoursDifference < minRefundTime) {
       throw new BadRequestException(
         `Bạn chỉ có thể yêu cầu hoàn tiền trễ nhất trước ${minRefundTime} giờ so với thời gian đã đặt.`,

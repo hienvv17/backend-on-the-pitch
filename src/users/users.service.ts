@@ -16,8 +16,7 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    console.log(createUserDto, 'check data create user');
-    console.log('check create user');
+
     const admin = this.firebaseAdmin.setup();
     let existingFirebaseUser: UserRecord = null;
     const existingUser = await this.usersRepo.findOne({

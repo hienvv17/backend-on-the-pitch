@@ -51,6 +51,9 @@ export class SportFieldService {
       .addSelect('sc.id', 'sportCategoryId')
       .addSelect('sf.defaultPrice', 'defaultPrice')
       .addSelect('sc.name', 'sportCategoryName')
+      .addSelect('sf.description', 'description')
+      .addSelect('sf.images', 'images')
+      .addSelect('sf.hasCanopy', 'hasCanopy')
       .addSelect(
         `COALESCE(
           (
@@ -148,6 +151,7 @@ export class SportFieldService {
       .addSelect('sf.createdAt', 'createdAt')
       .addSelect('sf.updatedAt', 'updatedAt')
       .addSelect('sf.isActive', 'isActive')
+      .addSelect('sf.hasCanopy', 'hasCanopy')
       .groupBy('sf.id')
       .addGroupBy('sc.id')
       .addGroupBy('b.name')
@@ -253,7 +257,7 @@ export class SportFieldService {
       ...updateDto,
       updatedAt: new Date(),
     });
-    console.log(updateDto);
+
     if (timeSlots && timeSlots.length > 0) {
       await this.createTimeSlot(id, timeSlots);
     }
@@ -324,13 +328,15 @@ export class SportFieldService {
       }
     }
 
-    console.log('startTime', startTime, endTime);
     let fieldInfo = await this.sportFieldRepo
       .createQueryBuilder('sf')
       .leftJoin('field_bookings', 'fb', 'sf.id = fb.sport_field_id')
       .select('sf.id', 'id')
       .addSelect('sf.name', 'name')
       .addSelect('sf.defaultPrice', 'defaultPrice')
+      .addSelect('sf.description', 'description')
+      .addSelect('sf.images', 'images')
+      .addSelect('sf.hasCanopy', 'hasCanopy')
       .addSelect(
         `COALESCE(
       json_agg(

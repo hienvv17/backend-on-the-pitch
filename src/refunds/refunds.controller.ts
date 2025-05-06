@@ -39,6 +39,7 @@ export class RefundsController {
     });
   }
 
+  @UseGuards(ManagerJwtGuard)
   @Get()
   async findAll(
     @Query('limit') limit: number = 10,
@@ -55,7 +56,7 @@ export class RefundsController {
     return this.responseService.successResponse({ items, count });
   }
 
-  @UseGuards(ManagerJwtGuard)
+  @UseGuards(JwtGuard)
   @Get('my-refunds')
   async findMyRefundAll(
     @GetUser('uid') uid: string,
@@ -79,17 +80,12 @@ export class RefundsController {
   //     return await this.refundsService.findOne(+id);
   //   }
 
-  //   @UseGuards(ManagerJwtGuard)
+  @UseGuards(ManagerJwtGuard)
   @Put(':id')
   async update(@Param('id') id: string, @Body() body: UpdateRefundDto) {
     await this.refundsService.update(+id, body);
     return this.responseService.successResponse({
       message: 'Cập nhật yêu cầu hoàn tiền thành công',
     });
-  }
-
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return await this.refundsService.remove(+id);
   }
 }

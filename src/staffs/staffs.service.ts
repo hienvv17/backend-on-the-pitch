@@ -241,7 +241,7 @@ export class StaffsService {
       ])
       .groupBy('staff.id')
       .getRawOne();
-    console.log('staffWithBranchIds', staffWithBranchIds);
+ 
     return staffWithBranchIds;
   }
 }

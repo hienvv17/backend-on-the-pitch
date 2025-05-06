@@ -186,7 +186,7 @@ export class FieldBookingsService {
         branch: true,
       },
     });
-    console.log(field, 'field data');
+   
     if (!field) {
       throw new BadRequestException('Sport field is not exist');
     }

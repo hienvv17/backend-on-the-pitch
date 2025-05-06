@@ -50,4 +50,9 @@ export class UpdateSportFieldDto {
   @IsNumber()
   @IsOptional()
   defaultPrice?: number;
+
+  @ApiProperty({ nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  hasCanopy?: boolean;
 }

@@ -55,4 +55,9 @@ export class CreateSportFieldDto {
   @IsNumber()
   @IsNotEmpty()
   defaultPrice: number;
+
+  @ApiProperty({ nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  hasCanopy?: boolean;
 }
