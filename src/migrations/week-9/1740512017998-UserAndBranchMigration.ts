@@ -27,6 +27,7 @@ export class UserAndBranchMigration1740512017998 implements MigrationInterface {
             phone_number VARCHAR(11) NOT NULL,
             role staff_role DEFAULT 'STAFF',
             is_active BOOLEAN DEFAULT TRUE,
+            is_deleted BOOLEAN DEFAULT FALSE,
             active_date DATE DEFAULT CURRENT_TIMESTAMP,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

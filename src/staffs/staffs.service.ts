@@ -33,7 +33,7 @@ export class StaffsService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async create(createStaffDto: CreateStaffDto): Promise<StaffsEntity> {
+  async create(createStaffDto: CreateStaffDto) {
     const admin = this.firebaseAdmin.setup();
     let existingFirebaseUser: UserRecord = null;
     try {
@@ -52,8 +52,19 @@ export class StaffsService {
     const existingStaff = await this.staffRepository.findOne({
       where: { email: createStaffDto.email },
     });
-    if (existingStaff) {
+    if (existingStaff && !existingStaff.isDeleted) {
       throw new BadRequestException('Staff already exists');
+    }
+    if (existingStaff && existingStaff.isDeleted) {
+      return await this.staffRepository.update(existingStaff.id, {
+        fullName: createStaffDto.fullName,
+        phoneNumber: createStaffDto.phoneNumber,
+        role: createStaffDto.role,
+        isActive: createStaffDto.isActive,
+        activeDate: createStaffDto.activeDate,
+        isDeleted: false,
+        updatedAt: new Date(),
+      });
     }
     const newStaff = await this.staffRepository.save(
       this.staffRepository.create({
@@ -146,6 +157,7 @@ export class StaffsService {
         'sb.staff_id = s.id AND sb.is_deleted = false',
       )
       .leftJoin('branches', 'b', 'b.id = sb.branch_id') // assuming relation name is `branches`
+      .where('s.isDeleted = false')
       .select([
         's.id "id"',
         's.fullName "fullName"',
@@ -194,10 +206,10 @@ export class StaffsService {
     };
   }
 
-  async remove(id: number): Promise<void> {
+  async delete(id: number): Promise<void> {
     const result = await this.staffRepository.update(
       { id: id },
-      { isActive: false },
+      { isActive: false, isDeleted: true },
     );
     if (result.affected === 0) {
       throw new NotFoundException(`Staff with ID ${id} not found`);
@@ -215,6 +227,7 @@ export class StaffsService {
       )
       .where('staff.email = :email', { email })
       .andWhere('staff.isActive = true')
+      .andWhere('staff.isDeleted = false')
       .andWhere('staff.activeDate <= :today', {
         today: moment().format('YYYY-MM-DD'),
       })

@@ -7,6 +7,7 @@ import {
   Put,
   Param,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { StaffsService } from './staffs.service';
 import { CreateStaffDto } from './dtos/create-staff.dto';
@@ -57,5 +58,11 @@ export class StaffsController {
       items,
       count,
     });
+  }
+
+  @Delete(':staffId')
+  async delete(@Param('staffId') staffId: number) {
+    const staff = await this.staffsService.delete(staffId);
+    return this.responseService.successResponse({ staff });
   }
 }

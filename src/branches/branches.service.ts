@@ -112,18 +112,24 @@ export class BranchesService {
   }
 
   async create(dto: CreateBranchDto) {
+    const cacheKey = 'getPublicAllBraches';
+    this.cacheService.del(cacheKey);
     return await this.branchRepo.save(dto);
   }
 
   async update(id: number, dto: UpdateBranchDto) {
+    const cacheKey = 'getPublicAllBraches';
     const branch = await this.branchRepo.findOne({ where: { id } });
     if (!branch) throw new BadRequestException('Branch do not exist');
+    this.cacheService.del(cacheKey);
     return await this.branchRepo.update(id, { ...dto, updatedAt: new Date() });
   }
 
   async delete(id: number) {
+    const cacheKey = 'getPublicAllBraches';
     const branch = await this.branchRepo.findOne({ where: { id } });
     if (!branch) throw new BadRequestException('Branch do not exist');
+    this.cacheService.del(cacheKey);
     return await this.branchRepo.delete(id);
   }
 }

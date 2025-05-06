@@ -38,8 +38,8 @@ export class SportFieldService {
     private cacheService: CacheService,
   ) {}
 
-  async getPublicAll(bracnhId: number) {
-    const cacheKey = `getPublicSportFieldOnBranch-${bracnhId}`;
+  async getPublicAll(branchId: number) {
+    const cacheKey = `getPublicSportFieldOnBranch-${branchId}`;
     let cachedData = this.cacheService.get(cacheKey);
     if (cachedData) return cachedData;
     const sportFields = await this.sportFieldRepo
@@ -170,6 +170,7 @@ export class SportFieldService {
       timeSlots,
       defaultPrice,
     } = dto;
+    const cacheKey = `getPublicSportFieldOnBranch-${branchId}`;
     const branch = await this.branchRepo.findOne({ where: { id: branchId } });
     //to do: validate payload timeSlots later do in FE 1 time
     if (!branch) throw new BadRequestException('Brach do not exist');
@@ -190,6 +191,7 @@ export class SportFieldService {
         defaultPrice,
       }),
     );
+    this.cacheService.del(cacheKey);
 
     if (!timeSlots && timeSlots?.length > 0) {
       await this.createTimeSlot(newField.id, timeSlots);
@@ -198,7 +200,6 @@ export class SportFieldService {
   }
 
   async createTimeSlot(sportFieldId: number, timeSlots: TimeSlotInput[]) {
-    console.log('timeSlots', timeSlots);
     if (!timeSlots || timeSlots.length === 0) return;
     const sportField = await this.sportFieldRepo.findOne({
       where: { id: sportFieldId },
@@ -246,7 +247,8 @@ export class SportFieldService {
 
     const { timeSlots } = updateDto;
     delete updateDto.timeSlots;
-
+    const cacheKey = `getPublicSportFieldOnBranch-${sportField.branchId}`;
+    this.cacheService.del(cacheKey);
     await this.sportFieldRepo.update(id, {
       ...updateDto,
       updatedAt: new Date(),
@@ -259,13 +261,15 @@ export class SportFieldService {
   }
 
   async deleteSportField(id: number): Promise<any> {
-    const sportField = await this.sportCategoryRepo.findOne({
+    const sportField = await this.sportFieldRepo.findOne({
       where: { id },
     });
 
     if (!sportField) {
       throw new BadRequestException(`Sport field with ID ${id} not found`);
     }
+    const cacheKey = `getPublicSportFieldOnBranch-${sportField.branchId}`;
+    this.cacheService.del(cacheKey);
 
     return await this.sportFieldRepo.delete(id);
   }
