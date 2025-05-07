@@ -56,7 +56,7 @@ import { UploadModule } from './upload/upload.module';
           from: configService.get<string>('MAILER_FROM'),
         },
         template: {
-          dir: 'src/templates',
+          dir: join(__dirname, '..', 'templates'),
           adapter: new HandlebarsAdapter(),
           options: {
             strict: true,
