@@ -137,7 +137,7 @@ export class StaffsService {
     } else {
       await this.staffBranchRepo.update(
         { staffId: staffId },
-        { isDeleted: true },
+        { isDeleted: true, updatedAt: new Date() },
       );
     }
     return;
@@ -209,7 +209,7 @@ export class StaffsService {
   async delete(id: number): Promise<void> {
     const result = await this.staffRepository.update(
       { id: id },
-      { isActive: false, isDeleted: true },
+      { isActive: false, isDeleted: true, updatedAt: new Date() },
     );
     if (result.affected === 0) {
       throw new NotFoundException(`Staff with ID ${id} not found`);
@@ -241,7 +241,7 @@ export class StaffsService {
       ])
       .groupBy('staff.id')
       .getRawOne();
- 
+
     return staffWithBranchIds;
   }
 }

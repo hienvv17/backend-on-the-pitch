@@ -54,7 +54,7 @@ export class RefundsService {
     }
     // Check if bookingDate is within refund time configuration
     const currentDate = new Date(getCurrentTimeInUTC7());
-  
+
     const base = moment.utc(fieldBooking.bookingDate).tz('Asia/Bangkok');
     // Combine the time
     const [hours, minutes] = fieldBooking.startTime.split(':').map(Number);
@@ -68,7 +68,7 @@ export class RefundsService {
       .toDate();
     const timeDifference = bookingDate.getTime() - currentDate.getTime();
     const hoursDifference = timeDifference / (1000 * 60 * 60);
-  
+
     if (hoursDifference < minRefundTime) {
       throw new BadRequestException(
         `Bạn chỉ có thể yêu cầu hoàn tiền trễ nhất trước ${minRefundTime} giờ so với thời gian đã đặt.`,
@@ -205,7 +205,7 @@ export class RefundsService {
 
   async update(id: number, data: UpdateRefundDto): Promise<RefundsEntity> {
     //update also booking status
-    await this.refundRepo.update(id, data);
+    await this.refundRepo.update(id, { ...data, updatedAt: new Date() });
     return this.findOne(id);
   }
 

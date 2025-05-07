@@ -41,6 +41,9 @@ export class SportItemsService {
   async remove(id: number) {
     const item = await this.findOne(id);
     if (!item) throw new BadRequestException('Sport item not exist');
-    return this.sportItemRepo.update(id, { isDelete: true });
+    return this.sportItemRepo.update(id, {
+      isDelete: true,
+      updatedAt: new Date(),
+    });
   }
 }

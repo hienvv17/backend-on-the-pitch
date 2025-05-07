@@ -16,7 +16,6 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-
     const admin = this.firebaseAdmin.setup();
     let existingFirebaseUser: UserRecord = null;
     const existingUser = await this.usersRepo.findOne({
@@ -56,7 +55,10 @@ export class UsersService {
   }
 
   async updateProfile(uid: string, dto: UpdateUserDto) {
-    await this.usersRepo.update({ uid: uid }, { ...dto });
+    await this.usersRepo.update(
+      { uid: uid },
+      { ...dto, updatedAt: new Date() },
+    );
     return;
   }
 
