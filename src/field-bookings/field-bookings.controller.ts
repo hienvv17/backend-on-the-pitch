@@ -9,6 +9,7 @@ import { GetUser } from '../auth/decorator/get-user.decorator';
 import { StaffJwtGuard } from '../auth/guard/staff-jwt.guard';
 import { CheckBookingDto } from './dto/check-booking.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { GetPersonalBookingHistoryDto } from './dto/get-personal-booking-history.dto';
 
 @ApiTags('Field Booking')
 @Controller('field-bookings')
@@ -47,7 +48,7 @@ export class FieldBookingsController {
   @Post('history')
   async getPersonalHistory(
     @GetUser('uid') uid: string,
-    @Body() dto: GetBookingHistoryDto,
+    @Body() dto: GetPersonalBookingHistoryDto,
   ) {
 
     const {items, count} = await this.fieldBookingsService.getPersonalBookingHistory(uid, dto);

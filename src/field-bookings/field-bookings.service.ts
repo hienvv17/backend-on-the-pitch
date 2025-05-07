@@ -146,7 +146,7 @@ export class FieldBookingsService {
         'fb.code "code"',
         'fb.userId "userId"',
         'fb.sportFieldId "sportFieldId"',
-        'fb.bookingDate "bookingDate"',
+        `TO_CHAR(fb.bookingDate, 'YYYY-MM-DD') "bookingDate"`,
         'fb.startTime "startTime"',
         'fb.endTime "endTime"',
         'fb.status "status"',
