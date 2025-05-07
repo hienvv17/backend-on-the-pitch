@@ -261,21 +261,21 @@ export class FieldBookingsService {
       throw new BadRequestException('Field is unavailable to booking!');
     }
     // create fieldBooking
-    // const newBooking = this.fieldBookingRepo.create({
-    //   ...dto,
-    //   userId: user.id,
-    //   code: this.generateBookingCode(),
-    //   status: FieldBookingStatus.PAID,
-    // });
-    // return this.fieldBookingRepo.save(newBooking);
-    return {
+    const newBooking = this.fieldBookingRepo.create({
       ...dto,
-      fieldName: field.name,
-      branchName: field.branch.name,
       userId: user.id,
       code: this.generateBookingCode(),
       status: FieldBookingStatus.PAID,
-    };
+    });
+    return this.fieldBookingRepo.save(newBooking);
+    // return {
+    //   ...dto,
+    //   fieldName: field.name,
+    //   branchName: field.branch.name,
+    //   userId: user.id,
+    //   code: this.generateBookingCode(),
+    //   status: FieldBookingStatus.PAID,
+    // };
   }
 
   async checkBooking(dto: CheckBookingDto) {
