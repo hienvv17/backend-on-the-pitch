@@ -49,11 +49,10 @@ export class FieldBookingsController {
     @GetUser('uid') uid: string,
     @Body() dto: GetBookingHistoryDto,
   ) {
-    const bookingHistories =
-      await this.fieldBookingsService.getPersonalBookingHistory(uid, dto);
+
+    const {items, count} = await this.fieldBookingsService.getPersonalBookingHistory(uid, dto);
     return this.responseService.successResponse({
-      items: bookingHistories[0],
-      count: bookingHistories[1],
+      items, count
     });
   }
 

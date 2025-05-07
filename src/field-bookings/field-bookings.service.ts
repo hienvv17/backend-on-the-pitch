@@ -165,8 +165,11 @@ export class FieldBookingsService {
       .addOrderBy('fb.start_time', 'DESC')
       .limit(dto.limit)
       .offset(dto.offset);
-
-    return await query.getManyAndCount();
+      const [items, count] = await Promise.all([
+        query.getRawMany(),
+        query.getCount(),
+      ]);
+    return {items, count};
   }
 
   async createFieldBooking(dto: CreateBookingDto) {
