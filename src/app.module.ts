@@ -18,6 +18,8 @@ import { SportItemsModule } from './sport-items/sport-items.module';
 import { ReviewsModule } from './reviews/review.module';
 import { RefundsModule } from './refunds/refunds.module';
 import { UploadModule } from './upload/upload.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronJobModule } from './cron-job/cron-job.module';
 
 @Module({
   imports: [
@@ -64,8 +66,8 @@ import { UploadModule } from './upload/upload.module';
         },
       }),
     }),
-    //to do update the path later
-
+    ScheduleModule.forRoot(),
+    CronJobModule,
     AuthModule,
     UsersModule,
     StaffsModule,

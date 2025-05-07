@@ -24,5 +24,6 @@ export class CreateFieldBookingsAndRefunds1746335371000000
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`DROP TABLE IF EXISTS refunds;`);
+    await queryRunner.query(`DROP TYPE IF EXISTS refund_status;`);
   }
 }

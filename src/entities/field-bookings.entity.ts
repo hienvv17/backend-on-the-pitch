@@ -56,6 +56,15 @@ export class FieldBookingsEntity {
   @Column({ type: 'int', name: 'total_price' })
   totalPrice: number; // Calculated based on time slots
 
+  @Column({ type: 'int', name: 'origin_price' })
+  originPrice: number; // Original price before any discounts if not it equal to total price
+
+  @Column({ type: 'int', name: 'discount_amount', nullable: true })
+  discountAmount: number; // Discount amount applied
+
+  @Column({ type: 'varchar', name: 'voucher_code', nullable: true })
+  voucherCode: number; // Voucher code applied
+
   @Column({
     type: 'enum',
     enum: FieldBookingStatus,

@@ -17,4 +17,4 @@ import { StaffsModule } from '../staffs/staffs.module';
   providers: [UsersService, FirebaseAdmin],
   exports: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}

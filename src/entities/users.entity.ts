@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { VouchersEntity } from './vouchers.entity';
 
 @Entity('users')
 export class UsersEntity {
@@ -25,6 +27,9 @@ export class UsersEntity {
 
   @Column({ nullable: true })
   image?: string;
+
+  @OneToMany(() => VouchersEntity, (voucher) => voucher.user)
+  vouchers: VouchersEntity[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
