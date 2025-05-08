@@ -6,10 +6,11 @@ import { UsersEntity } from '../entities/users.entity';
 import { ResponseModule } from '../response/response.module';
 import { FirebaseAdmin } from '../firebase/firebase.service';
 import { StaffsModule } from '../staffs/staffs.module';
+import { VouchersEntity } from '../entities/vouchers.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UsersEntity]),
+    TypeOrmModule.forFeature([UsersEntity, VouchersEntity]),
     ResponseModule,
     StaffsModule,
   ],

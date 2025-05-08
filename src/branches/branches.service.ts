@@ -30,6 +30,7 @@ export class BranchesService {
       .addSelect('br.city', 'city')
       .addSelect('br.openTime', 'openTime')
       .addSelect('br.closeTime', 'closeTime')
+      .addSelect('br.isHot', 'isHot')
       .addSelect('COUNT(sf.id)', 'total_fields')
       .addSelect('SUM(sf.default_price) / COUNT(sf.id)', 'averagePrice')
       .addSelect(

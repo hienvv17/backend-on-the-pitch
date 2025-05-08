@@ -27,7 +27,7 @@ export class VouchersController {
 
   @Get()
   async findAll() {
-    return this.service.findAll();
+    // return this.service.findAll();
   }
 
   @Get(':id')

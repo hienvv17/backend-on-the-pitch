@@ -52,6 +52,11 @@ export class UpdateBranchDto {
   isActive?: boolean;
 
   @ApiProperty({ nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  isHot?: boolean;
+
+  @ApiProperty({ nullable: true })
   @IsTimeString()
   @IsString()
   @IsOptional()

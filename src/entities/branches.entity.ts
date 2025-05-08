@@ -48,6 +48,9 @@ export class BranchsEntity {
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean;
 
+  @Column({ name: 'is_hot', type: 'boolean', default: true })
+  isHot: boolean;
+
   @Column({ name: 'open_time', type: 'varchar', length: 5 })
   openTime: string;
 

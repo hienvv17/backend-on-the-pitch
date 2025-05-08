@@ -44,6 +44,7 @@ export class UserAndBranchMigration1740512017998 implements MigrationInterface {
             images JSON,
             active_date DATE DEFAULT CURRENT_TIMESTAMP,
             is_active BOOLEAN DEFAULT TRUE,
+            is_hot BOOLEAN DEFAULT FALSE,
             open_time VARCHAR(5) NOT NULL,
             close_time VARCHAR(5) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

@@ -75,4 +75,9 @@ export class CreateBranchDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @ApiProperty({ nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  isHot?: boolean;
 }
