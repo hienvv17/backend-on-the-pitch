@@ -39,7 +39,7 @@ export class CreateSportFieldDto {
 
   @ApiProperty({ nullable: true })
   @IsOptional()
-  images?: any;
+  images?: string[];
 
   @ApiProperty()
   @IsArray()

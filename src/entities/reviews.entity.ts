@@ -41,6 +41,9 @@ export class ReviewsEntity {
   @Column({ type: 'int', default: 5 })
   rating: number; // Rating scale (e.g., 1-5)
 
+  @Column({ type: 'json', nullable: true })
+  images?: string[];
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

@@ -32,8 +32,9 @@ export class UpdateSportFieldDto {
   isActive?: boolean;
 
   @ApiProperty({ nullable: true })
+  @IsArray()
   @IsOptional()
-  images?: any;
+  images?: string[];
 
   @ApiProperty({ nullable: true })
   @IsString()

@@ -37,7 +37,7 @@ export class SportFieldsEntity {
   defaultPrice: number;
 
   @Column({ type: 'json' })
-  images?: any;
+  images?: string[];
 
   @Column({ type: 'text' })
   description?: string;
