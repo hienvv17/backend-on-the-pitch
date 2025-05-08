@@ -55,9 +55,17 @@ export class UsersService {
   }
 
   async updateProfile(uid: string, dto: UpdateUserDto) {
+    const birthday = dto.birthDate;
+    let _date = null,
+      month = null;
+    if (birthday) {
+      const date = new Date(birthday);
+      _date = date.getDate();
+      month = date.getMonth() + 1;
+    }
     await this.usersRepo.update(
       { uid: uid },
-      { ...dto, updatedAt: new Date() },
+      { ...dto, date: _date, month: month, updatedAt: new Date() },
     );
     return;
   }
@@ -70,6 +78,17 @@ export class UsersService {
         email: true,
         phoneNumber: true,
         image: true,
+      },
+    });
+  }
+
+  async findUserBirthDay(date: number, month: number) {
+    return await this.usersRepo.find({
+      where: { date: date, month: month },
+      select: {
+        id: true,
+        uid: true,
+        email: true,
       },
     });
   }

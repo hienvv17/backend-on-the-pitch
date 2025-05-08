@@ -5,6 +5,7 @@ import {
   Min,
   Max,
   IsPositive,
+  IsArray,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -24,4 +25,10 @@ export class CreateReviewDto {
   @IsPositive()
   @IsInt()
   rating: number;
+
+  @ApiProperty({ nullable: true })
+  @IsString({ each: true })
+  @IsArray()
+  @IsOptional()
+  images?: string[];
 }

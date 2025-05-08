@@ -115,6 +115,7 @@ export class FieldBookingsService {
     return { data: data, count: total, limit: limit, offset };
   }
 
+  async test() {}
   async getPersonalBookingHistory(
     uid: string,
     dto: GetPersonalBookingHistoryDto,

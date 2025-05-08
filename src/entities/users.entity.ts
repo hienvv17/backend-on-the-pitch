@@ -28,6 +28,15 @@ export class UsersEntity {
   @Column({ nullable: true })
   image?: string;
 
+  @Column({ name: 'birth_date', type: 'date', nullable: true })
+  birthDate?: Date;
+
+  @Column({ nullable: true })
+  date: number;
+
+  @Column({ nullable: true })
+  month: number;
+
   @OneToMany(() => VouchersEntity, (voucher) => voucher.user)
   vouchers: VouchersEntity[];
 

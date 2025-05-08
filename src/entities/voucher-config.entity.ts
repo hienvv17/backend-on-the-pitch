@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { VoucherType } from './vouchers.entity';
 
-@Entity()
+@Entity('voucher_config')
 export class VoucherConfig {
   @PrimaryGeneratedColumn()
   id: number;
@@ -9,7 +9,7 @@ export class VoucherConfig {
   @Column({ type: 'enum', enum: VoucherType, unique: true })
   type: VoucherType;
 
-  @Column({ name: 'voucherCode', type: 'varchar', length: 10, unique: true })
+  @Column({ name: 'voucher_code', type: 'varchar', length: 10, unique: true })
   voucherCode: string;
 
   @Column({ name: 'is_active', type: 'boolean', default: true })
@@ -24,6 +24,9 @@ export class VoucherConfig {
   @Column({ name: 'valid_days', type: 'int' })
   validDays: number;
 
-  @Column({ name: 'amount_to_trigger', type: 'int', nullable: true })
-  amountToTrigger: number;
+  @Column({ name: 'amount_to_trigger', type: 'int' })
+  amountToTrigger: number; // trigger amount for loyalty vouchers
+
+  @Column({ name: 'min_booking_amount', type: 'int' })
+  minBookingAmount: number;
 }

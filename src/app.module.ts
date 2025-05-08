@@ -20,6 +20,7 @@ import { RefundsModule } from './refunds/refunds.module';
 import { UploadModule } from './upload/upload.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronJobModule } from './cron-job/cron-job.module';
+import { VouchersModule } from './vouchers/vouchers.module';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { CronJobModule } from './cron-job/cron-job.module';
     ReviewsModule,
     RefundsModule,
     UploadModule,
+    VouchersModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -23,8 +23,10 @@ export const VoucherStatus = {
   EXPIRED: 'EXPIRED',
   USED: 'USED',
 } as const;
+export type VoucherStatusType =
+  (typeof VoucherStatus)[keyof typeof VoucherStatus];
 
-@Entity()
+@Entity('vouchers')
 export class VouchersEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -32,7 +34,7 @@ export class VouchersEntity {
   @Column({ type: 'enum', enum: VoucherType })
   type: VoucherType;
 
-  @Column()
+  @Column({ type: 'varchar', length: 20 })
   code: string;
 
   @Column({ type: 'int', name: 'max_discount_amount' })
@@ -48,7 +50,7 @@ export class VouchersEntity {
   validTo: Date;
 
   @Column({ type: 'enum', enum: VoucherStatus, default: VoucherStatus.ACTIVE })
-  status: typeof VoucherStatus;
+  status: VoucherStatusType;
 
   @Column({ name: 'user_id', type: 'bigint' })
   userId: number; // Only set for personalized vouchers (e.g., birthday, loyalty)

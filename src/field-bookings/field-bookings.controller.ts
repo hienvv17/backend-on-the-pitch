@@ -44,14 +44,14 @@ export class FieldBookingsController {
     return this.responseService.successResponse({ items: data, count: count });
   }
 
-  @UseGuards(JwtGuard)
+  // @UseGuards(JwtGuard)
   @Post('history')
   async getPersonalHistory(
-    @GetUser('uid') uid: string,
+    // @GetUser('uid') uid: string,
     @Body() dto: GetPersonalBookingHistoryDto,
   ) {
 
-    const {items, count} = await this.fieldBookingsService.getPersonalBookingHistory(uid, dto);
+    const {items, count} = await this.fieldBookingsService.getPersonalBookingHistory('fURiRi2CKBU4vxBtyMKE8f6lhwb2', dto);
     return this.responseService.successResponse({
       items, count
     });

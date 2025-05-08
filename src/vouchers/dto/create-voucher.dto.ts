@@ -12,7 +12,11 @@ import {
   IsDateString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { VoucherStatus, VoucherType } from '../../entities/vouchers.entity';
+import {
+  VoucherStatus,
+  VoucherStatusType,
+  VoucherType,
+} from '../../entities/vouchers.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateVoucherDto {
@@ -52,7 +56,7 @@ export class CreateVoucherDto {
   @ApiProperty()
   @IsEnum(VoucherStatus)
   @IsOptional()
-  status?: typeof VoucherStatus;
+  status?: VoucherStatusType;
 
   @ApiProperty()
   @IsPositive()

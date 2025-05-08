@@ -4,44 +4,75 @@ import {
   Post,
   Body,
   Param,
-  Patch,
   Delete,
+  Put,
+  UseGuards,
+  Query,
 } from '@nestjs/common';
 import { VouchersService } from './vouchers.service';
 import { CreateVoucherDto } from './dto/create-voucher.dto';
 import { ResponseService } from '../response/response.service';
-// import { UpdateVoucherDto } from './dto/update-voucher.dto';
+import { UpdateVoucherConfigDto } from './dto/update-voucher-config';
+import { JwtGuard } from '../auth/guard/jwt.guard';
+import { GetUser } from '../auth/decorator/get-user.decorator';
+import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 
 @Controller('vouchers')
 export class VouchersController {
   constructor(
-    private readonly service: VouchersService,
+    private readonly vouchersService: VouchersService,
     private readonly responseService: ResponseService,
   ) {}
 
+  @UseGuards(AdminJwtGuard)
   @Post('config')
   async create(@Body() dto: CreateVoucherDto) {
-    await this.service.create(dto);
+    await this.vouchersService.create(dto);
     return this.responseService.successResponse();
   }
 
-  @Get()
-  async findAll() {
-    // return this.service.findAll();
+  @UseGuards(AdminJwtGuard)
+  @Post('manual-create')
+  async createManual(@Body() dto: CreateVoucherDto) {
+    await this.vouchersService.createManual(dto);
+    return this.responseService.successResponse();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.service.findOne(+id);
+  @UseGuards(AdminJwtGuard)
+  @Put('config/:id')
+  async updateConfig(
+    @Param('id') id: number,
+    @Body() dto: UpdateVoucherConfigDto,
+  ) {
+    await this.vouchersService.updateConfig(id, dto);
+    return this.responseService.successResponse();
   }
 
-  //   @Patch(':id')
-  //   update(@Param('id') id: string, @Body() dto: UpdateVoucherDto) {
-  //     return this.service.update(+id, dto);
-  //   }
+  @UseGuards(AdminJwtGuard)
+  @Get('config')
+  async findAllConfig() {
+    const config = await this.vouchersService.findAllConfig();
+    return this.responseService.successResponse({ items: config });
+  }
 
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.service.remove(+id);
+  @UseGuards(JwtGuard)
+  @Get('my-voucher')
+  async findOne(
+    @GetUser('uid') uid: string,
+    @Query('limit') limit = 20,
+    @Query('offset') offset = 0,
+  ) {
+    const vouchers = await this.vouchersService.findMyVoucherAll(
+      uid,
+      limit,
+      offset,
+    );
+    return this.responseService.successResponse({ items: vouchers[0], count: vouchers[1] });
+  }
+
+  @UseGuards(AdminJwtGuard)
+  @Delete('config/:id')
+  async deleteConfig(@Param('id') id: string) {
+    return this.vouchersService.removeConfig(+id);
   }
 }
