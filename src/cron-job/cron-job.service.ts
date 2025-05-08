@@ -22,7 +22,8 @@ export class CronJobService {
     private usersRepo: Repository<UsersEntity>,
   ) {}
   // Cron job that runs every day at 3 AM
-  @Cron('0 3 * * *')
+  //test
+  @Cron('0 7 * * *')
   async handleDailyCron() {
     const birthDateConfig = await this.voucherConfigRepo.findOne({
       where: { type: VoucherType.BIRTHDAY, isActive: true },

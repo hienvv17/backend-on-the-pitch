@@ -67,7 +67,10 @@ export class VouchersController {
       limit,
       offset,
     );
-    return this.responseService.successResponse({ items: vouchers[0], count: vouchers[1] });
+    return this.responseService.successResponse({
+      items: vouchers[0],
+      count: vouchers[1],
+    });
   }
 
   @UseGuards(AdminJwtGuard)

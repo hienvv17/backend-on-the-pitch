@@ -12,7 +12,7 @@ import { ResponseModule } from '../response/response.module';
   imports: [
     TypeOrmModule.forFeature([VouchersEntity, VoucherConfig]),
     StaffsModule,
-    ResponseModule
+    ResponseModule,
   ],
   controllers: [VouchersController],
   providers: [VouchersService, FirebaseAdmin],
