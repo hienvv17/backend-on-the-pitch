@@ -13,7 +13,7 @@ import { CreateSportCategoryDto } from './dto/create-sport-category.dto';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateSportCategoryDto } from './dto/update-sport-category.dto';
-import { StaffJwtGuard } from 'src/auth/guard/staff-jwt.guard';
+import { StaffJwtGuard } from '../auth/guard/staff-jwt.guard';
 
 @ApiTags('Sport Category')
 @Controller('sport-categories')

@@ -14,7 +14,7 @@ import { UseGuards } from '@nestjs/common';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 import { ResponseService } from '../response/response.service';
 import { ApiTags } from '@nestjs/swagger';
-import { StaffJwtGuard } from 'src/auth/guard/staff-jwt.guard';
+import { StaffJwtGuard } from '../auth/guard/staff-jwt.guard';
 
 @ApiTags('Bracnh')
 @Controller('branches')

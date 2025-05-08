@@ -18,7 +18,7 @@ import {
 } from '../utils/helper/date-time.helper';
 import { GetPersonalBookingHistoryDto } from './dto/get-personal-booking-history.dto';
 import { CheckBookingDto } from './dto/check-booking.dto';
-import { STAFF_ROLE } from 'src/entities/staffs.entity';
+import { STAFF_ROLE } from '../entities/staffs.entity';
 
 @Injectable()
 export class FieldBookingsService {
@@ -165,11 +165,11 @@ export class FieldBookingsService {
       .addOrderBy('fb.start_time', 'DESC')
       .limit(dto.limit)
       .offset(dto.offset);
-      const [items, count] = await Promise.all([
-        query.getRawMany(),
-        query.getCount(),
-      ]);
-    return {items, count};
+    const [items, count] = await Promise.all([
+      query.getRawMany(),
+      query.getCount(),
+    ]);
+    return { items, count };
   }
 
   async createFieldBooking(dto: CreateBookingDto) {
@@ -189,7 +189,7 @@ export class FieldBookingsService {
         branch: true,
       },
     });
-   
+
     if (!field) {
       throw new BadRequestException('Sport field is not exist');
     }
@@ -328,18 +328,18 @@ export class FieldBookingsService {
     return await query.getRawMany();
   }
 
-  async extendTimeBooking(dto: GetBookingHistoryDto) {
-    //to do: accept booking 30 more => searh availble time with gap 30 accepted
-  }
+  // async extendTimeBooking(dto: GetBookingHistoryDto) {
+  //   //to do: accept booking 30 more => searh availble time with gap 30 accepted
+  // }
 
-  async createMultiBookingField(dto: GetBookingHistoryDto) {
-    //to do: create for one month - or 3 week with same time
-    /**
-     * separate booking : can refund request if need
-     *  -- pay in current week
-     *  -- schedule payment before 4 day this timeSlot
-     */
-  }
+  // async createMultiBookingField(dto: GetBookingHistoryDto) {
+  //   //to do: create for one month - or 3 week with same time
+  //   /**
+  //    * separate booking : can refund request if need
+  //    *  -- pay in current week
+  //    *  -- schedule payment before 4 day this timeSlot
+  //    */
+  // }
 
   generateBookingCode(): string {
     return 'OTP-' + uuidv4().split('-')[0].toUpperCase();
