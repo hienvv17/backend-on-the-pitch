@@ -12,7 +12,6 @@ import {
 import { VoucherType } from '../../entities/vouchers.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
-
 export class CreateVoucherConfigDto {
   @ApiProperty()
   @IsString()
@@ -50,8 +49,12 @@ export class CreateVoucherConfigDto {
   validDays: number;
 
   @ApiProperty()
-  @IsPositive()
   @IsInt()
   @IsOptional()
   amountToTrigger?: number;
+
+  @ApiProperty()
+  @IsInt()
+  @IsOptional()
+  minBookingAmount?: number;
 }

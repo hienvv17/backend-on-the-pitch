@@ -73,7 +73,7 @@ export class VouchersEntity {
   })
   updatedAt: Date;
 
-   @CreateDateColumn({
+  @CreateDateColumn({
     name: 'created_by',
     type: 'varchar',
     length: 225,

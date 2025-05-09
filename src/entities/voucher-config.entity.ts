@@ -24,9 +24,9 @@ export class VoucherConfig {
   @Column({ name: 'valid_days', type: 'int' })
   validDays: number;
 
-  @Column({ name: 'amount_to_trigger', type: 'int' })
+  @Column({ name: 'amount_to_trigger', type: 'int', nullable: true })
   amountToTrigger: number; // trigger amount for loyalty vouchers
 
-  @Column({ name: 'min_booking_amount', type: 'int' })
+  @Column({ name: 'min_booking_amount', type: 'int', nullable: true })
   minBookingAmount: number;
 }

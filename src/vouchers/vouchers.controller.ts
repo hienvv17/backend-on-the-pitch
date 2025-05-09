@@ -16,9 +16,12 @@ import { UpdateVoucherConfigDto } from './dto/update-voucher-config';
 import { JwtGuard } from '../auth/guard/jwt.guard';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
-import { ManagerJwtGuard } from 'src/auth/guard/manager-jwt.guard';
-import { VoucherStatusType } from 'src/entities/vouchers.entity';
+import { ManagerJwtGuard } from '../auth/guard/manager-jwt.guard';
+import { VoucherStatusType, VoucherType } from '../entities/vouchers.entity';
+import { ApiTags } from '@nestjs/swagger';
+import { CreateVoucherConfigDto } from './dto/create-voucher-config';
 
+@ApiTags('Vouchers')
 @Controller('vouchers')
 export class VouchersController {
   constructor(
@@ -28,8 +31,8 @@ export class VouchersController {
 
   @UseGuards(AdminJwtGuard)
   @Post('config')
-  async create(@Body() dto: CreateVoucherDto) {
-    await this.vouchersService.create(dto);
+  async create(@Body() dto: CreateVoucherConfigDto) {
+    await this.vouchersService.createConfig(dto);
     return this.responseService.successResponse();
   }
 
@@ -63,7 +66,7 @@ export class VouchersController {
     @Query('limit') limit = 20,
     @Query('offset') offset = 0,
     @Query('status') status?: VoucherStatusType,
-    @Query('type') type?: string,
+    @Query('type') type?: VoucherType,
     @Query('search') search?: string,
   ) {
     const config = await this.vouchersService.findManageAll(
@@ -91,6 +94,15 @@ export class VouchersController {
     return this.responseService.successResponse({
       items: vouchers[0],
       count: vouchers[1],
+    });
+  }
+
+  @UseGuards(JwtGuard)
+  @Get('validate')
+  async validate(@GetUser('uid') uid: string, @Query('code') code: string) {
+    const validVoucher = await this.vouchersService.validate(uid, code);
+    return this.responseService.successResponse({
+      items: validVoucher,
     });
   }
 

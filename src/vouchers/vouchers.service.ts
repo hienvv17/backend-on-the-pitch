@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 
 import { CreateVoucherDto } from './dto/create-voucher.dto';
 import {
   VouchersEntity,
+  VoucherStatus,
   VoucherStatusType,
   VoucherType,
 } from '../entities/vouchers.entity';
@@ -131,5 +132,24 @@ export class VouchersService {
 
   async updateConfig(id: number, dto: UpdateVoucherConfigDto) {
     return await this.voucherConfigRepo.update(id, dto);
+  }
+
+  async validate(uid: string, code: string) {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    const valid = await this.voucherRepo.findOne({
+      where: {
+        code: code,
+        status: VoucherStatus.ACTIVE,
+        user: {
+          uid,
+        },
+        validTo: MoreThanOrEqual(currentDate),
+      },
+    });
+    if (!valid) {
+      throw new BadRequestException('Voucher is not valid');
+    }
+    return valid;
   }
 }

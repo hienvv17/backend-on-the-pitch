@@ -9,9 +9,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-
 export class UpdateVoucherConfigDto {
-
   @ApiProperty()
   @Length(1, 10)
   @IsString()
@@ -33,7 +31,7 @@ export class UpdateVoucherConfigDto {
   @Min(1)
   @IsInt()
   @IsOptional()
-  maxDiscountAmount?: number; 
+  maxDiscountAmount?: number;
 
   @ApiProperty()
   @Min(1)
@@ -43,9 +41,12 @@ export class UpdateVoucherConfigDto {
   validDays?: number;
 
   @ApiProperty()
-  @Min(1)
-  @IsPositive()
   @IsInt()
   @IsOptional()
   amountToTrigger?: number;
+
+  @ApiProperty()
+  @IsInt()
+  @IsOptional()
+  minBookingAmount?: number;  
 }
