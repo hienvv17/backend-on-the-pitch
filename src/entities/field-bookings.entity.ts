@@ -63,7 +63,7 @@ export class FieldBookingsEntity {
   discountAmount: number; // Discount amount applied
 
   @Column({ type: 'varchar', name: 'voucher_code', nullable: true })
-  voucherCode: number; // Voucher code applied
+  voucherCode: string; // Voucher code applied
 
   @Column({
     type: 'enum',

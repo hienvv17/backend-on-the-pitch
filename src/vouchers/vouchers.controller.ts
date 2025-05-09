@@ -16,6 +16,8 @@ import { UpdateVoucherConfigDto } from './dto/update-voucher-config';
 import { JwtGuard } from '../auth/guard/jwt.guard';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
+import { ManagerJwtGuard } from 'src/auth/guard/manager-jwt.guard';
+import { VoucherStatusType } from 'src/entities/vouchers.entity';
 
 @Controller('vouchers')
 export class VouchersController {
@@ -52,6 +54,25 @@ export class VouchersController {
   @Get('config')
   async findAllConfig() {
     const config = await this.vouchersService.findAllConfig();
+    return this.responseService.successResponse({ items: config });
+  }
+
+  @UseGuards(ManagerJwtGuard)
+  @Get('manage')
+  async findAllVoucher(
+    @Query('limit') limit = 20,
+    @Query('offset') offset = 0,
+    @Query('status') status?: VoucherStatusType,
+    @Query('type') type?: string,
+    @Query('search') search?: string,
+  ) {
+    const config = await this.vouchersService.findManageAll(
+      limit,
+      offset,
+      status,
+      type,
+      search,
+    );
     return this.responseService.successResponse({ items: config });
   }
 

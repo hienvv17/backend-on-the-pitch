@@ -47,4 +47,22 @@ export class CreateBookingDto {
   @ApiProperty()
   @IsNotEmpty()
   totalPrice: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  originPrice: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @Matches(/^[A-Z0-9]{6}$/, {
+    message: 'voucherCode must be a 6-character alphanumeric string',
+  })
+  voucherCode?: string; // Optional field for voucher code
+  
+  @ApiProperty()
+  @IsNotEmpty()
+  @Matches(/^[A-Z0-9]{6}$/, {
+    message: 'code must be a 6-character alphanumeric string',
+  })
+  code: string; // Unique booking code
 }

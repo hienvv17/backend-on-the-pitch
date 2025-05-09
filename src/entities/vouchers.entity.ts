@@ -72,4 +72,12 @@ export class VouchersEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;
+
+   @CreateDateColumn({
+    name: 'created_by',
+    type: 'varchar',
+    length: 225,
+    default: () => 'SYSTEM',
+  })
+  createdBy: Date;
 }
