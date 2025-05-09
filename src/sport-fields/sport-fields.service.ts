@@ -369,7 +369,11 @@ export class SportFieldService {
         sportCategoryId,
       });
     }
-    let fieldInfo = await query.groupBy('sf.id').orderBy('sf.id').getRawMany();
+    let fieldInfo = await query
+      .groupBy('sf.id')
+      .addGroupBy('sc.id')
+      .orderBy('sf.id')
+      .getRawMany();
 
     fieldInfo = fieldInfo.map((field) => {
       return {
