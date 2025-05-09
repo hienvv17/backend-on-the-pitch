@@ -284,12 +284,13 @@ export class SportFieldService {
       where: { id: branchId },
     });
     if (!branch) throw new BadRequestException('Branch do not exist');
-    const sportCategory = await this.sportCategoryRepo.findOne({
-      where: { id: sportCategoryId },
-    });
-    if (!sportCategory)
-      throw new BadRequestException('Sport type do not exist');
-
+    if (!!sportCategoryId) {
+      const sportCategory = await this.sportCategoryRepo.findOne({
+        where: { id: sportCategoryId },
+      });
+      if (!sportCategory)
+        throw new BadRequestException('Sport type do not exist');
+    }
     let _endTime = endTime;
 
     if (startTime) {
@@ -328,7 +329,7 @@ export class SportFieldService {
       }
     }
 
-    let fieldInfo = await this.sportFieldRepo
+    let query = this.sportFieldRepo
       .createQueryBuilder('sf')
       .leftJoin('field_bookings', 'fb', 'sf.id = fb.sport_field_id')
       .select('sf.id', 'id')
@@ -358,13 +359,14 @@ export class SportFieldService {
         status: [FieldBookingStatus.CANCELLED, FieldBookingStatus.REFUND],
       })
       .where('sf.isActive = :isActive', { isActive: true })
-      .andWhere('sf.branchId = :branchId', { branchId })
-      .andWhere('sf.sportCategoryId = :sportCategoryId', {
+      .andWhere('sf.branchId = :branchId', { branchId });
+
+    if (sportCategoryId) {
+      query = query.andWhere('sf.sportCategoryId = :sportCategoryId', {
         sportCategoryId,
-      })
-      .groupBy('sf.id')
-      .orderBy('sf.id')
-      .getRawMany();
+      });
+    }
+    let fieldInfo = await query.groupBy('sf.id').orderBy('sf.id').getRawMany();
 
     fieldInfo = fieldInfo.map((field) => {
       return {

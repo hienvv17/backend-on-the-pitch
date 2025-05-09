@@ -13,8 +13,8 @@ import { IsValidDate } from '../../decorators/IsValidDate.decorator';
 export class GetAvailableFieldDto {
   @ApiProperty()
   @IsNumber()
-  @IsNotEmpty()
-  sportCategoryId: number;
+  @IsOptional()
+  sportCategoryId?: number;
 
   @ApiProperty()
   @IsNumber()
