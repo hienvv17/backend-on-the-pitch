@@ -26,7 +26,7 @@ export class AuthService {
           email: claims.email,
           uid: claims.uid,
           fullName: claims.name,
-          picture: claims.picture,
+          picture: user.image ?? claims.picture,
         });
       }
       return user;
