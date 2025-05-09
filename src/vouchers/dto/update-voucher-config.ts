@@ -48,5 +48,5 @@ export class UpdateVoucherConfigDto {
   @ApiProperty()
   @IsInt()
   @IsOptional()
-  minBookingAmount?: number;  
+  minBookingAmount?: number;
 }
