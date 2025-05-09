@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  UseGuards,
+  Put,
+  Param,
+} from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 
 import { ApiTags } from '@nestjs/swagger';
@@ -7,6 +16,8 @@ import { JwtGuard } from '../auth/guard/jwt.guard';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { ResponseService } from '../response/response.service';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
+import { UpdateReviewDto } from './dto/update-review.dto';
+import { ManagerJwtGuard } from 'src/auth/guard/manager-jwt.guard';
 
 @ApiTags('Reviews')
 @Controller('reviews')
@@ -23,9 +34,18 @@ export class ReviewsController {
     return this.responseService.successResponse();
   }
 
-  @Get()
-  async findAll(@Query('limit') limit = 10, @Query('offset') offset = 0) {
-    const { data, count } = await this.reviewsService.findAll(+limit, +offset);
+  @UseGuards(JwtGuard)
+  @Get('my-reviews')
+  async getAllMyReview(
+    @GetUser('uid') uid: string,
+    @Query('limit') limit = 10,
+    @Query('offset') offset = 0,
+  ) {
+    const { data, count } = await this.reviewsService.getMyReviewAll(
+      uid,
+      +limit,
+      +offset,
+    );
     return this.responseService.successResponse({
       items: data,
       count,
@@ -34,10 +54,28 @@ export class ReviewsController {
     });
   }
 
-  @UseGuards(AdminJwtGuard)
-  @Post('manage/update')
-  async update(@GetUser('uid') uid: string, @Body() dto: CreateReviewDto) {
-    await this.reviewsService.create(uid, dto);
+  @UseGuards(ManagerJwtGuard)
+  @Get('manage')
+  async getManageAll(@Query('limit') limit = 10, @Query('offset') offset = 0) {
+    const { data, count } = await this.reviewsService.findAll(+limit, +offset);
+    return this.responseService.successResponse({
+      items: data,
+      count,
+    });
+  }
+
+  @UseGuards(ManagerJwtGuard)
+  @Put('manage')
+  async update(@Param('id') id: number, @Body() dto: UpdateReviewDto) {
+    await this.reviewsService.update(id, dto);
     return this.responseService.successResponse();
+  }
+
+  @Get('top-reviews')
+  async getTopRivew() {
+    const reviews = await this.reviewsService.getTopReview();
+    return this.responseService.successResponse({
+      items: reviews,
+    });
   }
 }

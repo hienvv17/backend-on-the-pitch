@@ -332,12 +332,15 @@ export class SportFieldService {
     let query = this.sportFieldRepo
       .createQueryBuilder('sf')
       .leftJoin('field_bookings', 'fb', 'sf.id = fb.sport_field_id')
+      .leftJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id')
       .select('sf.id', 'id')
       .addSelect('sf.name', 'name')
       .addSelect('sf.defaultPrice', 'defaultPrice')
       .addSelect('sf.description', 'description')
       .addSelect('sf.images', 'images')
       .addSelect('sf.hasCanopy', 'hasCanopy')
+      .addSelect('sc.id', 'sportCategoryId')
+      .addSelect('sc.name', 'sportCategoryName')
       .addSelect(
         `COALESCE(
       json_agg(
@@ -385,6 +388,8 @@ export class SportFieldService {
         ),
         openTime: branch.openTime,
         closeTime: branch.closeTime,
+        branchId: branch.id,
+        branchName: branch.name,
       };
     });
 

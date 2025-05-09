@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 import { ReviewsEntity } from '../entities/reviews.entity';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UsersEntity } from '../entities/users.entity';
@@ -51,10 +51,62 @@ export class ReviewsService {
       skip: offset,
       take: limit,
       order: { createdAt: 'DESC' },
-      relations: ['user', 'fieldBooking'],
+      relations: ['user', 'fieldBooking', 'fieldBooking.sportField', 'fieldBooking.sportField.branch'],
+      select: {
+        id: true,
+        comment: true,
+        rating: true,
+        createdAt: true,
+        updatedAt: true,
+        isHidden: true,
+        isDeleted: true,
+        fieldBooking: {
+          id: true,
+          code: true,
+          bookingDate: true,
+          startTime: true,
+          endTime: true,
+          status: true,
+          sportField: {
+            id: true,
+            name: true,
+            branch:{
+              name: true,
+            }
+          },
+        },
+        user: {
+          id: true,
+          uid: true,
+          fullName: true,
+          phoneNumber: true,
+          email: true,
+        },
+      },
     });
 
-    return { data, count, limit, offset };
+    return { data, count };
+  }
+
+  async getMyReviewAll(uid: string, limit = 10, offset = 0) {
+    const [data, count] = await this.reviewRepo.findAndCount({
+      skip: offset,
+      take: limit,
+      order: { createdAt: 'DESC' },
+      where: { user: { uid: uid } },
+      relations: ['fieldBooking'],
+      select: {
+        id: true,
+        comment: true,
+        rating: true,
+        createdAt: true,
+        fieldBooking: {
+          id: true,
+        },
+      },
+    });
+
+    return { data, count };
   }
 
   async update(id: number, dto: UpdateReviewDto) {
@@ -62,5 +114,39 @@ export class ReviewsService {
     if (!review) throw new Error('Review not found');
     Object.assign(review, dto);
     return this.reviewRepo.save(review);
+  }
+
+  async getTopReview() {
+    const reviews = await this.reviewRepo.find({
+      where: { isHidden: false, isDeleted: false, rating: MoreThanOrEqual(4) },
+      order: { rating: 'DESC', createdAt: 'DESC' },
+      take: 10,
+      relations: ['user', 'fieldBooking', 'fieldBooking.sportField', 'fieldBooking.sportField.branch'],
+      select: {
+        id: true,
+        comment: true,
+        rating: true,
+        fieldBooking: {
+          id: true,
+          code: true,
+          sportField: {
+            name: true,
+            branch: {
+              name: true,
+            },
+          },
+        },
+        user: {
+          id: true,
+          uid: true,
+          fullName: true,
+          phoneNumber: true,
+          email: true,
+          image: true,
+        },
+      },
+    });
+
+    return reviews
   }
 }
