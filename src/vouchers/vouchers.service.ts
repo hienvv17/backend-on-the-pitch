@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 
 import { CreateVoucherDto } from './dto/create-voucher.dto';
 import {
@@ -43,47 +43,50 @@ export class VouchersService {
   async findManageAll(
     limit: number,
     offset: number,
+    order: string,
+    sortKey?: string,
     status?: VoucherStatusType,
     type?: VoucherType,
     search?: string,
   ) {
     let query = this.voucherRepo
-      .createQueryBuilder('v')
-      .leftJoin('users', 'u', 'u.id = v.userId')
-      .leftJoin('field_bookings', 'fb', 'fb.voucherCode = v.code')
+      .createQueryBuilder('voucher')
+      .leftJoin('users', 'u', 'u.id = voucher.userId')
+      .leftJoin('field_bookings', 'fb', 'fb.voucherCode = voucher.code')
       .select([
-        'v.id "id"',
-        'v.code "code"',
-        'v.type "type"',
-        'v.validFrom "validFrom"',
-        'v.validTo "validTo"',
-        'v.status "status"',
-        'v.maxDiscountAmount "maxDiscountAmount"',
-        'v.percentDiscount "percentDiscount"',
-        'v.createdAt "createdAt"',
-        'v.updatedAt "updatedAt"',
-        'v.createBy "createBy"',
+        'voucher.id "id"',
+        'voucher.code "code"',
+        'voucher.type "type"',
+        `TO_CHAR(voucher.validFrom, 'YYYY-MM-DD') "validFrom"`,
+        `TO_CHAR(voucher.validTo, 'YYYY-MM-DD') "validTo"`,
+        'voucher.status "status"',
+        'voucher.maxDiscountAmount "maxDiscountAmount"',
+        'voucher.percentDiscount "percentDiscount"',
+        'voucher.createdAt "createdAt"',
+        'voucher.updatedAt "updatedAt"',
+        'voucher.createdBy "createdBy"',
         'u.uid "uid"',
         'u.fullName "fullName"',
         'u.email "email"',
         'fb.code "bookingCode"',
         'fb.bookingDate "bookingDate"',
+        'voucher.minBookingAmount "minBookingAmount"',
       ]);
 
     if (status) {
-      query.andWhere('v.status = :status', { status });
+      query.andWhere('voucher.status = :status', { status });
     }
     if (type) {
-      query.andWhere('v.type = :type', { type });
+      query.andWhere('voucher.type = :type', { type });
     }
     if (search) {
       query.andWhere(
-        '(v.code ILIKE :search OR fb.code ILIKE :search OR u.email ILIKE :search OR u.phoneNumber ILIKE :search)',
+        '(voucher.code ILIKE :search OR fb.code ILIKE :search OR u.email ILIKE :search OR u.phoneNumber ILIKE :search)',
         { search: `%${search}%` },
       );
     }
-
-    query = query.orderBy('v.createdAt', 'DESC');
+    const sortBy = sortKey || 'voucher.createdAt';
+    query = query.orderBy(sortBy, order as any);
 
     const [items, count] = await Promise.all([
       query.limit(limit).offset(offset).getRawMany(),
@@ -105,14 +108,17 @@ export class VouchersService {
       .leftJoin('voucher.user', 'user')
       .where('user.uid = :uid', { uid })
       .andWhere('voucher.validTo > NOW()')
+      .andWhere('voucher.status = :status', {
+        status: VoucherStatus.ACTIVE,
+      })
       .orderBy('voucher.createdAt', 'DESC')
       .addOrderBy('voucher.status', 'ASC')
       .select([
         'voucher.id',
         'voucher.code',
         'voucher.type',
-        'voucher.validFrom',
-        'voucher.validTo',
+        `TO_CHAR(v.validFrom, 'YYYY-MM-DD') "validFrom"`,
+        `TO_CHAR(v.validTo, 'YYYY-MM-DD') "validTo"`,
         'voucher.status',
         'voucher.maxDiscountAmount',
         'voucher.percentDiscount',

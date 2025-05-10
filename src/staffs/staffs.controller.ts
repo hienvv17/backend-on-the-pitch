@@ -8,6 +8,7 @@ import {
   Param,
   Query,
   Delete,
+  Request,
 } from '@nestjs/common';
 import { StaffsService } from './staffs.service';
 import { CreateStaffDto } from './dtos/create-staff.dto';
@@ -43,14 +44,21 @@ export class StaffsController {
 
   @Get()
   async getAll(
+    @Request() req: any,
     @Query('limit') limit: number = 10,
     @Query('offset') offset: number = 0,
+    @Query('order') order: string = 'ASC',
+    @Query('sortKey') sortKey?: string,
     @Query('search') search?: string,
     @Query('branchId') branchId?: number,
   ) {
+    const manager = req.staff;
     const { items, count } = await this.staffsService.getAll(
+      manager,
       limit,
       offset,
+      order,
+      sortKey,
       branchId,
       search,
     );

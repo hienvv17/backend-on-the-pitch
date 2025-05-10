@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, QueryRunner, Brackets } from 'typeorm';
+import { DataSource, Repository, QueryRunner } from 'typeorm';
 import { SportFieldsEntity } from '../entities/sport-fields.entity';
 import { BranchsEntity } from '../entities/branches.entity';
 import { SportCategoriesEntity } from '../entities/sport-categories.entity';
@@ -40,7 +40,7 @@ export class SportFieldService {
 
   async getPublicAll(branchId: number) {
     const cacheKey = `getPublicSportFieldOnBranch-${branchId}`;
-    let cachedData = this.cacheService.get(cacheKey);
+    const cachedData = this.cacheService.get(cacheKey);
     if (cachedData) return cachedData;
     const sportFields = await this.sportFieldRepo
       .createQueryBuilder('sf')
@@ -107,30 +107,38 @@ export class SportFieldService {
   async getMangeAll(
     limit: number,
     offset: number,
+    order: string,
+    sortKey?: string,
     bracnhId?: number,
     sportCategoryId?: number,
   ) {
     let query = this.sportFieldRepo
-      .createQueryBuilder('sf')
-      .innerJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id')
-      .innerJoin('branches', 'b', 'b.id = sf.branch_id')
-      .leftJoin('time_slots', 'ts', 'ts.sport_field_id = sf.id')
-      .select('sf.id', 'id');
+      .createQueryBuilder('sportField')
+      .innerJoin(
+        'sport_categories',
+        'sc',
+        'sc.id = sportField.sport_category_id',
+      )
+      .innerJoin('branches', 'b', 'b.id = sportField.branch_id')
+      .leftJoin('time_slots', 'ts', 'ts.sport_field_id = sportField.id')
+      .select('sportField.id', 'id');
     if (bracnhId) {
-      query = query.where('sf.branchId = :branchId', { branchId: bracnhId });
+      query = query.where('sportField.branchId = :branchId', {
+        branchId: bracnhId,
+      });
     }
     if (sportCategoryId) {
-      query = query.andWhere('sf.sportCategoryId = :sportCategoryId', {
+      query = query.andWhere('sportField.sportCategoryId = :sportCategoryId', {
         sportCategoryId,
       });
     }
     query = query
-      .addSelect('sf.name', 'name')
+      .addSelect('sportField.name', 'name')
       .addSelect('sc.id', 'sportCategoryId')
-      .addSelect('sf.defaultPrice', 'defaultPrice')
+      .addSelect('sportField.defaultPrice', 'defaultPrice')
       .addSelect('sc.name', 'sportCategoryName')
-      .addSelect('sf.description', 'description')
-      .addSelect('sf.images', 'images')
+      .addSelect('sportField.description', 'description')
+      .addSelect('sportField.images', 'images')
       .addSelect('b.name', 'branchName')
       .addSelect('b.id', 'branchId')
       .addSelect(
@@ -148,16 +156,20 @@ export class SportFieldService {
   `,
         'timeSlots',
       )
-      .addSelect('sf.createdAt', 'createdAt')
-      .addSelect('sf.updatedAt', 'updatedAt')
-      .addSelect('sf.isActive', 'isActive')
-      .addSelect('sf.hasCanopy', 'hasCanopy')
-      .groupBy('sf.id')
+      .addSelect('sportField.createdAt', 'createdAt')
+      .addSelect('sportField.updatedAt', 'updatedAt')
+      .addSelect('sportField.isActive', 'isActive')
+      .addSelect('sportField.hasCanopy', 'hasCanopy')
+      .groupBy('sportField.id')
       .addGroupBy('sc.id')
       .addGroupBy('b.name')
       .addGroupBy('b.id');
+
+    const sortBy = sortKey || 'sportField.createdAt';
+    query = query.orderBy(sortBy, order as any);
+
     const [items, count] = await Promise.all([
-      query.orderBy('sf.id', 'ASC').limit(limit).offset(offset).getRawMany(),
+      query.limit(limit).offset(offset).getRawMany(),
       query.getCount(),
     ]);
     return { items, count };

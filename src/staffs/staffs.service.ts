@@ -4,16 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  DataSource,
-  In,
-  LessThanOrEqual,
-  QueryRunner,
-  Repository,
-} from 'typeorm';
+import { DataSource, In, QueryRunner, Repository } from 'typeorm';
 import { CreateStaffDto } from './dtos/create-staff.dto';
 import moment from 'moment';
-import { StaffsEntity } from '../entities/staffs.entity';
+import { STAFF_ROLE, StaffsEntity } from '../entities/staffs.entity';
 import { FirebaseAdmin } from '../firebase/firebase.service';
 import { StaffBranchEntity } from '../entities/staff_branch.entity';
 import { UserRecord } from 'firebase-admin/lib/auth/user-record';
@@ -144,30 +138,34 @@ export class StaffsService {
   }
 
   async getAll(
+    manager: Partial<StaffsEntity>,
     limit: number,
     offset: number,
+    order: string,
+    sortKey: string,
     branchId?: number,
     search: string = '',
   ) {
+    const role = manager.role;
     let query = this.staffRepository
-      .createQueryBuilder('s')
+      .createQueryBuilder('staff')
       .leftJoin(
         'staff_branch',
         'sb',
-        'sb.staff_id = s.id AND sb.is_deleted = false',
+        'sb.staff_id = staff.id AND sb.is_deleted = false',
       )
       .leftJoin('branches', 'b', 'b.id = sb.branch_id') // assuming relation name is `branches`
-      .where('s.isDeleted = false')
+      .where('staff.isDeleted = false')
       .select([
-        's.id "id"',
-        's.fullName "fullName"',
-        's.email "email"',
-        's.phoneNumber "phoneNumber"',
-        's.role "role"',
-        's.isActive "isActive"',
-        `TO_CHAR(s.activeDate, 'YYYY-MM-DD') "activeDate"`,
-        's.createdAt "createdAt"',
-        's.updatedAt "updatedAt"',
+        'staff.id "id"',
+        'staff.fullName "fullName"',
+        'staff.email "email"',
+        'staff.phoneNumber "phoneNumber"',
+        'staff.role "role"',
+        'staff.isActive "isActive"',
+        `TO_CHAR(staff.activeDate, 'YYYY-MM-DD') "activeDate"`,
+        'staff.createdAt "createdAt"',
+        'staff.updatedAt "updatedAt"',
       ])
       .addSelect(
         `COALESCE(
@@ -181,8 +179,12 @@ export class StaffsService {
         )`,
         'branches',
       )
-      .groupBy('s.id')
-      .orderBy('s.id', 'ASC');
+      .groupBy('staff.id');
+    const sortBy = sortKey || 'staff.createdAt';
+    query = query.orderBy(sortBy, order as any);
+    if (role !== STAFF_ROLE.ADMIN) {
+      query = query.andWhere('s.role != :role', { role: STAFF_ROLE.ADMIN });
+    }
     const count = await query.getCount();
 
     query = query.limit(limit).offset(offset);

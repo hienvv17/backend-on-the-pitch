@@ -31,12 +31,16 @@ export class SportFieldsController {
   async getManageAll(
     @Query('limit') limit: number = 10,
     @Query('offset') offset: number = 0,
+    @Query('order') order: string = 'ASC',
+    @Query('sortKey') sortKey?: string,
     @Query('branchId') branchId?: number,
     @Query('sportCategoryId') sportCategoryId?: number,
   ) {
     const { items, count } = await this.sportFieldsService.getMangeAll(
       limit,
       offset,
+      order,
+      sortKey,
       branchId,
       sportCategoryId,
     );
@@ -54,7 +58,6 @@ export class SportFieldsController {
   }
 
   @UseGuards(AdminJwtGuard)
-
   @Put(':sportFieldId')
   async update(
     @Param('sportFieldId') id: number,

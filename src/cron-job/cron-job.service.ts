@@ -162,81 +162,81 @@ export class CronJobService {
     // Generate loyalty vouchers for users who have made total amount bookings last month
   }
 
-  // @Cron('0 3 5 * * ')
-  // async handleMonthlyCronAt5th() {
-  //   // Generate review vouchers for users who have made 4 reviews within the last 30 days on bookings paid
-  //   const currentDate = new Date();
-  //   const _date = currentDate.getDate();
-  //   const month = currentDate.getMonth() + 1;
-  //   const currentYear = currentDate.getFullYear();
-  //   const reviewVoucherConfig = await this.voucherConfigRepo.findOne({
-  //     where: { type: VoucherType.REVIEW, isActive: true },
-  //   });
-  //   if (reviewVoucherConfig) {
-  //     const users = await this.usersRepo
-  //       .createQueryBuilder('user')
-  //       .leftJoin('field_bookings', 'b', 'b.user_id = user.id')
-  //       .where('b.status = :status', { status: 'PAID' })
-  //       .andWhere('b.booking_date >= :startDateOfMonth', {
-  //         startDateOfMonth: new Date(
-  //           new Date().getFullYear(),
-  //           new Date().getMonth() - 1,
-  //           1,
-  //         ),
-  //       })
-  //       .andWhere('b.booking_date <= :endDateOfMonth', {
-  //         endDateOfMonth: new Date(
-  //           new Date().getFullYear(),
-  //           new Date().getMonth(),
-  //           0,
-  //         ),
-  //       })
-  //       .groupBy('user.id')
-  //       .having('SUM(b.total_amount) >= :amount', {
-  //         amount: reviewVoucherConfig.amountToTrigger,
-  //       })
-  //       .select('user.id', 'id')
-  //       .addSelect('user.name', 'name')
-  //       .addSelect('user.email', 'email')
-  //       .getMany();
+  @Cron('0 16 1 * *')
+  async handleTenMinCron() {
+    // Generate loyalty vouchers for users who have made 4 reviews within the last 30 days on bookings paid
+    const currentDate = new Date();
+    const _date = currentDate.getDate();
+    const month = currentDate.getMonth() + 1;
+    const currentYear = currentDate.getFullYear();
+    const loyaltyVoucherConfig = await this.voucherConfigRepo.findOne({
+      where: { type: VoucherType.LOYALTY, isActive: true },
+    });
+    if (loyaltyVoucherConfig) {
+      const users = await this.usersRepo
+        .createQueryBuilder('user')
+        .leftJoin('field_bookings', 'b', 'b.user_id = user.id')
+        .where('b.status = :status', { status: 'PAID' })
+        .andWhere('b.booking_date >= :startDateOfMonth', {
+          startDateOfMonth: new Date(
+            new Date().getFullYear(),
+            new Date().getMonth() - 1,
+            1,
+          ),
+        })
+        .andWhere('b.booking_date <= :endDateOfMonth', {
+          endDateOfMonth: new Date(
+            new Date().getFullYear(),
+            new Date().getMonth(),
+            0,
+          ),
+        })
+        .groupBy('user.id')
+        .having('SUM(b.total_amount) >= :amount', {
+          amount: loyaltyVoucherConfig.amountToTrigger,
+        })
+        .select('user.id', 'id')
+        .addSelect('user.name', 'name')
+        .addSelect('user.email', 'email')
+        .getMany();
 
-  //     const monthStart = new Date(currentYear, month - 1, 1);
-  //     const monthEnd = new Date(currentYear, month, 0);
-  //     if (users.length > 0) {
-  //       await Promise.all(
-  //         users.map(async (user) => {
-  //           const existingVoucher = await this.voucherRepo.findOne({
-  //             where: {
-  //               userId: user.id,
-  //               type: VoucherType.LOYALTY,
-  //               createdAt: Between(monthStart, monthEnd),
-  //             },
-  //           });
+      const monthStart = new Date(currentYear, month - 1, 1);
+      const monthEnd = new Date(currentYear, month, 0);
+      if (users.length > 0) {
+        await Promise.all(
+          users.map(async (user) => {
+            const existingVoucher = await this.voucherRepo.findOne({
+              where: {
+                userId: user.id,
+                type: VoucherType.LOYALTY,
+                createdAt: Between(monthStart, monthEnd),
+              },
+            });
 
-  //           if (!existingVoucher) {
-  //             const voucherCode = generateVoucherCode(
-  //               reviewVoucherConfig.voucherCode,
-  //             );
+            if (!existingVoucher) {
+              const voucherCode = generateVoucherCode(
+                loyaltyVoucherConfig.voucherCode,
+              );
 
-  //             const now = new Date(currentYear, month - 1, _date);
-  //             const validTo = new Date(now);
-  //             validTo.setDate(now.getDate() + reviewVoucherConfig.validDays);
+              const now = new Date(currentYear, month - 1, _date);
+              const validTo = new Date(now);
+              validTo.setDate(now.getDate() + loyaltyVoucherConfig.validDays);
 
-  //             await this.voucherRepo.save({
-  //               userId: user.id,
-  //               type: VoucherType.LOYALTY,
-  //               code: voucherCode,
-  //               percentDiscount: reviewVoucherConfig.percentDiscount,
-  //               maxDiscountAmount: reviewVoucherConfig.maxDiscountAmount,
-  //               validFrom: now,
-  //               validTo,
-  //               status: VoucherStatus.ACTIVE,
-  //             });
-  //           }
-  //         }),
-  //       );
-  //     }
-  //   }
-  //   // Generate loyalty vouchers for users who have made total amount bookings last month
-  // }
+              await this.voucherRepo.save({
+                userId: user.id,
+                type: VoucherType.LOYALTY,
+                code: voucherCode,
+                percentDiscount: loyaltyVoucherConfig.percentDiscount,
+                maxDiscountAmount: loyaltyVoucherConfig.maxDiscountAmount,
+                validFrom: now,
+                validTo,
+                status: VoucherStatus.ACTIVE,
+              });
+            }
+          }),
+        );
+      }
+    }
+    // Generate loyalty vouchers for users who have made total amount bookings last month
+  }
 }

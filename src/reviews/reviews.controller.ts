@@ -7,6 +7,7 @@ import {
   UseGuards,
   Put,
   Param,
+  Request,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 
@@ -15,9 +16,8 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { JwtGuard } from '../auth/guard/jwt.guard';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { ResponseService } from '../response/response.service';
-import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 import { UpdateReviewDto } from './dto/update-review.dto';
-import { ManagerJwtGuard } from 'src/auth/guard/manager-jwt.guard';
+import { ManagerJwtGuard } from '../auth/guard/manager-jwt.guard';
 
 @ApiTags('Reviews')
 @Controller('reviews')
@@ -56,16 +56,32 @@ export class ReviewsController {
 
   @UseGuards(ManagerJwtGuard)
   @Get('manage')
-  async getManageAll(@Query('limit') limit = 10, @Query('offset') offset = 0) {
-    const { data, count } = await this.reviewsService.findAll(+limit, +offset);
+  async getManageAll(
+    @Request() req: any,
+    @Query('limit') limit = 10,
+    @Query('offset') offset = 0,
+    @Query('order') order: string = 'ASC',
+    @Query('sortKey') sortKey?: string,
+    @Query('branchId') branchId?: number,
+    @Query('search') search?: string,
+  ) {
+    const { items, count } = await this.reviewsService.findAll(
+      req.staff,
+      +limit,
+      +offset,
+      order,
+      sortKey,
+      branchId,
+      search,
+    );
     return this.responseService.successResponse({
-      items: data,
+      items,
       count,
     });
   }
 
   @UseGuards(ManagerJwtGuard)
-  @Put('manage')
+  @Put('manage/:id')
   async update(@Param('id') id: number, @Body() dto: UpdateReviewDto) {
     await this.reviewsService.update(id, dto);
     return this.responseService.successResponse();

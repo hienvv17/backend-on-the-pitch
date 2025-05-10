@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { ResponseService } from '../response/response.service';
 import { FieldBookingsService } from './field-bookings.service';
 import { CreateBookingDto } from './dto/create-booking-field.dto';
@@ -37,23 +37,27 @@ export class FieldBookingsController {
 
   @UseGuards(StaffJwtGuard)
   @Post('manage/history')
-  async getManageHistory(@Body() dto: GetBookingHistoryDto, @Req() req) {
+  async getManageHistory(@Body() dto: GetBookingHistoryDto, @Request() req) {
     const { branchids, role } = req.staff;
-    const { data, count, limit, offset } =
-      await this.fieldBookingsService.getBookingHistory(dto, role, branchids);
+    const { data, count } = await this.fieldBookingsService.getBookingHistory(
+      dto,
+      role,
+      branchids,
+    );
     return this.responseService.successResponse({ items: data, count: count });
   }
 
-  // @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard)
   @Post('history')
   async getPersonalHistory(
-    // @GetUser('uid') uid: string,
+    @GetUser('uid') uid: string,
     @Body() dto: GetPersonalBookingHistoryDto,
   ) {
-
-    const {items, count} = await this.fieldBookingsService.getPersonalBookingHistory('fURiRi2CKBU4vxBtyMKE8f6lhwb2', dto);
+    const { items, count } =
+      await this.fieldBookingsService.getPersonalBookingHistory(uid, dto);
     return this.responseService.successResponse({
-      items, count
+      items,
+      count,
     });
   }
 

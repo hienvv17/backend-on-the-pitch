@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { ReviewsEntity } from '../entities/reviews.entity';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UsersEntity } from '../entities/users.entity';
@@ -46,46 +46,81 @@ export class ReviewsService {
     return this.reviewRepo.save(review);
   }
 
-  async findAll(limit = 10, offset = 0) {
-    const [data, count] = await this.reviewRepo.findAndCount({
-      skip: offset,
-      take: limit,
-      order: { createdAt: 'DESC' },
-      relations: ['user', 'fieldBooking', 'fieldBooking.sportField', 'fieldBooking.sportField.branch'],
-      select: {
-        id: true,
-        comment: true,
-        rating: true,
-        createdAt: true,
-        updatedAt: true,
-        isHidden: true,
-        isDeleted: true,
-        fieldBooking: {
-          id: true,
-          code: true,
-          bookingDate: true,
-          startTime: true,
-          endTime: true,
-          status: true,
-          sportField: {
-            id: true,
-            name: true,
-            branch:{
-              name: true,
-            }
-          },
-        },
-        user: {
-          id: true,
-          uid: true,
-          fullName: true,
-          phoneNumber: true,
-          email: true,
-        },
-      },
-    });
+  async findAll(
+    staff: any,
+    limit = 10,
+    offset = 0,
+    order: string,
+    sortKey: string,
+    branchId?: number,
+    search?: string,
+  ) {
+    const role = staff.role;
+    const branchIds = staff.branchids.map(Number);
+    const queryBuilder = this.reviewRepo
+      .createQueryBuilder('review')
+      .leftJoin('users', 'user', 'user.id = review.userId')
+      .leftJoin(
+        'field_bookings',
+        'fieldBooking',
+        'fieldBooking.id = review.fieldBookingId',
+      )
+      .leftJoin(
+        'sport_fields',
+        'sportField',
+        'sportField.id = fieldBooking.sportFieldId',
+      )
+      .leftJoin('branches', 'branch', 'branch.id = sportField.branchId')
+      .select([
+        'review.id "id"',
+        'review.comment "comment"',
+        'review.rating "rating"',
+        'review.createdAt "createdAt"',
+        'review.updatedAt "updatedAt"',
+        'review.isHidden "isHidden"',
+        'review.isDeleted "isDeleted"',
 
-    return { data, count };
+        'fieldBooking.id "bookingId"',
+        'fieldBooking.code "bookingCode"',
+        `TO_CHAR(fieldBooking.bookingDate, 'YYYY-MM-DD') "bookingDate"`,
+        'fieldBooking.startTime "startTime"',
+        'fieldBooking.endTime "endTime"',
+        'fieldBooking.status "bookingStatus"',
+
+        'sportField.id "sportFieldId"',
+        'sportField.name "sportFieldName"',
+
+        'branch.name "branchName"',
+
+        'user.id "userId"',
+        'user.uid "uid"',
+        'user.fullName "fullName"',
+        'user.phoneNumber "phoneNumber"',
+        'user.email "userEmail"',
+      ]);
+
+    if (role !== 'ADMIN') {
+      queryBuilder.andWhere('branch.id IN (:...branchIds)', {
+        branchIds: branchIds,
+      });
+    }
+    if (search) {
+      queryBuilder.andWhere(
+        '(user.email ILIKE :search OR review.comment ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+    const sortBy = sortKey || 'review.createdAt';
+    queryBuilder.orderBy(sortBy, order as any);
+    if (branchId) {
+      queryBuilder.andWhere('branch.id = :branchId', { branchId });
+    }
+
+    const [items, count] = await Promise.all([
+      queryBuilder.limit(limit).offset(offset).getRawMany(),
+      queryBuilder.getCount(),
+    ]);
+    return { items, count };
   }
 
   async getMyReviewAll(uid: string, limit = 10, offset = 0) {
@@ -121,7 +156,12 @@ export class ReviewsService {
       where: { isHidden: false, isDeleted: false, rating: MoreThanOrEqual(4) },
       order: { rating: 'DESC', createdAt: 'DESC' },
       take: 10,
-      relations: ['user', 'fieldBooking', 'fieldBooking.sportField', 'fieldBooking.sportField.branch'],
+      relations: [
+        'user',
+        'fieldBooking',
+        'fieldBooking.sportField',
+        'fieldBooking.sportField.branch',
+      ],
       select: {
         id: true,
         comment: true,
@@ -147,6 +187,6 @@ export class ReviewsService {
       },
     });
 
-    return reviews
+    return reviews;
   }
 }

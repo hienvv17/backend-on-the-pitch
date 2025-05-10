@@ -8,8 +8,8 @@ import {
   MaxLength,
   Max,
   IsNotEmpty,
-  IsPositive,
   IsDateString,
+  IsEmail,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import {
@@ -59,8 +59,12 @@ export class CreateVoucherDto {
   status?: VoucherStatusType;
 
   @ApiProperty()
-  @IsPositive()
-  @IsInt()
+  @IsEmail()
   @IsNotEmpty()
-  userId: number;
+  email: string;
+
+  @ApiProperty()
+  @IsInt()
+  @IsOptional()
+  minBookingAmount: number;
 }

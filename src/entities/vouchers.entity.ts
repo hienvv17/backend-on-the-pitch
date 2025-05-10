@@ -43,6 +43,9 @@ export class VouchersEntity {
   @Column({ type: 'int', name: 'percent_discount' })
   percentDiscount: number;
 
+  @Column({ type: 'int', name: 'min_booking_amount', default: 0 })
+  minBookingAmount: number;
+
   @Column({ type: 'date', nullable: true, name: 'valid_from' })
   validFrom: Date;
 

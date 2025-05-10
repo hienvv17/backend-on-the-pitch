@@ -65,18 +65,22 @@ export class VouchersController {
   async findAllVoucher(
     @Query('limit') limit = 20,
     @Query('offset') offset = 0,
+    @Query('order') order: string = 'ASC',
+    @Query('sortKey') sortKey?: string,
     @Query('status') status?: VoucherStatusType,
     @Query('type') type?: VoucherType,
     @Query('search') search?: string,
   ) {
-    const config = await this.vouchersService.findManageAll(
+    const { items, count } = await this.vouchersService.findManageAll(
       limit,
       offset,
+      order,
+      sortKey,
       status,
       type,
       search,
     );
-    return this.responseService.successResponse({ items: config });
+    return this.responseService.successResponse({ items, count });
   }
 
   @UseGuards(JwtGuard)
