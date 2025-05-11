@@ -5,6 +5,7 @@ import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CacheService } from '../cache/cache.service';
+import { ReviewsService } from '../reviews/reviews.service';
 
 @Injectable()
 export class BranchesService {
@@ -12,6 +13,7 @@ export class BranchesService {
     @InjectRepository(BranchsEntity)
     private branchRepo: Repository<BranchsEntity>,
     private readonly cacheService: CacheService,
+    private readonly reviewService: ReviewsService,
   ) {}
 
   async getPublicAll() {
@@ -78,6 +80,7 @@ export class BranchesService {
     const cacheKey = `getPublicBranch-${id}`;
     const cachedData = this.cacheService.get(cacheKey);
     if (cachedData) return cachedData;
+    const topReiews = (await this.reviewService.getTopReview(id)) as any[];
     const branch = await this.branchRepo
       .createQueryBuilder('br')
       .leftJoin('sport_fields', 'sf', 'sf.branch_id = br.id')
@@ -111,10 +114,21 @@ export class BranchesService {
     if (!branch) throw new BadRequestException('Branch do not exist');
     this.cacheService.set(
       cacheKey,
-      { ...branch, averagePrice: parseInt(branch.averagePrice) },
+      { ...branch, averagePrice: parseInt(branch.averagePrice), topReiews },
       300,
     );
-    return { ...branch, averagePrice: parseInt(branch.averagePrice) };
+    return {
+      ...branch,
+      averagePrice: parseInt(branch.averagePrice),
+      topReiews: topReiews.map((review) => ({
+        id: review.id,
+        comment: review.comment,
+        rating: review.rating,
+        fieldName: review.fieldName,
+        username: review.userName,
+        userImage: review.userImage,
+      })),
+    };
   }
 
   async getOne(id: number): Promise<BranchsEntity> {

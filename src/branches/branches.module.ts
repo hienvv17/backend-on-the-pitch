@@ -7,6 +7,7 @@ import { BranchesService } from './branches.service';
 import { FirebaseAdmin } from '../firebase/firebase.service';
 import { StaffsModule } from '../staffs/staffs.module';
 import { CacheModule } from '../cache/cache.module';
+import { ReviewsModule } from '../reviews/review.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CacheModule } from '../cache/cache.module';
     ResponseModule,
     StaffsModule,
     CacheModule,
+    ReviewsModule,
   ],
   controllers: [BranchesController],
   providers: [BranchesService, FirebaseAdmin],
