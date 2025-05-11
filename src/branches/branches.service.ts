@@ -80,7 +80,7 @@ export class BranchesService {
     const cacheKey = `getPublicBranch-${id}`;
     const cachedData = this.cacheService.get(cacheKey);
     if (cachedData) return cachedData;
-    const topReiews = (await this.reviewService.getTopReview(id)) as any[];
+    const topReviews = (await this.reviewService.getTopReview(id)) as any[];
     const branch = await this.branchRepo
       .createQueryBuilder('br')
       .leftJoin('sport_fields', 'sf', 'sf.branch_id = br.id')
@@ -114,13 +114,24 @@ export class BranchesService {
     if (!branch) throw new BadRequestException('Branch do not exist');
     this.cacheService.set(
       cacheKey,
-      { ...branch, averagePrice: parseInt(branch.averagePrice), topReiews },
+      {
+        ...branch,
+        averagePrice: parseInt(branch.averagePrice),
+        topReviews: topReviews.map((review) => ({
+          id: review.id,
+          comment: review.comment,
+          rating: review.rating,
+          fieldName: review.fieldName,
+          username: review.userName,
+          userImage: review.userImage,
+        })),
+      },
       300,
     );
     return {
       ...branch,
       averagePrice: parseInt(branch.averagePrice),
-      topReiews: topReiews.map((review) => ({
+      topReviews: topReviews.map((review) => ({
         id: review.id,
         comment: review.comment,
         rating: review.rating,
