@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ReviewsEntity } from '../entities/reviews.entity';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UsersEntity } from '../entities/users.entity';
@@ -9,6 +9,7 @@ import {
   FieldBookingStatus,
 } from '../entities/field-bookings.entity';
 import { UpdateReviewDto } from './dto/update-review.dto';
+import { CacheService } from 'src/cache/cache.service';
 
 @Injectable()
 export class ReviewsService {
@@ -19,6 +20,7 @@ export class ReviewsService {
     private readonly usersRepo: Repository<UsersEntity>,
     @InjectRepository(FieldBookingsEntity)
     private readonly fieldBookingsRepo: Repository<FieldBookingsEntity>,
+    private readonly cacheService: CacheService,
   ) {}
 
   async create(uid: string, dto: CreateReviewDto) {
@@ -151,42 +153,42 @@ export class ReviewsService {
     return this.reviewRepo.save(review);
   }
 
-  async getTopReview() {
-    const reviews = await this.reviewRepo.find({
-      where: { isHidden: false, isDeleted: false, rating: MoreThanOrEqual(4) },
-      order: { rating: 'DESC', createdAt: 'DESC' },
-      take: 10,
-      relations: [
-        'user',
-        'fieldBooking',
-        'fieldBooking.sportField',
-        'fieldBooking.sportField.branch',
-      ],
-      select: {
-        id: true,
-        comment: true,
-        rating: true,
-        fieldBooking: {
-          id: true,
-          code: true,
-          sportField: {
-            name: true,
-            branch: {
-              name: true,
-            },
-          },
-        },
-        user: {
-          id: true,
-          uid: true,
-          fullName: true,
-          phoneNumber: true,
-          email: true,
-          image: true,
-        },
-      },
-    });
+  async getTopReview(branchId?: number) {
+    const cacheKey = branchId ? `getTopReview-${branchId}` : 'getTopReview';
+    const cacheData = this.cacheService.get(cacheKey);
+    if (cacheData) return cacheData;
+    let qb = this.reviewRepo
+      .createQueryBuilder('review')
+      .leftJoin('review.user', 'user')
+      .leftJoin('review.fieldBooking', 'fieldBooking')
+      .leftJoin('fieldBooking.sportField', 'sportField')
+      .leftJoin('sportField.branch', 'branch')
+      .where('review.isHidden = :isHidden', { isHidden: false })
+      .andWhere('review.isDeleted = :isDeleted', { isDeleted: false })
+      .andWhere('review.rating >= :minRating', { minRating: 4 })
+      .orderBy('review.rating', 'DESC')
+      .addOrderBy('review.createdAt', 'DESC')
+      .take(10)
+      .select([
+        'review.id "id"',
+        'review.comment "comment"',
+        'review.rating "rating"',
+        'review.createdAt "createdAt"',
+        'fieldBooking.id "bookingId"',
+        'fieldBooking.code "bookingCode"',
+        'sportField.name "fieldName"',
+        'branch.name "branchName"',
+        'user.id "userId"',
+        'user.fullName "userName"',
+        'user.email "userEmail"',
+        'user.image "userImage"',
+      ]);
 
-    return reviews;
+    if (branchId) {
+      qb = qb.andWhere('branch.id = :branchId', { branchId });
+    }
+    const rawReviews = await qb.getRawMany();
+    this.cacheService.set(cacheKey, rawReviews, 300);
+    return rawReviews;
   }
 }

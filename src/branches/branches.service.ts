@@ -93,8 +93,12 @@ export class BranchesService {
       .addSelect('COUNT(sf.id)', 'total_fields')
       .addSelect('SUM(sf.default_price) / COUNT(sf.id)', 'averagePrice')
       .addSelect(
-        `JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', sc.id, 'name', sc.name)) FILTER (WHERE sc.id IS NOT NULL)`,
+        `JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', sc.id, 'name', sc.name)) FILTER (WHERE sc.is_active = true)`,
         'sport_categories',
+      )
+      .addSelect(
+        `JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', sf.id, 'name', sf.name, 'images', sf.images)) FILTER (WHERE sf.is_active = true)`,
+        'sport_fields',
       )
       .where('sf.is_active = :active', { active: true })
       .andWhere('sc.is_active = :active', { active: true })
@@ -114,6 +118,7 @@ export class BranchesService {
   }
 
   async create(dto: CreateBranchDto) {
+    // remove cache publice all when create
     const cacheKey = 'getPublicAllBraches';
     this.cacheService.del(cacheKey);
     return await this.branchRepo.save(dto);
@@ -121,17 +126,23 @@ export class BranchesService {
 
   async update(id: number, dto: UpdateBranchDto) {
     const cacheKey = 'getPublicAllBraches';
+    const caccheKeOne = `getPublicBranch-${id}`;
     const branch = await this.branchRepo.findOne({ where: { id } });
     if (!branch) throw new BadRequestException('Branch do not exist');
+    // remove cache when update
     this.cacheService.del(cacheKey);
+    this.cacheService.del(caccheKeOne);
     return await this.branchRepo.update(id, { ...dto, updatedAt: new Date() });
   }
 
   async delete(id: number) {
+    //remove cache when delete
     const cacheKey = 'getPublicAllBraches';
+    const caccheKeOne = `getPublicBranch-${id}`;
     const branch = await this.branchRepo.findOne({ where: { id } });
     if (!branch) throw new BadRequestException('Branch do not exist');
     this.cacheService.del(cacheKey);
+    this.cacheService.del(caccheKeOne);
     return await this.branchRepo.delete(id);
   }
 }

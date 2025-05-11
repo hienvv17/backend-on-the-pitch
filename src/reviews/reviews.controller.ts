@@ -88,8 +88,8 @@ export class ReviewsController {
   }
 
   @Get('top-reviews')
-  async getTopRivew() {
-    const reviews = await this.reviewsService.getTopReview();
+  async getTopRivew(@Query('branchId') branchId: number) {
+    const reviews = await this.reviewsService.getTopReview(branchId);
     return this.responseService.successResponse({
       items: reviews,
     });
