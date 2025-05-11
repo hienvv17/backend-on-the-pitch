@@ -90,15 +90,17 @@ export class BranchesService {
       .addSelect('br.city', 'city')
       .addSelect('br.openTime', 'openTime')
       .addSelect('br.closeTime', 'closeTime')
-      .addSelect('COUNT(sf.id)', 'total_fields')
+      .addSelect('br.isHot', 'isHot')
+      .addSelect('br.images', 'images')
+      .addSelect('COUNT(sf.id)', 'totalFields')
       .addSelect('SUM(sf.default_price) / COUNT(sf.id)', 'averagePrice')
       .addSelect(
         `JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', sc.id, 'name', sc.name)) FILTER (WHERE sc.is_active = true)`,
-        'sport_categories',
+        'sportCategories',
       )
       .addSelect(
         `JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', sf.id, 'name', sf.name, 'images', sf.images)) FILTER (WHERE sf.is_active = true)`,
-        'sport_fields',
+        'sportFields',
       )
       .where('sf.is_active = :active', { active: true })
       .andWhere('sc.is_active = :active', { active: true })
@@ -107,8 +109,12 @@ export class BranchesService {
       .groupBy('br.id')
       .getRawOne();
     if (!branch) throw new BadRequestException('Branch do not exist');
-    this.cacheService.set(cacheKey, branch, 300);
-    return branch;
+    this.cacheService.set(
+      cacheKey,
+      { ...branch, averagePrice: parseInt(branch.averagePrice) },
+      300,
+    );
+    return { ...branch, averagePrice: parseInt(branch.averagePrice) };
   }
 
   async getOne(id: number): Promise<BranchsEntity> {

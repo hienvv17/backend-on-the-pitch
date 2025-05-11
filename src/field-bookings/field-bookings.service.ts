@@ -120,7 +120,11 @@ export class FieldBookingsService {
     uid: string,
     dto: GetPersonalBookingHistoryDto,
   ) {
-    const query = this.getBookingQuery();
+    const query = this.getBookingQuery().leftJoin(
+      'reviews',
+      'rv',
+      'rv.fieldBookingId = fb.id',
+    );
     query
       .where('u.uid = :uid', { uid })
       .andWhere('fb.status NOT IN (:...status)', {
@@ -161,6 +165,11 @@ export class FieldBookingsService {
         'sf.name "sportFieldName"',
         'sc.id "sportCategoryId"',
         'sc.name "sportCategoryName"',
+        'rv.id "reviewId"',
+        'rv.comment "reviewComment"',
+        'rv.rating "reviewRating"',
+        'rv.createdAt "reviewCreatedAt"',
+        'rv.updatedAt "reviewUpdatedAt"',
       ])
       .orderBy('fb.booking_date', 'DESC')
       .addOrderBy('fb.start_time', 'DESC')
