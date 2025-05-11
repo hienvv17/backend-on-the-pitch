@@ -11,7 +11,9 @@ import { FixedBookingRequestService } from './fixed-booking-request.service';
 import { FixedBookingRequestEntity } from '../entities/fixing-booking-request.entity';
 import { CreateFixedBookingDto } from './dto/create-fix-booking.dto';
 import { ResponseService } from '../response/response.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Fixed Booking Request')
 @Controller('fixed-booking-requests')
 export class FixedBookingRequestController {
   constructor(
