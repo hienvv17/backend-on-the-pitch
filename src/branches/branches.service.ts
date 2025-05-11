@@ -136,7 +136,7 @@ export class BranchesService {
         comment: review.comment,
         rating: review.rating,
         fieldName: review.fieldName,
-        username: review.userName,
+        userName: review.userName,
         userImage: review.userImage,
       })),
     };
