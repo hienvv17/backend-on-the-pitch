@@ -122,6 +122,7 @@ export class VouchersService {
         'voucher.maxDiscountAmount "maxDiscountAmount"',
         'voucher.percentDiscount  "percentDiscount"',
         'voucher.minBookingAmount "minBookingAmount"',
+        'voucher.createdAt "createdAt"',
       ])
       .take(limit)
       .skip(offset)
