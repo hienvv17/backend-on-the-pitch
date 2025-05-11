@@ -9,7 +9,7 @@ import {
   FieldBookingStatus,
 } from '../entities/field-bookings.entity';
 import { UpdateReviewDto } from './dto/update-review.dto';
-import { CacheService } from 'src/cache/cache.service';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class ReviewsService {
