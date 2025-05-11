@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Delete,
+  Request,
 } from '@nestjs/common';
 import { FixedBookingRequestService } from './fixed-booking-request.service';
 import { FixedBookingRequestEntity } from '../entities/fixing-booking-request.entity';
@@ -36,7 +37,13 @@ export class FixedBookingRequestController {
     await this.fixedBookingService.create(body);
     return this.responseService.successResponse({});
   }
-  s;
+
+  @Post('callback-test')
+  async callbackTest(@Request() req: any) {
+    console.log('callback test from zalo', req.body);
+
+    return this.responseService.successResponse({});
+  }
 
   @Patch(':id')
   update(
