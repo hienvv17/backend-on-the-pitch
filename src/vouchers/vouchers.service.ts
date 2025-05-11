@@ -105,7 +105,7 @@ export class VouchersService {
   async findMyVoucherAll(uid: string, limit: number = 20, offset: number = 0) {
     return this.voucherRepo
       .createQueryBuilder('voucher')
-      .leftJoin('voucher.user', 'user')
+      .leftJoin('users', 'user', 'user.id = voucher.userId')
       .where('user.uid = :uid', { uid })
       .andWhere('voucher.validTo > NOW()')
       .andWhere('voucher.status = :status', {
@@ -114,14 +114,14 @@ export class VouchersService {
       .orderBy('voucher.createdAt', 'DESC')
       .addOrderBy('voucher.status', 'ASC')
       .select([
-        'voucher.id',
-        'voucher.code',
-        'voucher.type',
-        `TO_CHAR(v.validFrom, 'YYYY-MM-DD') "validFrom"`,
-        `TO_CHAR(v.validTo, 'YYYY-MM-DD') "validTo"`,
-        'voucher.status',
-        'voucher.maxDiscountAmount',
-        'voucher.percentDiscount',
+        'voucher.id "id"',
+        'voucher.code "code"',
+        `TO_CHAR(voucher.validFrom, 'YYYY-MM-DD') "validFrom"`,
+        `TO_CHAR(voucher.validTo, 'YYYY-MM-DD') "validTo"`,
+        'voucher.status "status"',
+        'voucher.maxDiscountAmount "maxDiscountAmount"',
+        'voucher.percentDiscount  "percentDiscount"',
+        'voucher.minBookingAmount "minBookingAmount"',
       ])
       .take(limit)
       .skip(offset)
