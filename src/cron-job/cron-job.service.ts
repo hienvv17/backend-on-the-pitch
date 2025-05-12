@@ -62,10 +62,13 @@ export class CronJobService {
             const now = new Date(currentYear, month - 1, _date);
             const validTo = new Date(currentYear, month - 1, _date);
             validTo.setDate(now.getDate() + birthDateConfig.validDays);
+            const voucherCode = generateVoucherCode(
+              birthDateConfig.voucherCode,
+            );
             await this.voucherRepo.save({
               userId: user.id,
               type: VoucherType.BIRTHDAY,
-              code: birthDateConfig.voucherCode,
+              code: voucherCode,
               percentDiscount: birthDateConfig.percentDiscount,
               maxDiscountAmount: birthDateConfig.maxDiscountAmount,
               validFrom: now,
