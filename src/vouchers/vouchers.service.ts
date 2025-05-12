@@ -165,6 +165,22 @@ export class VouchersService {
     return valid;
   }
 
+  async checkActive(code: string) {
+    const currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0);
+    const valid = await this.voucherRepo.findOne({
+      where: {
+        code: code,
+        status: VoucherStatus.ACTIVE,
+        validTo: MoreThanOrEqual(currentDate),
+      },
+    });
+    if (!valid) {
+      throw new BadRequestException('Voucher is not valid');
+    }
+    return valid;
+  }
+
   async usedVoucher(voucherCode: string) {
     return this.voucherRepo.update(
       { code: voucherCode },

@@ -236,8 +236,7 @@ export class FieldBookingsService {
     // todo
     // validate voucher
     if (dto.voucherCode) {
-      const validVoucher = await this.voucherService.validate(
-        user.uid,
+      const validVoucher = await this.voucherService.checkActive(
         dto.voucherCode,
       );
       if (!validVoucher) {
