@@ -420,4 +420,135 @@ export class SportFieldService {
 
     return fieldInfo;
   }
+
+  async checkAvailable(dto: GetAvailableFieldDto) {
+    const { branchId, sportCategoryId, date, startTime, endTime } = dto;
+    const branch = await this.branchRepo.findOne({
+      where: { id: branchId },
+    });
+    if (!branch) throw new BadRequestException('Branch do not exist');
+    if (!!sportCategoryId) {
+      const sportCategory = await this.sportCategoryRepo.findOne({
+        where: { id: sportCategoryId },
+      });
+      if (!sportCategory)
+        throw new BadRequestException('Sport type do not exist');
+    }
+    let _endTime = endTime;
+
+    if (startTime) {
+      if (!_endTime) {
+        // Generate endTime as 1 hour after startTime
+        const [startHour, startMinute] = startTime.split(':').map(Number);
+        const endDate = new Date();
+        endDate.setHours(startHour + 1, startMinute); // Add 1 hour
+        const endHour = endDate.getHours().toString().padStart(2, '0');
+        const endMin = endDate.getMinutes().toString().padStart(2, '0');
+        _endTime = `${endHour}:${endMin}`;
+      } else {
+        // Validate that endTime is at least 1 hour after startTime
+        const [startHour, startMinute] = startTime.split(':').map(Number);
+        const [endHour, endMinute] = _endTime.split(':').map(Number);
+        const startDate = new Date();
+        const endDate = new Date();
+        startDate.setHours(startHour, startMinute, 0);
+        endDate.setHours(endHour, endMinute, 0);
+
+        const diffMs = endDate.getTime() - startDate.getTime();
+        const oneHourMs = 60 * 60 * 1000;
+
+        if (diffMs < oneHourMs) {
+          const adjustedEndDate = new Date(startDate.getTime() + oneHourMs);
+          const adjustedHour = adjustedEndDate
+            .getHours()
+            .toString()
+            .padStart(2, '0');
+          const adjustedMin = adjustedEndDate
+            .getMinutes()
+            .toString()
+            .padStart(2, '0');
+          _endTime = `${adjustedHour}:${adjustedMin}`;
+        }
+      }
+    }
+
+    let query = this.sportFieldRepo
+      .createQueryBuilder('sf')
+      .leftJoin('field_bookings', 'fb', 'sf.id = fb.sport_field_id')
+      .leftJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id')
+      .select('sf.id', 'id')
+      .addSelect('sf.name', 'name')
+      .addSelect('sf.defaultPrice', 'defaultPrice')
+      .addSelect('sf.description', 'description')
+      .addSelect('sf.images', 'images')
+      .addSelect('sf.hasCanopy', 'hasCanopy')
+      .addSelect('sc.id', 'sportCategoryId')
+      .addSelect('sc.name', 'sportCategoryName')
+      .addSelect(
+        `COALESCE(
+      json_agg(
+        CASE 
+          WHEN fb.bookingDate = :bookingDate 
+            AND fb.status NOT IN (:...status)
+          THEN json_build_object(
+            'startTime', fb.start_time,
+            'endTime', fb.end_time
+          )
+        END
+      ) FILTER (WHERE fb.bookingDate = :bookingDate), '[]'::json
+    )
+    `,
+        'bookedTimeSlots',
+      )
+      .setParameters({
+        bookingDate: date,
+        status: [FieldBookingStatus.CANCELLED, FieldBookingStatus.REFUND],
+      })
+      .where('sf.isActive = :isActive', { isActive: true })
+      .andWhere('sf.branchId = :branchId', { branchId });
+
+    if (sportCategoryId) {
+      query = query.andWhere('sf.sportCategoryId = :sportCategoryId', {
+        sportCategoryId,
+      });
+    }
+    let fieldInfo = await query
+      .groupBy('sf.id')
+      .addGroupBy('sc.id')
+      .orderBy('sf.id')
+      .getRawMany();
+
+    fieldInfo = fieldInfo.map((field) => {
+      return {
+        ...field,
+        bookedTimeSlots: mergeTimeSlots(field.bookedTimeSlots),
+      };
+    });
+
+    fieldInfo = fieldInfo.map((field) => {
+      return {
+        ...field,
+        availableTimeSlots: getAvailableTimeSlots(
+          field.bookedTimeSlots,
+          branch.openTime,
+          branch.closeTime,
+        ),
+        openTime: branch.openTime,
+        closeTime: branch.closeTime,
+        branchId: branch.id,
+        branchName: branch.name,
+      };
+    });
+
+    if (startTime && endTime) {
+      fieldInfo = fieldInfo.filter((field) => {
+        const availableSlots = field.availableTimeSlots.filter((slot) =>
+          isTimeInRange(startTime, endTime, slot),
+        );
+        return availableSlots.length > 0;
+      });
+    }
+
+    return fieldInfo;
+  }
 }

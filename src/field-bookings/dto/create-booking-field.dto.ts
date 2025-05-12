@@ -4,6 +4,7 @@ import {
   IsString,
   IsEmail,
   IsOptional,
+  IsNumber,
 } from 'class-validator';
 import { IsEndTimeAtLeastOneHourAfter } from '../../decorators/IsEndTimeAtLeastOneHourAfter.decorator.ts';
 import { IsTimeString } from '../../decorators/IsTimeString.decorator';
@@ -53,16 +54,11 @@ export class CreateBookingDto {
   originPrice: number;
 
   @ApiProperty()
-  @IsOptional()
-  @Matches(/^[A-Z0-9]{6}$/, {
-    message: 'voucherCode must be a 6-character alphanumeric string',
-  })
-  voucherCode?: string; // Optional field for voucher code
-  
-  @ApiProperty()
+  @IsNumber()
   @IsNotEmpty()
-  @Matches(/^[A-Z0-9]{6}$/, {
-    message: 'code must be a 6-character alphanumeric string',
-  })
-  code: string; // Unique booking code
+  discountAmount: number; // Discount amount
+
+  @ApiProperty()
+  @IsOptional()
+  voucherCode?: string; // Optional field for voucher code
 }

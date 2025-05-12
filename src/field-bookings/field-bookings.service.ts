@@ -19,6 +19,22 @@ import {
 import { GetPersonalBookingHistoryDto } from './dto/get-personal-booking-history.dto';
 import { CheckBookingDto } from './dto/check-booking.dto';
 import { STAFF_ROLE } from '../entities/staffs.entity';
+import { VouchersService } from '../vouchers/vouchers.service';
+import { PaymentService } from '../payment/payment.service';
+
+export interface BookingDataInterface {
+  id: number;
+  code: string;
+  userId: number;
+  sportFieldId: number;
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
+  totalPrice: number;
+  originPrice: number;
+  discountAmount: number;
+  voucherCode?: string;
+}
 
 @Injectable()
 export class FieldBookingsService {
@@ -32,6 +48,8 @@ export class FieldBookingsService {
     @InjectRepository(UsersEntity)
     private userRepo: Repository<UsersEntity>,
     private userService: UsersService,
+    private voucherService: VouchersService,
+    private paymentService: PaymentService,
   ) {}
 
   async getBookingHistory(
@@ -115,7 +133,6 @@ export class FieldBookingsService {
     return { data: data, count: total, limit: limit, offset };
   }
 
-  async test() {}
   async getPersonalBookingHistory(
     uid: string,
     dto: GetPersonalBookingHistoryDto,
@@ -204,6 +221,7 @@ export class FieldBookingsService {
       throw new BadRequestException('Sport field is not exist');
     }
 
+    //validate time slot in service time
     if (
       !isInServiceTime(
         field.branch.openTime,
@@ -213,6 +231,18 @@ export class FieldBookingsService {
       )
     ) {
       throw new BadRequestException('Time booking is out of service time');
+    }
+    // validate time slot is available
+    // todo
+    // validate voucher
+    if (dto.voucherCode) {
+      const validVoucher = await this.voucherService.validate(
+        user.uid,
+        dto.voucherCode,
+      );
+      if (!validVoucher) {
+        throw new BadRequestException('Voucher code is not valid');
+      }
     }
     const bookedField = await this.fieldBookingRepo
       .createQueryBuilder('booking')
@@ -271,21 +301,30 @@ export class FieldBookingsService {
       throw new BadRequestException('Field is unavailable to booking!');
     }
     // create fieldBooking
-    const newBooking = this.fieldBookingRepo.create({
+    const newBooking = await this.fieldBookingRepo.create({
       ...dto,
       userId: user.id,
       code: this.generateBookingCode(),
-      status: FieldBookingStatus.PAID,
+      status: FieldBookingStatus.PENDING,
     });
-    return this.fieldBookingRepo.save(newBooking);
-    // return {
-    //   ...dto,
-    //   fieldName: field.name,
-    //   branchName: field.branch.name,
-    //   userId: user.id,
-    //   code: this.generateBookingCode(),
-    //   status: FieldBookingStatus.PAID,
-    // };
+    await this.fieldBookingRepo.save(newBooking);
+    // call to payment service
+    let paymentResponse = undefined;
+    try {
+      paymentResponse = await this.paymentService.createZaloPayOrder(
+        [newBooking] as BookingDataInterface[],
+        newBooking.totalPrice,
+      );
+    } catch (error) {
+      console.error('Error creating ZaloPay order:', error);
+      await this.fieldBookingRepo.update(
+        { code: newBooking.code },
+        { status: FieldBookingStatus.CANCELLED },
+      );
+      throw new BadRequestException('Error happening when creating payment');
+    }
+
+    return paymentResponse;
   }
 
   async checkBooking(dto: CheckBookingDto) {

@@ -7,10 +7,11 @@ import { ResponseModule } from '../response/response.module';
 import { FirebaseAdmin } from '../firebase/firebase.service';
 import { StaffsModule } from '../staffs/staffs.module';
 import { VouchersEntity } from '../entities/vouchers.entity';
+import { NotificationEntity } from '../entities/notification.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UsersEntity, VouchersEntity]),
+    TypeOrmModule.forFeature([UsersEntity, VouchersEntity, NotificationEntity]),
     ResponseModule,
     StaffsModule,
   ],

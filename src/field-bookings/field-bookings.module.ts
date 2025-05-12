@@ -12,6 +12,8 @@ import { BookingMailService } from '../mail/mail.service';
 import { FirebaseAdmin } from '../firebase/firebase.service';
 import { StaffsModule } from '../staffs/staffs.module';
 import { RefundsEntity } from '../entities/refund.entity';
+import { VouchersModule } from '../vouchers/vouchers.module';
+import { PaymentModule } from '../payment/payment.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { RefundsEntity } from '../entities/refund.entity';
     ResponseModule,
     UsersModule,
     StaffsModule,
+    VouchersModule,
+    PaymentModule,
   ],
   controllers: [FieldBookingsController],
   providers: [FieldBookingsService, BookingMailService, FirebaseAdmin],

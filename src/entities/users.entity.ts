@@ -7,6 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { VouchersEntity } from './vouchers.entity';
+import { NotificationEntity } from './notification.entity';
 
 @Entity('users')
 export class UsersEntity {
@@ -39,6 +40,9 @@ export class UsersEntity {
 
   @OneToMany(() => VouchersEntity, (voucher) => voucher.user)
   vouchers: VouchersEntity[];
+
+  @OneToMany(() => NotificationEntity, (notification) => notification.user)
+  notifications: NotificationEntity[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

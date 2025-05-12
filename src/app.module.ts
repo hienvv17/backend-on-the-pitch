@@ -84,6 +84,7 @@ import { FixedBookingRequestModule } from './fixed-booking-request/fixed-booking
     UploadModule,
     VouchersModule,
     FixedBookingRequestModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
