@@ -108,9 +108,7 @@ export class VouchersService {
       .leftJoin('users', 'user', 'user.id = voucher.userId')
       .where('user.uid = :uid', { uid })
       .andWhere('voucher.validTo > NOW()')
-      .andWhere('voucher.status = :status', {
-        status: VoucherStatus.ACTIVE,
-      })
+      .andWhere('voucher.isDeleted =  false')
       .orderBy('voucher.createdAt', 'DESC')
       .addOrderBy('voucher.status', 'ASC')
       .select([
@@ -157,6 +155,17 @@ export class VouchersService {
           uid,
         },
         validTo: MoreThanOrEqual(currentDate),
+      },
+      select: {
+        id: true,
+        code: true,
+        type: true,
+        maxDiscountAmount: true,
+        percentDiscount: true,
+        minBookingAmount: true,
+        validFrom: true,
+        validTo: true,
+        status: true,
       },
     });
     if (!valid) {

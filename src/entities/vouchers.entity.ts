@@ -55,6 +55,9 @@ export class VouchersEntity {
   @Column({ type: 'enum', enum: VoucherStatus, default: VoucherStatus.ACTIVE })
   status: VoucherStatusType;
 
+  @Column({ name: 'is_deleted', type: 'boolean', default: false })
+  isDeleted: boolean;
+
   @Column({ name: 'user_id', type: 'bigint' })
   userId: number; // Only set for personalized vouchers (e.g., birthday, loyalty)
 
