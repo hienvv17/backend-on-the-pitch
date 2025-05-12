@@ -90,14 +90,14 @@ export class VouchersController {
     @Query('limit') limit = 20,
     @Query('offset') offset = 0,
   ) {
-    const vouchers = await this.vouchersService.findMyVoucherAll(
+    const { items, count } = await this.vouchersService.findMyVoucherAll(
       uid,
       limit,
       offset,
     );
     return this.responseService.successResponse({
-      items: vouchers[0],
-      count: vouchers[1],
+      items,
+      count,
     });
   }
 

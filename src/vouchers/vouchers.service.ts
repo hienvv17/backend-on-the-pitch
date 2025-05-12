@@ -103,7 +103,7 @@ export class VouchersService {
   }
 
   async findMyVoucherAll(uid: string, limit: number = 20, offset: number = 0) {
-    return this.voucherRepo
+    const query = this.voucherRepo
       .createQueryBuilder('voucher')
       .leftJoin('users', 'user', 'user.id = voucher.userId')
       .where('user.uid = :uid', { uid })
@@ -123,10 +123,15 @@ export class VouchersService {
         'voucher.percentDiscount  "percentDiscount"',
         'voucher.minBookingAmount "minBookingAmount"',
         'voucher.createdAt "createdAt"',
-      ])
-      .take(limit)
-      .skip(offset)
-      .getManyAndCount();
+      ]);
+    const [items, count] = await Promise.all([
+      query.limit(limit).offset(offset).getRawMany(),
+      query.getCount(),
+    ]);
+    return {
+      items,
+      count,
+    };
   }
 
   async findOne(id: number) {
