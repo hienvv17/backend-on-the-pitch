@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import axios from 'axios';
 import * as CryptoJS from 'crypto-js';
 import moment from 'moment';
 import { BookingDataInterface } from '../field-bookings/field-bookings.service';
-import { v1 as uuidv1 } from 'uuid';
+// import { v1 as uuidv1 } from 'uuid';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   PaymentGateway,
@@ -152,7 +152,7 @@ export class PaymentService {
       where: { appTransactionId: appTransId },
     });
     if (!payment) {
-      throw new Error('Payment not found');
+      throw new BadRequestException('Payment not found');
     }
     try {
       const response = await axios.post(
@@ -165,8 +165,11 @@ export class PaymentService {
         },
       );
       const data = response.data;
-      console.log('ZaloPay Query Response:', data);
       if (data.return_code !== 1) {
+        if (!status && data.return_code == 3) {
+          //cron job run
+          return;
+        }
         // cancel payment from user && fail payment
         if (!!status && status == '-49' && data.return_code == 3) {
           await this.paymentsRepository.update(
