@@ -42,7 +42,7 @@ export class PaymentService {
     const appTransId = `${moment().format('YYMMDD')}_${transID}`;
     const appTime = Date.now();
     const embedData = {
-      redirecturl: `https://special-garbanzo-pj9v5w69546qf6gvj-3000.app.github.dev/payment-result`,
+      redirecturl: 'https://frontend-on-the-pitch.vercel.app/payment-result',
       items: items,
     };
 
