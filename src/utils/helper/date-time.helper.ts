@@ -80,7 +80,7 @@ export const mergeTimeSlots = (slots: TimeSlot[]): TimeSlot[] => {
     }
   }
 
-  return merged;
+  return merged.filter(Boolean);
 };
 
 export const getAvailableTimeSlots = (

@@ -355,18 +355,18 @@ export class SportFieldService {
       .addSelect('sc.name', 'sportCategoryName')
       .addSelect(
         `
-    COALESCE(
-      json_agg(
-        json_build_object(
-          'startTime', fb.start_time,
-          'endTime', fb.end_time
-        )
-      ) FILTER (
-        WHERE fb.bookingDate = :bookingDate 
-        AND fb.status NOT IN (:...status)
-      ), '[]'::json
-    )
-  `,
+           COALESCE(
+             json_agg(
+               json_build_object(
+                 'startTime', fb.start_time,
+                 'endTime', fb.end_time
+               )
+             ) FILTER (
+               WHERE fb.bookingDate = :bookingDate 
+               AND fb.status NOT IN (:...status)
+             ), '[]'::json
+           )
+         `,
         'bookedTimeSlots',
       )
       .setParameters({
@@ -386,13 +386,10 @@ export class SportFieldService {
       .addGroupBy('sc.id')
       .orderBy('sf.id')
       .getRawMany();
-
-    console.log('fieldInfo', fieldInfo);
-
     fieldInfo = fieldInfo.map((field) => {
       return {
         ...field,
-        bookedTimeSlots: mergeTimeSlots(field.bookedTimeSlots),
+        bookedTimeSlots: mergeTimeSlots(field.bookedTimeSlots.filter(Boolean)),
       };
     });
 

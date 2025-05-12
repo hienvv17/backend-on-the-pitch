@@ -41,7 +41,7 @@ export class AuthService {
     const staff = await this.staffsService.findByEmail(claims.email);
     if (!staff) {
       throw new UnauthorizedException(
-        'You have no access permission to this resource.'
+        'You have no access permission to this resource.',
       );
     }
     return staff;

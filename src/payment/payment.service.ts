@@ -11,7 +11,11 @@ import {
   PaymentStatus,
 } from '../entities/payment.entity';
 import { Repository } from 'typeorm';
-import { FieldBookingsEntity } from '../entities/field-bookings.entity';
+import {
+  FieldBookingsEntity,
+  FieldBookingStatus,
+} from '../entities/field-bookings.entity';
+import * as qs from 'qs';
 
 @Injectable()
 export class PaymentService {
@@ -26,6 +30,7 @@ export class PaymentService {
     key1: process.env.ZALOPAY_KEY1,
     key2: process.env.ZALOPAY_KEY2,
     endpoint: process.env.ZALOPAY_CREATE_ORDER_ENDPOINT,
+    queryEndpoint: process.env.ZALOPAY_QUERY_ENDPOINT,
   };
 
   async createZaloPayOrder(
@@ -37,7 +42,7 @@ export class PaymentService {
     const appTransId = `${moment().format('YYMMDD')}_${transID}`;
     const appTime = Date.now();
     const embedData = {
-      redirecturl: process.env.FRONT_END_URL,
+      redirecturl: `${process.env.FRONT_END_URL}?bookingCode=${items[0].code}`,
       items: items,
     };
 
@@ -133,5 +138,79 @@ export class PaymentService {
     }
 
     return result;
+  }
+
+  async queryZaloOrder(appTransId: string, status?: string): Promise<any> {
+    const postData = {
+      app_id: this.config.appid,
+      app_trans_id: appTransId,
+    };
+
+    const data = `${postData.app_id}|${postData.app_trans_id}|${this.config.key1}`;
+    postData['mac'] = CryptoJS.HmacSHA256(data, this.config.key1).toString();
+    const payment = await this.paymentsRepository.findOne({
+      where: { appTransactionId: appTransId },
+    });
+    if (!payment) {
+      throw new Error('Payment not found');
+    }
+    try {
+      const response = await axios.post(
+        this.config.queryEndpoint,
+        qs.stringify(postData),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        },
+      );
+      const data = response.data;
+      console.log('ZaloPay Query Response:', data);
+      if (data.return_code !== 1) {
+        // cancel payment from user && fail payment
+        if (!!status && status == '-49' && data.return_code == 3) {
+          await this.paymentsRepository.update(
+            { appTransactionId: payment.appTransactionId },
+            {
+              status: PaymentStatus.CANCELLED,
+            },
+          );
+        }
+        if (data.return_code == 2) {
+          await this.paymentsRepository.update(
+            { appTransactionId: payment.appTransactionId },
+            {
+              status: PaymentStatus.FAILED,
+            },
+          );
+        }
+        await this.fieldBookingsRepository.update(
+          { id: payment.fieldBookingId },
+          { status: FieldBookingStatus.CANCELLED },
+        );
+      }
+      if (data.return_code == 1) {
+        await this.paymentsRepository.update(
+          { appTransactionId: payment.appTransactionId },
+          {
+            status: PaymentStatus.SUCCESS,
+            transactionId: data.zp_trans_id,
+          },
+        );
+        await this.fieldBookingsRepository.update(
+          { id: payment.fieldBookingId },
+          { status: FieldBookingStatus.PAID },
+        );
+      }
+
+      return;
+    } catch (error) {
+      // Optionally log or handle error properly
+      console.error(
+        'ZaloPay Query Error:',
+        error?.response?.data || error.message,
+      );
+      throw error;
+    }
   }
 }
