@@ -301,13 +301,17 @@ export class FieldBookingsService {
       throw new BadRequestException('Field is unavailable to booking!');
     }
     // create fieldBooking
-    const newBooking = await this.fieldBookingRepo.create({
+    const newBooking = this.fieldBookingRepo.create({
       ...dto,
       userId: user.id,
       code: this.generateBookingCode(),
       status: FieldBookingStatus.PENDING,
     });
-    await this.fieldBookingRepo.save(newBooking);
+
+    await Promise.all([
+      this.fieldBookingRepo.save(newBooking),
+      this.voucherService.usedVoucher(dto.voucherCode),
+    ]);
     // call to payment service
     let paymentResponse = undefined;
     try {
@@ -317,10 +321,15 @@ export class FieldBookingsService {
       );
     } catch (error) {
       console.error('Error creating ZaloPay order:', error);
-      await this.fieldBookingRepo.update(
-        { code: newBooking.code },
-        { status: FieldBookingStatus.CANCELLED },
-      );
+      //cancel booking, undo voucher
+      await Promise.all([
+        this.fieldBookingRepo.update(
+          { code: newBooking.code },
+          { status: FieldBookingStatus.CANCELLED },
+        ),
+        this.voucherService.undoUseVoucher(dto.voucherCode),
+      ]);
+
       throw new BadRequestException('Error happening when creating payment');
     }
 

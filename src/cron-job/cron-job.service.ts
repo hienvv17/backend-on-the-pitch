@@ -8,8 +8,13 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from '../entities/users.entity';
 import { VoucherConfig } from '../entities/voucher-config.entity';
-import { Between, LessThan, Repository } from 'typeorm';
+import { Between, In, LessThan, Repository } from 'typeorm';
 import { generateVoucherCode } from '../utils/helper/voucher-generate';
+import {
+  FieldBookingsEntity,
+  FieldBookingStatus,
+} from '../entities/field-bookings.entity';
+import { PaymentsEntity, PaymentStatus } from '../entities/payment.entity';
 
 @Injectable()
 export class CronJobService {
@@ -20,6 +25,10 @@ export class CronJobService {
     private voucherConfigRepo: Repository<VoucherConfig>,
     @InjectRepository(UsersEntity)
     private usersRepo: Repository<UsersEntity>,
+    @InjectRepository(FieldBookingsEntity)
+    private fieldBookingRepo: Repository<FieldBookingsEntity>,
+    @InjectRepository(PaymentsEntity)
+    private paymentRepo: Repository<PaymentsEntity>,
   ) {}
   // Cron job that runs every day at 3 AM
   //test
@@ -162,81 +171,53 @@ export class CronJobService {
     // Generate loyalty vouchers for users who have made total amount bookings last month
   }
 
-  @Cron('0 16 1 * *')
-  async handleTenMinCron() {
-    // Generate loyalty vouchers for users who have made 4 reviews within the last 30 days on bookings paid
-    const currentDate = new Date();
-    const _date = currentDate.getDate();
-    const month = currentDate.getMonth() + 1;
-    const currentYear = currentDate.getFullYear();
-    const loyaltyVoucherConfig = await this.voucherConfigRepo.findOne({
-      where: { type: VoucherType.LOYALTY, isActive: true },
-    });
-    if (loyaltyVoucherConfig) {
-      const users = await this.usersRepo
-        .createQueryBuilder('user')
-        .leftJoin('field_bookings', 'b', 'b.user_id = user.id')
-        .where('b.status = :status', { status: 'PAID' })
-        .andWhere('b.booking_date >= :startDateOfMonth', {
-          startDateOfMonth: new Date(
-            new Date().getFullYear(),
-            new Date().getMonth() - 1,
-            1,
-          ),
-        })
-        .andWhere('b.booking_date <= :endDateOfMonth', {
-          endDateOfMonth: new Date(
-            new Date().getFullYear(),
-            new Date().getMonth(),
-            0,
-          ),
-        })
-        .groupBy('user.id')
-        .having('SUM(b.total_amount) >= :amount', {
-          amount: loyaltyVoucherConfig.amountToTrigger,
-        })
-        .select('user.id', 'id')
-        .addSelect('user.name', 'name')
-        .addSelect('user.email', 'email')
-        .getMany();
+  @Cron('*/10 * * * *')
+  async handleEveryTenMinCron() {
+    const now = new Date();
+    const fifteenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
-      const monthStart = new Date(currentYear, month - 1, 1);
-      const monthEnd = new Date(currentYear, month, 0);
-      if (users.length > 0) {
-        await Promise.all(
-          users.map(async (user) => {
-            const existingVoucher = await this.voucherRepo.findOne({
-              where: {
-                userId: user.id,
-                type: VoucherType.LOYALTY,
-                createdAt: Between(monthStart, monthEnd),
-              },
-            });
+    // Step 1: Get field bookings with PENDING status older than 15 mins
+    const expiredBookings = await this.fieldBookingRepo
+      .createQueryBuilder('booking')
+      .leftJoin('payments', 'p', 'p.field_booking_id = booking.id')
+      .where('booking.status = :status', { status: FieldBookingStatus.PENDING })
+      .andWhere('booking.created_at < :fifteenMinutesAgo', {
+        fifteenMinutesAgo,
+      })
+      .andWhere('p.status = :paymentStatus', { paymentStatus: 'PENDING' })
+      .select([
+        'booking.id "bookingId"',
+        'p.id AS payment_id',
+        'booking.voucher_code "voucherCode"',
+      ])
+      .getRawMany();
 
-            if (!existingVoucher) {
-              const voucherCode = generateVoucherCode(
-                loyaltyVoucherConfig.voucherCode,
-              );
+    if (expiredBookings.length != 0) {
+      const bookingIds = expiredBookings.map((booking) => booking.bookingId);
+      const paymentIds = expiredBookings.map((booking) => booking.payment_id);
+      const voucherCodes = expiredBookings.map(
+        (booking) => booking.voucherCode,
+      );
 
-              const now = new Date(currentYear, month - 1, _date);
-              const validTo = new Date(now);
-              validTo.setDate(now.getDate() + loyaltyVoucherConfig.validDays);
-
-              await this.voucherRepo.save({
-                userId: user.id,
-                type: VoucherType.LOYALTY,
-                code: voucherCode,
-                percentDiscount: loyaltyVoucherConfig.percentDiscount,
-                maxDiscountAmount: loyaltyVoucherConfig.maxDiscountAmount,
-                validFrom: now,
-                validTo,
-                status: VoucherStatus.ACTIVE,
-              });
-            }
-          }),
-        );
-      }
+      await Promise.all([
+        this.fieldBookingRepo.update(
+          { id: In(bookingIds) },
+          { status: FieldBookingStatus.CANCELLED },
+        ),
+        this.paymentRepo.update(
+          { id: In(paymentIds) },
+          { status: PaymentStatus.CANCELLED },
+        ),
+        this.voucherRepo.update(
+          { code: In(voucherCodes) },
+          { status: VoucherStatus.ACTIVE }, // or 'CANCELLED', depending on your logic
+        ),
+      ]);
     }
-    // Generate loyalty vouchers for users who have made total amount bookings last month
+    console.log(
+      `[Cron] Cancelled ${
+        expiredBookings.length
+      } expired bookings at ${now.toISOString()}`,
+    );
   }
 }

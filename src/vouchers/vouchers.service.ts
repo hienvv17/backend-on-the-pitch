@@ -164,4 +164,18 @@ export class VouchersService {
     }
     return valid;
   }
+
+  async usedVoucher(voucherCode: string) {
+    return this.voucherRepo.update(
+      { code: voucherCode },
+      { status: VoucherStatus.USED },
+    );
+  }
+
+  async undoUseVoucher(voucherCode: string) {
+    return this.voucherRepo.update(
+      { code: voucherCode },
+      { status: VoucherStatus.ACTIVE },
+    );
+  }
 }
