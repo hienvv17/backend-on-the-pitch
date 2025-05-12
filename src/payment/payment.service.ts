@@ -52,8 +52,7 @@ export class PaymentService {
       description: `Payment for order #${transID}`,
       bank_code: 'zalopayapp',
       callback_url:
-        'https://expert-barnacle-qgvg79pv9ppc46wg-3005.app.github.dev/payment/callback',
-      // 'https://develop-backend-on-the-pitch.vercel.app/payment/callback',
+        'https://develop-backend-on-the-pitch.vercel.app/payment/callback',
     };
 
     // Create MAC
