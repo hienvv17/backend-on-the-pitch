@@ -42,7 +42,7 @@ export class PaymentService {
     const appTransId = `${moment().format('YYMMDD')}_${transID}`;
     const appTime = Date.now();
     const embedData = {
-      redirecturl: `${process.env.FRONT_END_URL}?bookingCode=${items[0].code}`,
+      redirecturl: `${process.env.FRONT_END_URL}/payment-result`,
       items: items,
     };
 
