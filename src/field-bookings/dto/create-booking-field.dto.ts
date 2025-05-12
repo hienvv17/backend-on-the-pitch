@@ -1,6 +1,5 @@
 import {
   IsNotEmpty,
-  Matches,
   IsString,
   IsEmail,
   IsOptional,
@@ -13,10 +12,15 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateBookingDto {
   @ApiProperty()
+  @IsNumber()
   @IsNotEmpty()
   sportFieldId: number;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({
+    nullable: true,
+    description: 'ID của người dùng khi đã đăng nhập',
+  })
+  @IsNumber()
   @IsOptional()
   userId?: number;
 
@@ -45,20 +49,22 @@ export class CreateBookingDto {
   @IsNotEmpty()
   endTime: string;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'Số tiền thanh toán' })
+  @IsNumber()
   @IsNotEmpty()
   totalPrice: number;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'Giá gốc' })
   @IsNotEmpty()
   originPrice: number;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'Số tiền giảm giá' })
   @IsNumber()
   @IsNotEmpty()
-  discountAmount: number; // Discount amount
+  discountAmount: number = 0; // Discount amount
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true, description: 'Mã giảm giá' })
+  @IsString()
   @IsOptional()
   voucherCode?: string; // Optional field for voucher code
 }
