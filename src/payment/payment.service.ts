@@ -148,17 +148,19 @@ export class PaymentService {
         }
 
         //Update payment status
-        await this.paymentsRepository.update(
-          { appTransactionId: payment.appTransactionId },
-          {
-            status: PaymentStatus.SUCCESS,
-            transactionId: data.zp_trans_id,
-          },
-        );
-        await this.fieldBookingsRepository.update(
-          { id: payment.fieldBookingId },
-          { status: 'PAID', sentMail: true },
-        );
+        if (payment.status !== PaymentStatus.SUCCESS) {
+          await this.paymentsRepository.update(
+            { appTransactionId: payment.appTransactionId },
+            {
+              status: PaymentStatus.SUCCESS,
+              transactionId: data.zp_trans_id,
+            },
+          );
+          await this.fieldBookingsRepository.update(
+            { id: payment.fieldBookingId },
+            { status: 'PAID', sentMail: true },
+          );
+        }
         if (!payment.sentMail) {
           try {
             await this.mailerService.sendBookingSuccessEmail(
@@ -272,17 +274,19 @@ export class PaymentService {
         return { paymentSuccess: false, bookingCode: payment.bookingCode };
       }
       if (data.return_code == 1) {
-        await this.paymentsRepository.update(
-          { appTransactionId: payment.appTransactionId },
-          {
-            status: PaymentStatus.SUCCESS,
-            transactionId: data.zp_trans_id,
-          },
-        );
-        await this.fieldBookingsRepository.update(
-          { id: payment.fieldBookingId },
-          { status: FieldBookingStatus.PAID },
-        );
+        if (payment.status !== PaymentStatus.SUCCESS) {
+          await this.paymentsRepository.update(
+            { appTransactionId: payment.appTransactionId },
+            {
+              status: PaymentStatus.SUCCESS,
+              transactionId: data.zp_trans_id,
+            },
+          );
+          await this.fieldBookingsRepository.update(
+            { id: payment.fieldBookingId },
+            { status: FieldBookingStatus.PAID },
+          );
+        }
         if (!payment.sentMail) {
           try {
             await this.mailerService.sendBookingSuccessEmail(
