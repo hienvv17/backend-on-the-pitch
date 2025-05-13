@@ -160,10 +160,14 @@ export class PaymentService {
           { status: 'PAID', sentMail: true },
         );
         if (!payment.sentMail) {
-          await this.mailerService.sendBookingSuccessEmail(
-            payment.userEmail,
-            payment,
-          );
+          try {
+            await this.mailerService.sendBookingSuccessEmail(
+              payment.userEmail,
+              payment,
+            );
+          } catch (error) {
+            console.error('Error sending email:', error);
+          }
         }
         result['returncode'] = 1;
         result['returnmessage'] = 'success';
@@ -280,10 +284,14 @@ export class PaymentService {
           { status: FieldBookingStatus.PAID },
         );
         if (!payment.sentMail) {
-          await this.mailerService.sendBookingSuccessEmail(
-            payment.userEmail,
-            payment,
-          );
+          try {
+            await this.mailerService.sendBookingSuccessEmail(
+              payment.userEmail,
+              payment,
+            );
+          } catch (error) {
+            console.error('Error sending email:', error);
+          }
         }
         return { paymentSuccess: true, bookingCode: payment.bookingCode };
       }

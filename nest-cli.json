@@ -7,8 +7,8 @@
     "plugins": ["@nestjs/swagger"],
     "assets": [
       {
-        "include": "src/templates/**/*",
-        "outDir": "dist/src/templates"
+        "include": "templates/**/*",
+        "outDir": "dist/templates"
       }
     ]
   }
