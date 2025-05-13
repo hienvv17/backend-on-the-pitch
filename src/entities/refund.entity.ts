@@ -46,10 +46,10 @@ export class RefundsEntity {
   @Column({ name: 'admin_note', type: 'text', nullable: true })
   adminNote: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar', nullable: true, name: 'transaction_id' })
   transactionId: string; // Refund transaction ID from ZaloPay
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar', nullable: true, name: 'payment_method' })
   paymentMethod: string; // 'CASH', 'ZaloPay'
 
   @CreateDateColumn({
