@@ -45,8 +45,7 @@ export class PaymentService {
     const appTransId = `${moment().format('YYMMDD')}_${transID}`;
     const appTime = Date.now();
     const embedData = {
-      // redirecturl: 'https://frontend-on-the-pitch.vercel.app/payment-result',
-      redirecturl: 'https://upgraded-acorn-5pvpg4xvx5jcrpv-3000.app.github.dev/payment-result',
+      redirecturl: 'https://frontend-on-the-pitch.vercel.app/payment-result',
       items: items,
     };
 
@@ -61,8 +60,7 @@ export class PaymentService {
       description: `Payment for booking ${bookingInfo[0].code} #${transID}`,
       bank_code: 'zalopayapp',
       callback_url:
-        'https://expert-barnacle-qgvg79pv9ppc46wg.github.dev/payment/callback',
-      // 'https://develop-backend-on-the-pitch.vercel.app/payment/callback',
+        'https://develop-backend-on-the-pitch.vercel.app/payment/callback',
     };
 
     // Create MAC
@@ -109,7 +107,7 @@ export class PaymentService {
         const embedData = JSON.parse(data.embed_data);
         const apptransid = data.apptransid;
         const fieldBookingId = embedData.items[0].id;
-    
+
         // TODO: Update payment status in DB using `apptransid`
         const payment = await this.paymentsRepository
           .createQueryBuilder('payment')
