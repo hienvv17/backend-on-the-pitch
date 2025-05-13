@@ -179,7 +179,8 @@ export class CronJobService {
     const now = new Date();
     const fifteenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
-    // Step 1: Get field bookings with PENDING status older than 15 mins
+    // Step 1: Get field bookings with PENDING status older than 15 mins, ignore those with latestPaymentDate > today
+    const today = new Date(new Date().setHours(0, 0, 0, 0));
     const expiredBookings = await this.fieldBookingRepo
       .createQueryBuilder('booking')
       .leftJoin('payments', 'p', 'p.field_booking_id = booking.id')
@@ -188,6 +189,12 @@ export class CronJobService {
         fifteenMinutesAgo,
       })
       .andWhere('p.status = :paymentStatus', { paymentStatus: 'PENDING' })
+      .andWhere(
+        '(booking.latestPaymentDate IS NULL OR booking.latestPaymentDate < :today)',
+        {
+          today,
+        },
+      )
       .select([
         'booking.id "bookingId"',
         'p.id AS payment_id',
