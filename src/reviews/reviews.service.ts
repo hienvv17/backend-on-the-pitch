@@ -44,7 +44,12 @@ export class ReviewsService {
     });
     if (existReview)
       throw new BadRequestException('You have already review this booking');
-    const review = this.reviewRepo.create(dto);
+    const review = this.reviewRepo.create({
+      userId: user.id,
+      fieldBookingId: dto.fieldBookingId,
+      comment: dto.comment,
+      rating: dto.rating,
+    });
     return this.reviewRepo.save(review);
   }
 
