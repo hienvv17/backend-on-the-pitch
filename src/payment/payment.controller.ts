@@ -22,7 +22,10 @@ export class PaymentController {
     @Query('appTransId') appTransId: string,
     @Query('status') status?: string,
   ) {
-    await this.paymentService.queryZaloOrder(appTransId, status);
-    return this.responseService.successResponse({});
+    const paymentSuccess = await this.paymentService.queryZaloOrder(
+      appTransId,
+      status,
+    );
+    return this.responseService.successResponse({ paymentSuccess });
   }
 }

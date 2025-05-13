@@ -191,6 +191,7 @@ export class PaymentService {
           { id: payment.fieldBookingId },
           { status: FieldBookingStatus.CANCELLED },
         );
+        return false;
       }
       if (data.return_code == 1) {
         await this.paymentsRepository.update(
@@ -203,7 +204,8 @@ export class PaymentService {
         await this.fieldBookingsRepository.update(
           { id: payment.fieldBookingId },
           { status: FieldBookingStatus.PAID },
-        );
+        ); 
+        return true
       }
 
       return;
