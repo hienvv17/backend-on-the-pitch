@@ -34,7 +34,7 @@ export class RefundsEntity {
   @JoinColumn({ name: 'field_booking_id' }) // explicitly sets the foreign key column
   fieldBooking: FieldBookingsEntity;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: true })
   amount: number;
 
   @Column({ type: 'enum', enum: RefundStatus, default: RefundStatus.PENDING })
