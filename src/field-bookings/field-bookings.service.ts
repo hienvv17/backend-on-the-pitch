@@ -21,6 +21,8 @@ import { CheckBookingDto } from './dto/check-booking.dto';
 import { STAFF_ROLE } from '../entities/staffs.entity';
 import { VouchersService } from '../vouchers/vouchers.service';
 import { PaymentService } from '../payment/payment.service';
+import moment from 'moment';
+import constants from '../config/constants';
 
 export interface BookingDataInterface {
   id: number;
@@ -137,6 +139,7 @@ export class FieldBookingsService {
     uid: string,
     dto: GetPersonalBookingHistoryDto,
   ) {
+    const minRefundTime = constants.refund.minRefundTime;
     const query = this.getBookingQuery().leftJoin(
       'reviews',
       'rv',
@@ -192,10 +195,22 @@ export class FieldBookingsService {
       .addOrderBy('fb.start_time', 'DESC')
       .limit(dto.limit)
       .offset(dto.offset);
-    const [items, count] = await Promise.all([
+    const [data, count] = await Promise.all([
       query.getRawMany(),
       query.getCount(),
     ]);
+    const dateToCalDiff = new Date(getCurrentTimeInUTC7());
+    const items = data.map((item) => ({
+      ...item,
+      canRequestRefund:
+        item.status === FieldBookingStatus.PAID &&
+        this.getDiffTimeInHours(
+          item.bookingDate,
+          dateToCalDiff,
+          item.startTime,
+          item.endTime,
+        ) < minRefundTime,
+    }));
     return { items, count };
   }
 
@@ -410,4 +425,27 @@ export class FieldBookingsService {
       .innerJoin('branches', 'br', 'br.id = sf.branch_id')
       .innerJoin('sport_categories', 'sc', 'sc.id = sf.sport_category_id');
   }
+
+  getDiffTimeInHours = (
+    bookingDate: string,
+    dateToCalDiff: Date,
+    startTime: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    endTime: string,
+  ) => {
+    const base = moment.utc(bookingDate).tz('Asia/Bangkok');
+    // Combine the time
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const _bookingDate = base
+      .set({
+        hour: hours,
+        minute: minutes,
+        second: 0,
+        millisecond: 0,
+      })
+      .toDate();
+    const timeDifference = dateToCalDiff.getTime() - _bookingDate.getTime();
+    const hoursDifference = timeDifference / (1000 * 60 * 60);
+    return hoursDifference;
+  };
 }

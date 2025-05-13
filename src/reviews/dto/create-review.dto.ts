@@ -6,12 +6,14 @@ import {
   Max,
   IsPositive,
   IsArray,
+  IsNotEmpty,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateReviewDto {
   @ApiProperty()
   @IsInt()
+  @IsNotEmpty()
   fieldBookingId: number;
 
   @ApiProperty({ required: false })
