@@ -154,6 +154,7 @@ export class PaymentService {
     if (!payment) {
       throw new BadRequestException('Payment not found');
     }
+
     try {
       const response = await axios.post(
         this.config.queryEndpoint,
@@ -166,6 +167,11 @@ export class PaymentService {
       );
       const data = response.data;
       if (data.return_code !== 1) {
+        // update payment status before
+        if (payment.status !== PaymentStatus.PENDING) {
+          return payment.status == PaymentStatus.SUCCESS;
+        }
+        
         if (!status && data.return_code == 3) {
           //cron job run
           return;
@@ -204,8 +210,8 @@ export class PaymentService {
         await this.fieldBookingsRepository.update(
           { id: payment.fieldBookingId },
           { status: FieldBookingStatus.PAID },
-        ); 
-        return true
+        );
+        return true;
       }
 
       return;
