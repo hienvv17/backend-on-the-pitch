@@ -191,7 +191,6 @@ export class FieldBookingsService {
         'fb.originPrice "originPrice"',
         'fb.discountAmount "discountAmount"',
         'fb.voucherCode "voucherCode"',
-        'fb.latestPaymentDate "latestPaymentDate"',
         'fb.createdAt "createdAt"',
         'fb.updatedAt "updatedAt"',
         'u.email  "userEmail"',
