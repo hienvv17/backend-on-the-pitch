@@ -1,7 +1,7 @@
-import { IsEnum, IsOptional, IsString, Min } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { RefundStatus } from '../../entities/refund.entity';
 
-export class UpdateRefundDto {
+export class ProcessRefundDto {
   @IsOptional()
   @IsEnum(RefundStatus)
   status?: RefundStatus;
@@ -9,4 +9,8 @@ export class UpdateRefundDto {
   @IsOptional()
   @IsString()
   adminNote?: string;
+
+  @IsNumber()
+  @IsOptional()
+  amount?: number;
 }
