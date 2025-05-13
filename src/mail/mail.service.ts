@@ -9,7 +9,7 @@ export class BookingMailService {
     //todo updat template that can not show
     await this.mailerService.sendMail({
       to,
-      subject: `Booking Success - ${bookingData.code}`,
+      subject: `Đặt sân thành công - ${bookingData.bookingCode}`,
       template: 'booking-success',
       context: {
         code: bookingData.code,
@@ -26,8 +26,6 @@ export class BookingMailService {
         voucherCode: bookingData.voucherCode ?? '',
       },
     });
-
-    console.log('Booking success email sent to:', to);
     return;
   }
 }
