@@ -1,11 +1,15 @@
 <h3>Xin chào, {{customerName}},</h3>
 
-<p>Bạn đã đặt sân <strong>{{fieldName}}</strong> tại <strong>{{branchName}}</strong> thành công!</p>
+<p>Bạn đã đặt sân
+  <strong>{{fieldName}}</strong>
+  tại
+  <strong>{{branchName}}</strong>
+  thành công!</p>
 
 <p>Thông tin đặt sân của bạn như sau:</p>
 
 <ul>
-  <li><strong>Mã đặt sân:</strong> {{code}}</li>
+  <li><strong>Mã đặt sân:</strong> {{bookingCode}}</li>
   <li><strong>Ngày:</strong> {{bookingDate}}</li>
   <li><strong>Thời gian:</strong> {{startTime}} - {{endTime}}</li>
   <li><strong>Phương thức thanh toán:</strong> {{paymentMethod}}</li>
@@ -14,10 +18,20 @@
   <li><strong>Mã giảm giá đã dùng:</strong> {{voucherCode}}</li>
 </ul>
 
-<p>Hãy cung cấp mã đặt sân <strong>{{code}}</strong> cho nhân viên khi bạn đến sân để được hỗ trợ nếu cần.</p>
+<p>Hãy cung cấp mã đặt sân
+  <strong>{{code}}</strong>
+  cho nhân viên khi bạn đến sân để được hỗ trợ nếu cần.</p>
 
-<p><em><strong>Lưu ý:</strong> Mã giảm giá sẽ không được hoàn lại nếu bạn yêu cầu hoàn tiền. Số tiền hoàn lại (nếu có) sẽ được tính dựa trên số tiền bạn đã thực tế thanh toán sau khi trừ đi giá trị khuyến mãi.</em></p>
+<p><em><strong>Lưu ý:</strong>
+    Mã giảm giá sẽ không được hoàn lại nếu bạn yêu cầu hoàn tiền. Số tiền hoàn
+    lại (nếu có) sẽ được tính dựa trên số tiền bạn đã thực tế thanh toán sau khi
+    trừ đi giá trị khuyến mãi.</em></p>
 
-<p>📄 <strong>Quy định hoàn tiền:</strong> <a href="https://frontend-on-the-pitch.vercel.app/chinh-sach-hoan-tien" target="_blank">Xem tại đây</a></p>
+<p>📄
+  <strong>Quy định hoàn tiền:</strong>
+  <a
+    href='https://frontend-on-the-pitch.vercel.app/chinh-sach-hoan-tien'
+    target='_blank'
+  >Xem tại đây</a></p>
 
 <p>Cảm ơn bạn đã sử dụng dịch vụ thể thao của chúng tôi!</p>
