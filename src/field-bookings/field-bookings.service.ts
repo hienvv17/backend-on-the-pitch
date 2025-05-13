@@ -70,6 +70,7 @@ export class FieldBookingsService {
       status,
       limit,
       offset,
+      search,
     } = dto;
 
     const query = this.getBookingQuery();
@@ -96,6 +97,15 @@ export class FieldBookingsService {
     }
     if (status) {
       query.andWhere('fb.status = :status', { status });
+    }
+    if (search) {
+      query.andWhere(
+        new Brackets((qb) => {
+          qb.where('u.email LIKE :search', { search: `%${search}%` })
+            .orWhere('u.phone_number LIKE :search', { search: `%${search}%` })
+            .orWhere('fb.code LIKE :search', { search: `%${search}%` });
+        }),
+      );
     }
     if (role !== STAFF_ROLE.ADMIN) {
       query.andWhere('br.id IN (:...branchIds)', {
@@ -140,11 +150,9 @@ export class FieldBookingsService {
     dto: GetPersonalBookingHistoryDto,
   ) {
     const minRefundTime = constants.refund.minRefundTime;
-    const query = this.getBookingQuery().leftJoin(
-      'reviews',
-      'rv',
-      'rv.fieldBookingId = fb.id',
-    );
+    const query = this.getBookingQuery()
+      .leftJoin('reviews', 'rv', 'rv.fieldBookingId = fb.id')
+      .leftJoin('refunds', 'rf', 'rf.fieldBookingId = fb.id');
     query
       .where('u.uid = :uid', { uid })
       .andWhere('fb.status NOT IN (:...status)', {
@@ -190,6 +198,7 @@ export class FieldBookingsService {
         'rv.rating "reviewRating"',
         'rv.createdAt "reviewCreatedAt"',
         'rv.updatedAt "reviewUpdatedAt"',
+        'rf.id "refundId"',
       ])
       .orderBy('fb.booking_date', 'DESC')
       .addOrderBy('fb.start_time', 'DESC')
@@ -203,6 +212,7 @@ export class FieldBookingsService {
     const items = data.map((item) => ({
       ...item,
       canRequestRefund:
+        !item.refundId &&
         item.status === FieldBookingStatus.PAID &&
         this.getDiffTimeInHours(
           item.bookingDate,

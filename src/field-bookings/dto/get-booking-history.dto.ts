@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsNumber,
   IsIn,
+  IsBoolean,
 } from 'class-validator';
 import { IsEndTimeAtLeastOneHourAfter } from '../../decorators/IsEndTimeAtLeastOneHourAfter.decorator.ts.js';
 import { IsTimeString } from '../../decorators/IsTimeString.decorator.js';
@@ -50,7 +51,6 @@ export class GetBookingHistoryDto extends ListAllEntities {
   @IsOptional()
   branchId?: number;
 
-
   @ApiProperty({ nullable: true })
   @IsNumber()
   @IsOptional()
@@ -61,4 +61,9 @@ export class GetBookingHistoryDto extends ListAllEntities {
   @IsString()
   @IsOptional()
   status?: string = FieldBookingStatus.PAID;
+
+  @ApiProperty({ nullable: true })
+  @IsString()
+  @IsOptional()
+  search?: string; // e.g., "userEmail" or "userPhoneNumber"
 }
