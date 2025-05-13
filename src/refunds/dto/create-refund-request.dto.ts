@@ -1,17 +1,13 @@
-import {
-  IsNotEmpty,
-  IsNumber,
-  IsEnum,
-  IsOptional,
-  IsString,
-  Min,
-} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreateRefundDto {
-  @IsNotEmpty()
+  @ApiProperty()
   @IsNumber()
+  @IsNotEmpty()
   fieldBookingId: number;
 
-  @IsOptional()
+  @ApiProperty({ nullable: true })
   @IsString()
+  @IsOptional()
   reason?: string;
 }

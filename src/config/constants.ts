@@ -1,5 +1,3 @@
-
-
 export default {
   default: {
     listItemLimit: 20,
@@ -23,6 +21,6 @@ export default {
     endBookingMinute: ['00', '30'], // interval 30 mins
   },
   refund: {
-    minRefundTime: 48, // 48 hours before and after booking time
+    minRefundTime: 48, // 48 hours after bookingDate
   },
 };

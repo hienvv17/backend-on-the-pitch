@@ -66,12 +66,12 @@ export class RefundsService {
         millisecond: 0,
       })
       .toDate();
-    const timeDifference = bookingDate.getTime() - currentDate.getTime();
+    const timeDifference = currentDate.getTime() - bookingDate.getTime();
     const hoursDifference = timeDifference / (1000 * 60 * 60);
 
-    if (hoursDifference < minRefundTime) {
+    if (hoursDifference > minRefundTime) {
       throw new BadRequestException(
-        `Bạn chỉ có thể yêu cầu hoàn tiền trễ nhất trước ${minRefundTime} giờ so với thời gian đã đặt.`,
+        `Bạn chỉ có thể yêu cầu hoàn tiền trễ nhất sau ${minRefundTime} giờ so với thời gian đã đặt.`,
       );
     }
     // Check if a refund request already exists for this booking
