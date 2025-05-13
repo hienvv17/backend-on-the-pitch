@@ -19,9 +19,15 @@ export class BookingMailService {
         bookingDate: bookingData.bookingDate,
         startTime: bookingData.startTime,
         endTime: bookingData.endTime,
-        paymentMethod: 'VNPay',
+        paymentMethod: 'ZaloPay',
+        totalPrice: bookingData.totalPrice,
+        originPrice: bookingData.originPrice,
+        discountAmount: bookingData.discountAmount ?? 0,
+        voucherCode: bookingData.voucherCode ?? '',
       },
     });
+
+    console.log('Booking success email sent to:', to);
     return;
   }
 }

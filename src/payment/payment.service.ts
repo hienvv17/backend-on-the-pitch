@@ -16,6 +16,7 @@ import {
   FieldBookingStatus,
 } from '../entities/field-bookings.entity';
 import * as qs from 'qs';
+import { BookingMailService } from '../mail/mail.service';
 
 @Injectable()
 export class PaymentService {
@@ -24,6 +25,8 @@ export class PaymentService {
     private paymentsRepository: Repository<PaymentsEntity>,
     @InjectRepository(FieldBookingsEntity)
     private fieldBookingsRepository: Repository<FieldBookingsEntity>,
+    private readonly mailerService: BookingMailService,
+    // private readonly fieldBookingsService: FieldBookingsService,
   ) {}
   private readonly config = {
     appid: Number(process.env.ZALOPAY_APP_ID),
@@ -42,7 +45,8 @@ export class PaymentService {
     const appTransId = `${moment().format('YYMMDD')}_${transID}`;
     const appTime = Date.now();
     const embedData = {
-      redirecturl: 'https://frontend-on-the-pitch.vercel.app/payment-result',
+      // redirecturl: 'https://frontend-on-the-pitch.vercel.app/payment-result',
+      redirecturl: 'https://upgraded-acorn-5pvpg4xvx5jcrpv-3000.app.github.dev/payment-result',
       items: items,
     };
 
@@ -54,10 +58,11 @@ export class PaymentService {
       item: JSON.stringify(items),
       embed_data: JSON.stringify(embedData),
       amount,
-      description: `Payment for order #${transID}`,
+      description: `Payment for booking ${bookingInfo[0].code} #${transID}`,
       bank_code: 'zalopayapp',
       callback_url:
-        'https://develop-backend-on-the-pitch.vercel.app/payment/callback',
+        'https://expert-barnacle-qgvg79pv9ppc46wg.github.dev/payment/callback',
+      // 'https://develop-backend-on-the-pitch.vercel.app/payment/callback',
     };
 
     // Create MAC
@@ -104,18 +109,47 @@ export class PaymentService {
         const embedData = JSON.parse(data.embed_data);
         const apptransid = data.apptransid;
         const fieldBookingId = embedData.items[0].id;
-        console.log('ZaloPay callback success data:', data);
-        //
+    
         // TODO: Update payment status in DB using `apptransid`
-        const payment = await this.paymentsRepository.findOne({
-          where: { appTransactionId: apptransid, fieldBookingId },
-        });
+        const payment = await this.paymentsRepository
+          .createQueryBuilder('payment')
+          .leftJoin('field_bookings', 'fb', 'fb.id = payment.fieldBookingId')
+          .leftJoin('users', 'u', 'u.id = fb.userId')
+          .leftJoin('sport_fields', 'sf', 'sf.id = fb.sportFieldId')
+          .leftJoin('branches', 'b', 'b.id = sf.branchId')
+          .where('payment.appTransactionId = :appTransId', {
+            appTransId: apptransid,
+          })
+          .select([
+            'payment.id "id"',
+            'payment.appTransactionId "appTransactionId"',
+            'payment.transactionId "transactionId"',
+            'payment.fieldBookingId "fieldBookingId"',
+            'payment.status "status"',
+            'fb.code "bookingCode"',
+            'u.fullName "customerName"',
+            'u.email "userEmail"',
+            'sf.name "fieldName"',
+            'b.name "branchName"',
+            `TO_CHAR(fb.bookingDate, 'YYYY-MM-DD') "bookingDate"`,
+            'fb.startTime "startTime"',
+            'fb.endTime "endTime"',
+            'fb.totalPrice "totalPrice"',
+            'fb.originPrice "originPrice"',
+            'fb.status "status"',
+            'fb.sentMail "sentMail"',
+            'fb.discountAmount "discountAmount"',
+            'fb.voucherCode "voucherCode"',
+          ])
+          .getRawOne();
+
         if (!payment) {
           result['returncode'] = 0;
           result['returnmessage'] = 'Payment not found';
           return result;
         }
 
+        //Update payment status
         await this.paymentsRepository.update(
           { appTransactionId: payment.appTransactionId },
           {
@@ -125,9 +159,14 @@ export class PaymentService {
         );
         await this.fieldBookingsRepository.update(
           { id: payment.fieldBookingId },
-          { status: 'PAID' },
+          { status: 'PAID', sentMail: true },
         );
-
+        if (!payment.sentMail) {
+          await this.mailerService.sendBookingSuccessEmail(
+            payment.userEmail,
+            payment,
+          );
+        }
         result['returncode'] = 1;
         result['returnmessage'] = 'success';
       }
@@ -148,9 +187,37 @@ export class PaymentService {
 
     const data = `${postData.app_id}|${postData.app_trans_id}|${this.config.key1}`;
     postData['mac'] = CryptoJS.HmacSHA256(data, this.config.key1).toString();
-    const payment = await this.paymentsRepository.findOne({
-      where: { appTransactionId: appTransId },
-    });
+    const payment = await this.paymentsRepository
+      .createQueryBuilder('payment')
+      .leftJoin('field_bookings', 'fb', 'fb.id = payment.fieldBookingId')
+      .leftJoin('users', 'u', 'u.id = fb.userId')
+      .leftJoin('sport_fields', 'sf', 'sf.id = fb.sportFieldId')
+      .leftJoin('branches', 'b', 'b.id = sf.branchId')
+      .where('payment.appTransactionId = :appTransId', { appTransId })
+      .select([
+        'payment.id "id"',
+        'payment.appTransactionId "appTransactionId"',
+        'payment.transactionId "transactionId"',
+        'payment.fieldBookingId "fieldBookingId"',
+        'payment.status "status"',
+        'fb.code "bookingCode"',
+        'u.fullName "customerName"',
+        'u.email "userEmail"',
+        'sf.name "fieldName"',
+        'b.name "branchName"',
+        `TO_CHAR(fb.bookingDate, 'YYYY-MM-DD') "bookingDate"`,
+        'fb.startTime "startTime"',
+        'fb.endTime "endTime"',
+        'fb.totalPrice "totalPrice"',
+        'fb.originPrice "originPrice"',
+        'fb.status "status"',
+        'fb.sentMail "sentMail"',
+        'fb.discountAmount "discountAmount"',
+        'fb.voucherCode "voucherCode"',
+        'fb.sentMail "sentMail"',
+      ])
+      .getRawOne();
+
     if (!payment) {
       throw new BadRequestException('Payment not found');
     }
@@ -169,9 +236,12 @@ export class PaymentService {
       if (data.return_code !== 1) {
         // update payment status before
         if (payment.status !== PaymentStatus.PENDING) {
-          return payment.status == PaymentStatus.SUCCESS;
+          return {
+            paymentSuccess: payment.status == PaymentStatus.SUCCESS,
+            bookingCode: payment.bookingCode,
+          };
         }
-        
+
         if (!status && data.return_code == 3) {
           //cron job run
           return;
@@ -197,7 +267,7 @@ export class PaymentService {
           { id: payment.fieldBookingId },
           { status: FieldBookingStatus.CANCELLED },
         );
-        return false;
+        return { paymentSuccess: false, bookingCode: payment.bookingCode };
       }
       if (data.return_code == 1) {
         await this.paymentsRepository.update(
@@ -211,7 +281,13 @@ export class PaymentService {
           { id: payment.fieldBookingId },
           { status: FieldBookingStatus.PAID },
         );
-        return true;
+        if (!payment.sentMail) {
+          await this.mailerService.sendBookingSuccessEmail(
+            payment.userEmail,
+            payment,
+          );
+        }
+        return { paymentSuccess: true, bookingCode: payment.bookingCode };
       }
 
       return;

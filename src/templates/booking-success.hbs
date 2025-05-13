@@ -1,7 +1,14 @@
-<h3>Xin chào {{customerName}},</h3>
+<h3>Xin chào, {{customerName}},</h3>
 <p>Bạn đã đặt sân <strong>{{fieldName}}</strong> tại <strong>{{branchName}}</strong> thành công!</p>
 <p><strong>Ngày:</strong> {{bookingDate}}</p>
 <p><strong>Thời gian:</strong> {{startTime}} - {{endTime}}</p>
 <p><strong>Phương thức thanh toán:</strong> {{paymentMethod}}</p>
-<p>Hãy cung cấp mã đặt sân {{code}} cho nhân viên khi bạn đến sân để được hỗ trợ nếu cần.</p>
+<p><strong>Tổng tiền:</strong> {{totalPrice}} VND</p>
+<p><strong>Được giảm giá:</strong> {{discountAmount}} VND</p>
+<p><strong>Mã giảm giá đã dùng:</strong>{{voucherCode}}</p>
+
+<p>Hãy cung cấp mã đặt sân <strong>{{code}}</strong> cho nhân viên khi bạn đến sân để được hỗ trợ nếu cần.</p>
+
+<p><em><strong>Lưu ý:</strong> Mã giảm giá sẽ không được hoàn lại nếu bạn yêu cầu hoàn tiền. Số tiền hoàn lại (nếu có) sẽ được tính dựa trên số tiền bạn đã thực tế thanh toán sau khi trừ đi giá trị khuyến mãi.</em></p>
+
 <p>Cảm ơn bạn đã sử dụng dịch vụ thể thao của chúng tôi!</p>
