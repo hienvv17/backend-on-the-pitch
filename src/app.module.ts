@@ -61,7 +61,7 @@ import { FixedBookingRequestModule } from './fixed-booking-request/fixed-booking
           from: configService.get<string>('MAILER_FROM'),
         },
         template: {
-          dir: join(__dirname, '../templates'), // resolves to dist/templates
+          dir: join(__dirname, 'templates'), // resolves to dist/templates
           adapter: new HandlebarsAdapter(),
           options: { strict: true },
         },
