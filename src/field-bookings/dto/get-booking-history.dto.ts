@@ -1,13 +1,4 @@
-import {
-  IsNotEmpty,
-  Matches,
-  IsString,
-  IsEmail,
-  IsOptional,
-  IsNumber,
-  IsIn,
-  IsBoolean,
-} from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsIn } from 'class-validator';
 import { IsEndTimeAtLeastOneHourAfter } from '../../decorators/IsEndTimeAtLeastOneHourAfter.decorator.ts.js';
 import { IsTimeString } from '../../decorators/IsTimeString.decorator.js';
 import { IsValidDate } from '../../decorators/IsValidDate.decorator.js';

@@ -10,6 +10,7 @@ import { StaffJwtGuard } from '../auth/guard/staff-jwt.guard';
 import { CheckBookingDto } from './dto/check-booking.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { GetPersonalBookingHistoryDto } from './dto/get-personal-booking-history.dto';
+import { PayNowDto } from './dto/pay-now.dto';
 
 @ApiTags('Field Booking')
 @Controller('field-bookings')
@@ -23,6 +24,12 @@ export class FieldBookingsController {
   @Post('new')
   async create(@Body() dto: CreateBookingDto) {
     const bookingData = await this.fieldBookingsService.createFieldBooking(dto);
+    return this.responseService.successResponse({ bookingData });
+  }
+
+  @Post('pay-now')
+  async payNow(@Body() dto: PayNowDto) {
+    const bookingData = await this.fieldBookingsService.payNow(dto);
     return this.responseService.successResponse({ bookingData });
   }
 

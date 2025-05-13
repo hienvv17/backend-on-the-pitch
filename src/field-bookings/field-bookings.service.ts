@@ -23,6 +23,7 @@ import { VouchersService } from '../vouchers/vouchers.service';
 import { PaymentService } from '../payment/payment.service';
 import moment from 'moment';
 import constants from '../config/constants';
+import { PayNowDto } from './dto/pay-now.dto';
 
 export interface BookingDataInterface {
   id: number;
@@ -128,6 +129,9 @@ export class FieldBookingsService {
         'fb.endTime "endTime"',
         'fb.status "status"',
         'fb.totalPrice "totalPrice"',
+        'fb.originPrice "originPrice"',
+        'fb.discountAmount "discountAmount"',
+        'fb.voucherCode "voucherCode"',
         'fb.createdAt "createdAt"',
         'fb.updatedAt "updatedAt"',
         'u.email  "userEmail"',
@@ -345,15 +349,87 @@ export class FieldBookingsService {
       );
     } catch (error) {
       console.error('Error creating ZaloPay order:', error);
-      //cancel booking, undo voucher
-      await Promise.all([
-        this.fieldBookingRepo.update(
-          { code: newBooking.code },
-          { status: FieldBookingStatus.CANCELLED },
-        ),
-        this.voucherService.undoUseVoucher(dto.voucherCode),
-      ]);
+      //cancel bookings
+      await this.fieldBookingRepo.update(
+        { code: newBooking.code },
+        { status: FieldBookingStatus.CANCELLED },
+      );
+      throw new BadRequestException('Error happening when creating payment');
+    }
 
+    return paymentResponse;
+  }
+
+  async payNow(dto: PayNowDto) {
+    const user = await this.userRepo.findOne({ where: { email: dto.email } });
+    if (!user) {
+      throw new BadRequestException(
+        'Có lỗi xảy ra trong quá trình thanh toán, vui lòng thử lại sau',
+      );
+    }
+
+    // check if booking is exist and pending
+    const pendingBookedField = await this.fieldBookingRepo
+      .createQueryBuilder('booking')
+      .where('booking.code = :code', { code: dto.bookingCode })
+      .andWhere('booking.status = :status', {
+        status: FieldBookingStatus.PENDING,
+      })
+      .andWhere('booking.userId = :userId', { userId: user.id })
+      .andWhere('booking.sportFieldid= :sportFieldId', {
+        sportFieldId: dto.sportFieldId,
+      })
+      .andWhere('booking.bookingDate = :bookingDate', {
+        bookingDate: dto.bookingDate,
+      })
+      .andWhere('booking.startTime = :startTime', { startTime: dto.startTime })
+      .andWhere('booking.endTime = :endTime', { endTime: dto.endTime })
+      .getOne();
+
+    // update booking price
+    if (!pendingBookedField) {
+      throw new BadRequestException(
+        'Có lỗi xảy ra trong quá trình thanh toán, vui lòng thử lại sau',
+      );
+    }
+
+    // validate time voucher and new price is correct
+    await this.fieldBookingRepo.update(
+      { id: pendingBookedField.id },
+      {
+        totalPrice: dto.totalPrice,
+        originPrice: dto.originPrice,
+        discountAmount: dto.discountAmount,
+        voucherCode: dto.voucherCode,
+      },
+    );
+    // call to payment service
+    let paymentResponse = undefined;
+    const bookingData: BookingDataInterface = {
+      id: pendingBookedField.id,
+      code: pendingBookedField.code,
+      userId: pendingBookedField.userId,
+      sportFieldId: pendingBookedField.sportFieldId,
+      bookingDate: pendingBookedField.bookingDate,
+      startTime: pendingBookedField.startTime,
+      endTime: pendingBookedField.endTime,
+      totalPrice: dto.totalPrice,
+      originPrice: dto.originPrice,
+      discountAmount: dto.discountAmount,
+      voucherCode: dto.voucherCode,
+    };
+    try {
+      paymentResponse = await this.paymentService.createZaloPayOrder(
+        [bookingData] as BookingDataInterface[],
+        bookingData.totalPrice,
+      );
+    } catch (error) {
+      console.error('Error creating ZaloPay order:', error);
+      //cancel bookings
+      await this.fieldBookingRepo.update(
+        { code: bookingData.code },
+        { status: FieldBookingStatus.CANCELLED },
+      );
       throw new BadRequestException('Error happening when creating payment');
     }
 

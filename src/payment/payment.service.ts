@@ -26,7 +26,6 @@ export class PaymentService {
     @InjectRepository(FieldBookingsEntity)
     private fieldBookingsRepository: Repository<FieldBookingsEntity>,
     private readonly mailerService: BookingMailService,
-    // private readonly fieldBookingsService: FieldBookingsService,
   ) {}
   private readonly config = {
     appid: Number(process.env.ZALOPAY_APP_ID),
