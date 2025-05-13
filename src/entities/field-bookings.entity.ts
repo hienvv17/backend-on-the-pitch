@@ -65,6 +65,9 @@ export class FieldBookingsEntity {
   @Column({ type: 'varchar', name: 'voucher_code', nullable: true })
   voucherCode: string; // Voucher code applied
 
+  @Column({ type: 'boolean', name: 'sent_mail', default: false })
+  sentMail: boolean; // Voucher code applied
+
   @Column({
     type: 'enum',
     enum: FieldBookingStatus,
