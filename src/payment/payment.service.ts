@@ -78,7 +78,15 @@ export class PaymentService {
         gateway: PaymentGateway.ZALOPAY,
         status: PaymentStatus.PENDING,
       }));
-      await this.paymentsRepository.save(paymentList);
+
+      await Promise.all([
+        this.paymentsRepository.save(paymentList),
+        this.fieldBookingsRepository.update(
+          { id: bookingInfo[0].id },
+          { latestPaymentDate: new Date() },
+        ),
+      ]);
+
       return response.data;
     } catch (error) {
       console.error('ZaloPay create Order error:', error.message);
@@ -325,5 +333,13 @@ export class PaymentService {
       );
       throw error;
     }
+  }
+
+  async getPaymentByBookingId(
+    bookingId: number,
+  ): Promise<PaymentsEntity | null> {
+    return await this.paymentsRepository.findOne({
+      where: { fieldBookingId: bookingId },
+    });
   }
 }

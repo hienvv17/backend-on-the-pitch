@@ -78,8 +78,8 @@ export class FieldBookingsEntity {
   })
   status: string;
 
-  @Column({ type: 'date', name: 'latest_payment_date', nullable: true })
-  latestPaymentDate: string;
+  @Column({ type: 'timestamp', name: 'latest_payment_date', nullable: true })
+  latestPaymentDate: Date;
 
   @OneToMany(() => RefundsEntity, (refund) => refund.fieldBooking)
   refunds: RefundsEntity[];

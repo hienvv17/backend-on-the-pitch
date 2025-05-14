@@ -375,22 +375,17 @@ export class FieldBookingsService {
     }
 
     // check if booking is exist and pending
-    const pendingBookedField = await this.fieldBookingRepo
-      .createQueryBuilder('booking')
-      .where('booking.code = :code', { code: dto.bookingCode })
-      .andWhere('booking.status = :status', {
+    const pendingBookedField = await this.fieldBookingRepo.findOne({
+      where: {
+        code: dto.bookingCode,
         status: FieldBookingStatus.PENDING,
-      })
-      .andWhere('booking.userId = :userId', { userId: user.id })
-      .andWhere('booking.sportFieldId= :sportFieldId', {
         sportFieldId: dto.sportFieldId,
-      })
-      .andWhere('booking.bookingDate = :bookingDate', {
+        userId: user.id,
         bookingDate: dto.bookingDate,
-      })
-      .andWhere('booking.startTime = :startTime', { startTime: dto.startTime })
-      .andWhere('booking.endTime = :endTime', { endTime: dto.endTime })
-      .getOne();
+        startTime: dto.startTime,
+        endTime: dto.endTime,
+      },
+    });
 
     // update booking price
     if (!pendingBookedField) {
@@ -409,8 +404,18 @@ export class FieldBookingsService {
         voucherCode: dto.voucherCode,
       },
     );
-    // call to payment service
+    // check if payment is already created
+    const existingPayment = await this.paymentService.getPaymentByBookingId(
+      pendingBookedField.id,
+    );
+
     let paymentResponse = undefined;
+    if (existingPayment) {
+      paymentResponse = {
+        order_url: existingPayment.orderUrl,
+      };
+      return paymentResponse;
+    }
     const bookingData: BookingDataInterface = {
       id: pendingBookedField.id,
       code: pendingBookedField.code,

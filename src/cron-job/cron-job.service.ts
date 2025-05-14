@@ -201,13 +201,15 @@ export class CronJobService {
     // Generate loyalty vouchers for users who have made total amount bookings last month
   }
 
-  @Cron('*/10 * * * *')
+  @Cron('*/1 * * * *')
   async handleEveryTenMinCron() {
     const now = new Date();
     const fifteenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
     // Step 1: Get field bookings with PENDING status older than 15 mins, ignore those with latestPaymentDate > today
-    const today = new Date(new Date().setHours(0, 0, 0, 0));
+    const today = new Date();
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 59);
     const expiredBookings = await this.fieldBookingRepo
       .createQueryBuilder('booking')
       .leftJoin('payments', 'p', 'p.field_booking_id = booking.id')
@@ -215,11 +217,20 @@ export class CronJobService {
       .andWhere('booking.created_at < :fifteenMinutesAgo', {
         fifteenMinutesAgo,
       })
-      .andWhere('p.status = :paymentStatus', { paymentStatus: 'PENDING' })
+      .andWhere('p.status = :paymentStatus', {
+        paymentStatus: PaymentStatus.PENDING,
+      })
       .andWhere(
-        '(booking.latestPaymentDate IS NULL OR booking.latestPaymentDate < :today)',
+        `booking.latestPaymentDate < 
+      CAST(
+        CASE 
+          WHEN p.id IS NOT NULL THEN :today
+          ELSE :endOfToday
+        END
+      AS TIMESTAMP)`,
         {
           today,
+          endOfToday,
         },
       )
       .select([
