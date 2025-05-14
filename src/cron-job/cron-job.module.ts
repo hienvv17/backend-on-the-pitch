@@ -6,6 +6,7 @@ import { VouchersEntity } from '../entities/vouchers.entity';
 import { VoucherConfig } from '../entities/voucher-config.entity';
 import { PaymentsEntity } from '../entities/payment.entity';
 import { FieldBookingsEntity } from '../entities/field-bookings.entity';
+import { BookingMailService } from '../mail/mail.service';
 
 @Module({
   imports: [
@@ -17,6 +18,6 @@ import { FieldBookingsEntity } from '../entities/field-bookings.entity';
       FieldBookingsEntity,
     ]),
   ],
-  providers: [CronJobService],
+  providers: [CronJobService, BookingMailService],
 })
 export class CronJobModule {}

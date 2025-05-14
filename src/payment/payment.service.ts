@@ -103,10 +103,7 @@ export class PaymentService {
         result['returnmessage'] = 'mac not equal';
       } else {
         const data = JSON.parse(dataStr);
-        const embedData = JSON.parse(data.embed_data);
         const apptransid = data.apptransid;
-        const fieldBookingId = embedData.items[0].id;
-
         // TODO: Update payment status in DB using `apptransid`
         const payment = await this.paymentsRepository
           .createQueryBuilder('payment')
@@ -135,6 +132,7 @@ export class PaymentService {
             'fb.originPrice "originPrice"',
             'fb.status "status"',
             'fb.sentMail "sentMail"',
+            'fb.totalRetrySendMail "totalRetrySendMail"',
             'fb.discountAmount "discountAmount"',
             'fb.voucherCode "voucherCode"',
           ])
@@ -157,16 +155,25 @@ export class PaymentService {
           );
           await this.fieldBookingsRepository.update(
             { id: payment.fieldBookingId },
-            { status: 'PAID', sentMail: true },
+            { status: FieldBookingStatus.PAID },
           );
         }
         if (!payment.sentMail) {
           try {
-            await this.mailerService.sendBookingSuccessEmail(
-              payment.userEmail,
-              payment,
-            );
+            await this.mailerService
+              .sendBookingSuccessEmail(payment.userEmail, payment)
+              .then(() => {
+                this.fieldBookingsRepository.update(
+                  { id: payment.fieldBookingId },
+                  { sentMail: true },
+                );
+              });
           } catch (error) {
+            // Handle email sending error
+            await this.fieldBookingsRepository.update(
+              { id: payment.fieldBookingId },
+              { totalRetrySendMail: Number(payment.totalRetrySendMail) + 1 },
+            );
             console.error('Error sending email:', error);
           }
         }
@@ -218,6 +225,7 @@ export class PaymentService {
         'fb.discountAmount "discountAmount"',
         'fb.voucherCode "voucherCode"',
         'fb.sentMail "sentMail"',
+        'fb.totalRetrySendMail "totalRetrySendMail"',
       ])
       .getRawOne();
 
@@ -288,11 +296,21 @@ export class PaymentService {
         }
         if (!payment.sentMail) {
           try {
-            await this.mailerService.sendBookingSuccessEmail(
-              payment.userEmail,
-              payment,
-            );
+            await this.mailerService
+              .sendBookingSuccessEmail(payment.userEmail, payment)
+              .then(() => {
+                this.fieldBookingsRepository.update(
+                  { id: payment.fieldBookingId },
+                  { sentMail: true },
+                );
+              });
           } catch (error) {
+            await this.fieldBookingsRepository.update(
+              { id: payment.fieldBookingId },
+              { totalRetrySendMail: Number(payment.totalRetrySendMail) + 1 },
+            );
+
+            // gentally handle error not crash system
             console.error('Error sending email:', error);
           }
         }
@@ -301,7 +319,6 @@ export class PaymentService {
 
       return;
     } catch (error) {
-      // Optionally log or handle error properly
       console.error(
         'ZaloPay Query Error:',
         error?.response?.data || error.message,

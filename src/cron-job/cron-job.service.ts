@@ -15,6 +15,8 @@ import {
   FieldBookingStatus,
 } from '../entities/field-bookings.entity';
 import { PaymentsEntity, PaymentStatus } from '../entities/payment.entity';
+import constants from '../config/constants';
+import { BookingMailService } from '../mail/mail.service';
 
 @Injectable()
 export class CronJobService {
@@ -29,6 +31,7 @@ export class CronJobService {
     private fieldBookingRepo: Repository<FieldBookingsEntity>,
     @InjectRepository(PaymentsEntity)
     private paymentRepo: Repository<PaymentsEntity>,
+    private readonly mailService: BookingMailService,
   ) {}
   // Cron job that runs every day at 3 AM
   //test
@@ -248,6 +251,95 @@ export class CronJobService {
         ),
       ]);
     }
+
+    // Resend email to user if the booking PAID but not sent mail
+    const failedResendMailList = [];
+    const maxRetry = constants.email.maxRetry;
+    const resendMailList = await this.fieldBookingRepo
+      .createQueryBuilder('booking')
+      .leftJoin('users', 'user', 'user.id = booking.user_id')
+      .leftJoin('sport_fields', 'sf', 'sf.id = booking.sport_field_id')
+      .leftJoin('branches', 'br', 'br.id = sf.branch_id')
+      .where('booking.status = :status', { status: FieldBookingStatus.PAID })
+      .andWhere('booking.sent_mail = :sentMail', { sentMail: false })
+      .andWhere('booking.total_retry_send_mail < :maxRetry', {
+        maxRetry,
+      })
+      .select([
+        'booking.id "bookingId"',
+        'booking.code "bookingCode"',
+        'user.fullName "customerName"',
+        'user.fullName "customerName"',
+        'user.email "customerEmail"',
+        'sf.name "fieldName"',
+        'br.name "branchName"',
+        `TO_CHAR(booking.bookingDate, 'YYYY-MM-DD') "bookingDate"`,
+        'booking.start_time "startTime"',
+        'booking.end_time "endTime"',
+        'booking.total_price "totalPrice"',
+        'booking.origin_price "originPrice"',
+        'booking.discount_amount "discountAmount"',
+        'booking.voucher_code "voucherCode"',
+        'booking.sent_mail "sentMail"',
+        'booking.total_retry_send_mail "totalRetrySendMail"',
+      ])
+      .getRawMany();
+    if (resendMailList.length > 0) {
+      await Promise.all(
+        resendMailList.map(async (booking) => {
+          try {
+            await this.mailService.sendBookingSuccessEmail(
+              booking.customerEmail,
+              {
+                ...booking,
+                discountAmount: booking.discountAmount ?? 0,
+                voucherCode: booking.voucherCode ?? '',
+              },
+            );
+          } catch (error) {
+            failedResendMailList.push(booking);
+          }
+        }),
+      );
+    }
+
+    if (failedResendMailList.length > 0) {
+      await Promise.all(
+        failedResendMailList.map(
+          async (booking) =>
+            await this.fieldBookingRepo.update(
+              { id: booking.bookingId },
+              {
+                sentMail: false,
+                totalRetrySendMail: Number(booking.totalRetrySendMail) + 1,
+              },
+            ),
+        ),
+      );
+    }
+    // sucess retry List
+    const successResendMailList = resendMailList.filter(
+      (booking) =>
+        !failedResendMailList.some(
+          (failedBooking) => failedBooking.bookingId === booking.bookingId,
+        ),
+    );
+
+    if (successResendMailList.length > 0) {
+      await Promise.all(
+        successResendMailList.map(
+          async (booking) =>
+            await this.fieldBookingRepo.update(
+              { id: booking.bookingId },
+              {
+                sentMail: true,
+                totalRetrySendMail: Number(booking.totalRetrySendMail) + 1,
+              },
+            ),
+        ),
+      );
+    }
+
     console.log(
       `[Cron] Cancelled ${
         expiredBookings.length

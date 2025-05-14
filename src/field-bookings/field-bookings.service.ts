@@ -136,6 +136,8 @@ export class FieldBookingsService {
         'fb.updatedAt "updatedAt"',
         'u.email  "userEmail"',
         'u.phoneNumber "phoneNumber"',
+        'fb.sentMail "sentMail"',
+        'fb.totalRetrySendMail "totalRetrySendMail"',
         'br.id  "branchId"',
         'br.name "branchName"',
         'sf.name "sportFieldName"',

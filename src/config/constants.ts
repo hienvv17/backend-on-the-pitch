@@ -23,4 +23,7 @@ export default {
   refund: {
     minRefundTime: 48, // 48 hours after bookingDate
   },
+  email: {
+    maxRetry: 2,
+  },
 };

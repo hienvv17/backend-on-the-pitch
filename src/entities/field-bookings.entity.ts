@@ -66,7 +66,10 @@ export class FieldBookingsEntity {
   voucherCode: string; // Voucher code applied
 
   @Column({ type: 'boolean', name: 'sent_mail', default: false })
-  sentMail: boolean; // Voucher code applied
+  sentMail: boolean; // sent mail to user
+
+  @Column({ type: 'int', name: 'total_retry_send_mail', default: 0 })
+  totalRetrySendMail: number; // Total retry send mail count
 
   @Column({
     type: 'enum',
