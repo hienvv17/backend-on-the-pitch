@@ -44,7 +44,7 @@ export class PaymentService {
     const appTransId = `${moment().format('YYMMDD')}_${transID}`;
     const appTime = Date.now();
     const embedData = {
-      redirecturl: 'https://frontend-on-the-pitch.vercel.app/payment-result',
+      redirecturl: 'https://on-the-pitch.vercel.app/payment-result',
       items: items,
     };
 
