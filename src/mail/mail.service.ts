@@ -12,7 +12,7 @@ export class BookingMailService {
       subject: `Đặt sân thành công - ${bookingData.bookingCode}`,
       template: 'booking-success',
       context: {
-        code: bookingData.code,
+        bookingCode: bookingData.bookingCode,
         customerName: bookingData.customerName,
         fieldName: bookingData.fieldName,
         branchName: bookingData.branchName,
