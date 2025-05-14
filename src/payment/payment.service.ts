@@ -78,12 +78,12 @@ export class PaymentService {
         gateway: PaymentGateway.ZALOPAY,
         status: PaymentStatus.PENDING,
       }));
-
+      const nowPlus15Mins = new Date(Date.now() + 15 * 60 * 1000);
       await Promise.all([
         this.paymentsRepository.save(paymentList),
         this.fieldBookingsRepository.update(
           { id: bookingInfo[0].id },
-          { latestPaymentDate: new Date() },
+          { latestPaymentDate: nowPlus15Mins },
         ),
       ]);
 
