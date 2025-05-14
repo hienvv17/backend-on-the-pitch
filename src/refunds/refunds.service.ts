@@ -12,6 +12,7 @@ import { getCurrentTimeInUTC7 } from '../utils/helper/date-time.helper';
 import constants from '../config/constants';
 import { UpdateRefundDto } from './dto/update-refund-request.dto';
 import moment from 'moment-timezone';
+import { ProcessRefundDto } from './dto/process-refund.dto';
 
 @Injectable()
 export class RefundsService {
@@ -94,31 +95,40 @@ export class RefundsService {
   async findAll(
     limit: number,
     offset: number,
+    order: string,
+    sortKey?: string,
     status?: string,
     bracnhId?: number,
+    search?: string,
   ) {
     let query = this.refundRepo
       .createQueryBuilder('refund')
-      .innerJoin('field_bookings', 'fb', 'fb.id = refund.fieldBookingId')
-      .innerJoin('users', 'u', 'u.id = refund.userId')
-      .innerJoin('sport_fields', 'sf', 'sf.id = fb.sportFieldId')
+      .innerJoin(
+        'field_bookings',
+        'fieldBooking',
+        'fieldBooking.id = refund.fieldBookingId',
+      )
+      .innerJoin('users', 'user', 'user.id = refund.userId')
+      .innerJoin('sport_fields', 'sf', 'sf.id = fieldBooking.sportFieldId')
       .innerJoin('branches', 'br', 'br.id = sf.branchId')
       .select([
         'refund.id "id"',
-        'refund.fieldBookingId "fieldBookingId"',
-        'refund.userId "userId"',
         'refund.amount "amount"',
         'refund.reason "reason"',
         'refund.adminNote "adminNote"',
         'refund.status "status"',
-        'fb.code "fieldBookingCode"',
-        'fb.bookingDate "bookingDate"',
-        'fb.startTime "startTime"',
-        'fb.endTime "endTime"',
-        'fb.totalPrice "totalPrice"',
-        'u.email "userEmail"',
-        'u.fullName "userName"',
+        'fieldBooking.code "fieldBookingCode"',
+        `TO_CHAR(fieldBooking.bookingDate, 'YYYY-MM-DD') "bookingDate"`,
+        'fieldBooking.startTime "startTime"',
+        'fieldBooking.endTime "endTime"',
+        'fieldBooking.totalPrice "totalPrice"',
+        'fieldBooking.originPrice "originPrice"',
+        'fieldBooking.discountAmount "discountAmount"',
+        'fieldBooking.status "fieldBookingStatus"',
+        'user.email "userEmail"',
+        'user.fullName "userName"',
         'refund.createdAt "createdAt"',
+        'refund.updatedAt "updatedAt"',
         'sf.name "sportFieldName"',
         'sf.id "sportFieldId"',
         'br.name "branchName"',
@@ -130,9 +140,16 @@ export class RefundsService {
     if (bracnhId) {
       query = query.andWhere('br.id = :branchId', { branchId: bracnhId });
     }
+    if (search) {
+      query = query.andWhere(
+        '(u.email ILIKE :search OR u.fullName ILIKE :search OR fb.code ILIKE :search)',
+        { search: `%${search}%` },
+      );
+    }
+    const sortBy = sortKey ?? 'refund.createdAt';
     const [items, count] = await Promise.all([
       query
-        .orderBy('refund.createdAt', 'DESC')
+        .orderBy(sortBy, order as any)
         .take(limit)
         .skip(offset)
         .getRawMany(),
@@ -208,6 +225,11 @@ export class RefundsService {
     await this.refundRepo.update(id, { ...data, updatedAt: new Date() });
     return this.findOne(id);
   }
+
+  // async processRefund(
+  //   id: number,
+  //   dto: ProcessRefundDto
+  // ): Promise<RefundsEntity> {}
 
   async remove(id: number): Promise<void> {
     await this.refundRepo.delete(id);

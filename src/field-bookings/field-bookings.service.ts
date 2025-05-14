@@ -380,7 +380,7 @@ export class FieldBookingsService {
         status: FieldBookingStatus.PENDING,
       })
       .andWhere('booking.userId = :userId', { userId: user.id })
-      .andWhere('booking.sportFieldid= :sportFieldId', {
+      .andWhere('booking.sportFieldId= :sportFieldId', {
         sportFieldId: dto.sportFieldId,
       })
       .andWhere('booking.bookingDate = :bookingDate', {

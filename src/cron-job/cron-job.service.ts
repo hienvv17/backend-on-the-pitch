@@ -93,6 +93,30 @@ export class CronJobService {
         await this.voucherRepo.save(voucher);
       }
     }
+
+    // // Email to user have voucher expired today
+    // const todayVouchers = await this.voucherRepo
+    //   .createQueryBuilder('voucher')
+    //   .innerJoin('users', 'user', 'user.id = voucher.userId')
+    //   .where('voucher.validTo = :today', {
+    //     today: new Date(currentYear, month - 1, _date),
+    //   })
+    //   .andWhere('voucher.status = :status', {
+    //     status: VoucherStatus.ACTIVE,
+    //   })
+    //   .select([
+    //     'user.id "userId"',
+    //     `count(*) "voucherCount"`,
+    //     'user.email "email"',
+    //     'user.fullName "fullName"',
+    //   ])
+    //   .groupBy('user.id')
+    //   .getMany();
+    // reduce to get total number of vouchers  expire to day to users to send email
+    // if (todayVouchers.length > 0) {
+    //   const userIds = todayVouchers.map((voucher) => voucher.userId);
+
+    // email to user have booking must be paid today
   }
 
   // Cron job that runs on the first day of every month at 4 PM

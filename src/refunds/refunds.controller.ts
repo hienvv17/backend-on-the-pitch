@@ -20,6 +20,7 @@ import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 import { ManagerJwtGuard } from '../auth/guard/manager-jwt.guard';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guard/jwt.guard';
+import { ProcessRefundDto } from './dto/process-refund.dto';
 
 @ApiTags('Refunds')
 @Controller('refunds')
@@ -40,18 +41,24 @@ export class RefundsController {
   }
 
   @UseGuards(ManagerJwtGuard)
-  @Get()
+  @Get('manage')
   async findAll(
     @Query('limit') limit: number = 10,
     @Query('offset') offset: number = 0,
+    @Query('order') order: string = 'DESC',
+    @Query('sortKey') sortKey?: string,
     @Query('status') status?: string,
     @Query('bracnhId') bracnhId?: number,
+    @Query('search') search?: string,
   ) {
     const { items, count } = await this.refundsService.findAll(
       limit,
       offset,
+      order,
+      sortKey,
       status,
       bracnhId,
+      search,
     );
     return this.responseService.successResponse({ items, count });
   }
@@ -81,8 +88,8 @@ export class RefundsController {
   //   }
 
   @UseGuards(ManagerJwtGuard)
-  @Put(':id')
-  async update(@Param('id') id: string, @Body() body: UpdateRefundDto) {
+  @Post('process-refund/:id')
+  async processRefund(@Param('id') id: string, @Body() body: ProcessRefundDto) {
     await this.refundsService.update(+id, body);
     return this.responseService.successResponse({
       message: 'Cập nhật yêu cầu hoàn tiền thành công',
