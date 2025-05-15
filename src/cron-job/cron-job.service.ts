@@ -17,6 +17,8 @@ import {
 import { PaymentsEntity, PaymentStatus } from '../entities/payment.entity';
 import constants from '../config/constants';
 import { BookingMailService } from '../mail/mail.service';
+import { RefundsEntity, RefundStatus } from '../entities/refund.entity';
+import { PaymentService } from '../payment/payment.service';
 
 @Injectable()
 export class CronJobService {
@@ -31,7 +33,10 @@ export class CronJobService {
     private fieldBookingRepo: Repository<FieldBookingsEntity>,
     @InjectRepository(PaymentsEntity)
     private paymentRepo: Repository<PaymentsEntity>,
+    @InjectRepository(RefundsEntity)
+    private refundsRepo: Repository<RefundsEntity>,
     private readonly mailService: BookingMailService,
+    private readonly paymentService: PaymentService,
   ) {}
   // Cron job that runs every day at 3 AM
   //test
@@ -201,7 +206,7 @@ export class CronJobService {
     // Generate loyalty vouchers for users who have made total amount bookings last month
   }
 
-  @Cron('*/10 * * * *')
+  @Cron('*/1 * * * *')
   async handleEveryTenMinCron() {
     const now = new Date();
     const fifteenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
@@ -350,7 +355,35 @@ export class CronJobService {
         ),
       );
     }
+    // check refund if is processing update status
+    const processRefundList = await this.refundsRepo.find({
+      where: {
+        status: RefundStatus.PROCESSING,
+      },
+    });
 
+    if (processRefundList.length > 0) {
+      await Promise.all(
+        processRefundList.map(async (refund) => {
+          let status = RefundStatus.PENDING,
+            failedReason = null;
+          const response = await this.paymentService.queryRefundStatus(
+            refund.transactionId,
+          );
+          if (response.return_code === 1) {
+            status = RefundStatus.COMPLETED;
+          }
+          if (response.return_code === 2) {
+            status = RefundStatus.FAILED;
+            failedReason = response.message;
+          }
+          await this.refundsRepo.update(
+            { id: refund.id },
+            { status: status, failedReason: failedReason },
+          );
+        }),
+      );
+    }
     console.log(
       `[Cron] Cancelled ${
         expiredBookings.length

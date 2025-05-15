@@ -28,4 +28,36 @@ export class BookingMailService {
     });
     return;
   }
+
+  async sendRefundSuccessEmail(to: string, bookingData: any) {
+    await this.mailerService.sendMail({
+      to,
+      subject: `Hoàn tiền thành công - ${bookingData.bookingCode}`,
+      template: 'refund-success',
+      context: {
+        customerName: bookingData.customerName,
+        bookingCode: bookingData.bookingCode,
+        refundAmount: bookingData.refundAmount,
+        paymentMethod: 'ZaloPay',
+      },
+    });
+
+    return;
+  }
+
+  async sendRefundRejectEmail(to: string, bookingData: any) {
+    await this.mailerService.sendMail({
+      to,
+      subject: `Từ chối hoàn tiền - ${bookingData.bookingCode}`,
+      template: 'refund-reject',
+      context: {
+        customerName: bookingData.customerName,
+        bookingCode: bookingData.bookingCode,
+        reason:
+          bookingData.rejectReason ?? 'Không đáp ứng điều kiện hoàn tiền.',
+      },
+    });
+
+    return;
+  }
 }
