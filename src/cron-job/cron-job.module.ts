@@ -7,6 +7,8 @@ import { VoucherConfig } from '../entities/voucher-config.entity';
 import { PaymentsEntity } from '../entities/payment.entity';
 import { FieldBookingsEntity } from '../entities/field-bookings.entity';
 import { BookingMailService } from '../mail/mail.service';
+import { RefundsEntity } from '../entities/refund.entity';
+import { PaymentModule } from 'src/payment/payment.module';
 
 @Module({
   imports: [
@@ -16,7 +18,9 @@ import { BookingMailService } from '../mail/mail.service';
       VoucherConfig,
       PaymentsEntity,
       FieldBookingsEntity,
+      RefundsEntity,
     ]),
+    PaymentModule,
   ],
   providers: [CronJobService, BookingMailService],
 })

@@ -9,14 +9,13 @@ import {
   Put,
   UseGuards,
   Query,
+  Request,
 } from '@nestjs/common';
 import { RefundsService } from './refunds.service';
-import { RefundsEntity } from '../entities/refund.entity';
 import { CreateRefundDto } from './dto/create-refund-request.dto';
 import { GetUser } from '../auth/decorator/get-user.decorator';
 import { ResponseService } from '../response/response.service';
 import { UpdateRefundDto } from './dto/update-refund-request.dto';
-import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 import { ManagerJwtGuard } from '../auth/guard/manager-jwt.guard';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guard/jwt.guard';
@@ -89,10 +88,27 @@ export class RefundsController {
 
   @UseGuards(ManagerJwtGuard)
   @Post('process-refund/:id')
-  async processRefund(@Param('id') id: string, @Body() body: ProcessRefundDto) {
-    await this.refundsService.update(+id, body);
+  async processRefund(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() body: ProcessRefundDto,
+  ) {
+    await this.refundsService.processRefund(req, +id, body);
     return this.responseService.successResponse({
-      message: 'Cập nhật yêu cầu hoàn tiền thành công',
+      message: 'Yêu cầu hoàn tiền đã được xử lý thành công',
+    });
+  }
+
+  @UseGuards(ManagerJwtGuard)
+  @Put('reject/:id')
+  async rejectRefund(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Body() body: UpdateRefundDto,
+  ) {
+    await this.refundsService.rejectRefund(req, +id, body);
+    return this.responseService.successResponse({
+      message: 'Yêu cầu hoàn tiền đã được từ chối thành công',
     });
   }
 }

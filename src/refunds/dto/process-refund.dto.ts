@@ -1,16 +1,13 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 import { RefundStatus } from '../../entities/refund.entity';
 
 export class ProcessRefundDto {
   @IsOptional()
-  @IsEnum(RefundStatus)
-  status?: RefundStatus;
-
-  @IsOptional()
   @IsString()
   adminNote?: string;
 
+  @IsPositive()
   @IsNumber()
-  @IsOptional()
-  amount?: number;
+  @IsNotEmpty()
+  amount: number;  // null will full amount
 }

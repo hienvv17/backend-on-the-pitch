@@ -17,6 +17,7 @@ import {
 } from '../entities/field-bookings.entity';
 import * as qs from 'qs';
 import { BookingMailService } from '../mail/mail.service';
+import { RefundsEntity } from '../entities/refund.entity';
 
 @Injectable()
 export class PaymentService {
@@ -33,6 +34,8 @@ export class PaymentService {
     key2: process.env.ZALOPAY_KEY2,
     endpoint: process.env.ZALOPAY_CREATE_ORDER_ENDPOINT,
     queryEndpoint: process.env.ZALOPAY_QUERY_ENDPOINT,
+    refundEndpoint: process.env.ZALOPAY_REFUND_ENDPOINT,
+    queryRefundEndpoint: process.env.ZALOPAY_QUERY_REFUND_ENDPOINT,
   };
 
   async createZaloPayOrder(
@@ -332,6 +335,72 @@ export class PaymentService {
         error?.response?.data || error.message,
       );
       throw error;
+    }
+  }
+
+  async refund(
+    transactionId: string,
+    amount: number,
+    description: string,
+  ): Promise<any> {
+    const timestamp = Date.now();
+    const uid = `${timestamp}${Math.floor(111 + Math.random() * 999)}`;
+
+    const apprRefundId = `${moment().format('YYMMDD')}_${
+      this.config.appid
+    }_${uid}`;
+
+    const data = `${this.config.appid}|${transactionId}|${amount}|${description}|${timestamp}`;
+    const mac = CryptoJS.HmacSHA256(data, this.config.key1).toString();
+
+    const params = {
+      app_id: this.config.appid,
+      apprRefundId,
+      zp_trans_id: transactionId,
+      amount,
+      description,
+      timestamp,
+      mac,
+    };
+    try {
+      const response = await axios.post(this.config.refundEndpoint, null, {
+        params,
+      });
+      return response.data;
+    } catch (error) {
+      console.error(
+        'ZaloPay refund error:',
+        error.response?.data || error.message,
+      );
+      throw new Error('Failed to request ZaloPay refund');
+    }
+  }
+
+  async queryRefundStatus(transactionId: string): Promise<any> {
+    const timestamp = Date.now();
+    const data = `${this.config.appid}|${transactionId}|${timestamp}`;
+    const mac = CryptoJS.HmacSHA256(data, this.config.key1).toString();
+
+    const params = {
+      app_id: this.config.appid,
+      m_refund_id: transactionId,
+      timestamp,
+      mac,
+    };
+
+    try {
+      const response = await axios.post(this.config.endpoint, null, { params });
+      return response.data;
+    } catch (error) {
+      console.error(
+        'ZaloPay query refund error:',
+        error.response?.data || error.message,
+      );
+      return {
+        return_code: 2,
+        return_message: 'Failed to query refund status',
+        data: null,
+      };
     }
   }
 

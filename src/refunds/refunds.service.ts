@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RefundsEntity } from '../entities/refund.entity';
+import { RefundsEntity, RefundStatus } from '../entities/refund.entity';
 import { Repository } from 'typeorm';
 import { CreateRefundDto } from './dto/create-refund-request.dto';
 import {
@@ -13,6 +13,9 @@ import constants from '../config/constants';
 import { UpdateRefundDto } from './dto/update-refund-request.dto';
 import moment from 'moment-timezone';
 import { ProcessRefundDto } from './dto/process-refund.dto';
+import { PaymentStatus } from '../entities/payment.entity';
+import { PaymentService } from '../payment/payment.service';
+import { BookingMailService } from '../mail/mail.service';
 
 @Injectable()
 export class RefundsService {
@@ -23,6 +26,8 @@ export class RefundsService {
     private fieldBookingRepo: Repository<FieldBookingsEntity>,
     @InjectRepository(UsersEntity)
     private usersRepo: Repository<UsersEntity>,
+    private paymentService: PaymentService,
+    private readonly mailService: BookingMailService,
   ) {}
 
   async create(uid: string, dto: CreateRefundDto) {
@@ -226,12 +231,100 @@ export class RefundsService {
     return this.findOne(id);
   }
 
-  // async processRefund(
-  //   id: number,
-  //   dto: ProcessRefundDto
-  // ): Promise<RefundsEntity> {}
+  async processRefund(req: any, id: number, dto: ProcessRefundDto) {
+    const staff = req.staff;
+    const bookingData = await this.refundRepo
+      .createQueryBuilder('rf')
+      .innerJoin('field_bookings', 'fb', 'rf.field_booking_id = fb.id')
+      .innerJoin('payments', 'p', 'p.field_booking_id = b.id')
+      .innerJoin('users', 'u', 'fb.userId = u.id')
+      .where('b.status = :status', {
+        status: FieldBookingStatus.PAID,
+      })
+      .andWhere('rf.id = :id', { id })
+      .andWhere('p.status = :status', {
+        status: PaymentStatus.SUCCESS,
+      })
+      // approve and not process , or failed when process
+      .andWhere('rf.status IN (:...acceptedStatatus)', {
+        acceptedStatatus: [RefundStatus.APPROVED, RefundStatus.FAILED],
+      })
+      .select([
+        'rf.id "refundId"',
+        'fb.totalAmount "totalAmount"',
+        'fb.code "bookingCode"',
+        'p.transactionId "transactionId"',
+        'u.email "userEmail"',
+        'u.fullName "userName"',
+      ])
+      .getRawOne();
+
+    if (!bookingData) {
+      throw new BadRequestException('Dữ liệu yêu cầu hoàn tiền không hợp lệ');
+    }
+
+    if (dto.amount > bookingData.totalAmount) {
+      throw new BadRequestException('Số tiền hoàn trả không hợp lệ');
+    }
+
+    // aprrove refund
+    await this.refundRepo.update(id, {
+      status: RefundStatus.APPROVED,
+      adminNote: dto.adminNote,
+      updatedAt: new Date(),
+      updatedBy: staff.email,
+    });
+
+    const refundResponse = await this.paymentService.refund(
+      bookingData.transactionId,
+      dto.amount,
+      `Refund for booking ${bookingData.bookingCode}`,
+    );
+
+    // failed
+    if (!refundResponse || refundResponse.return_code == 2) {
+      await this.refundRepo.update(id, {
+        status: RefundStatus.FAILED,
+        transactionId: refundResponse?.refund_id,
+        failedReason: refundResponse?.return_message,
+      });
+      throw new BadRequestException(
+        'Giao dịch hoàn tiền không thành công. Hãy thử lại sau.',
+      );
+    }
+    if (refundResponse.return_code == 3) {
+      await this.refundRepo.update(id, {
+        status: RefundStatus.PROCESSING,
+        transactionId: refundResponse?.refund_id,
+      });
+    }
+    if (refundResponse.return_code == 1) {
+      await this.refundRepo.update(id, {
+        status: RefundStatus.COMPLETED,
+        transactionId: refundResponse?.refund_id,
+      });
+
+      await this.mailService.sendRefundSuccessEmail(bookingData.userEmail, {
+        bookingCode: bookingData.bookingCode,
+        customerName: bookingData.userName,
+        refundAmount: dto.amount,
+        paymentMethod: 'ZaloPay',
+      });
+    }
+  }
 
   async remove(id: number): Promise<void> {
     await this.refundRepo.delete(id);
+  }
+
+  async rejectRefund(req: any, id: number, dto: UpdateRefundDto) {
+    const staff = req.staff;
+    await this.refundRepo.update(id, {
+      status: RefundStatus.REJECTED,
+      adminNote: dto.adminNote,
+      updatedAt: new Date(),
+      updatedBy: staff.email,
+    });
+    return;
   }
 }
