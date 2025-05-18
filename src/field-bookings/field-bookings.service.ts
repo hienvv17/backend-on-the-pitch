@@ -23,7 +23,6 @@ import { CheckBookingDto } from './dto/check-booking.dto';
 import { STAFF_ROLE } from '../entities/staffs.entity';
 import { VouchersService } from '../vouchers/vouchers.service';
 import { PaymentService } from '../payment/payment.service';
-import moment, { now } from 'moment';
 import constants from '../config/constants';
 import { PayNowDto } from './dto/pay-now.dto';
 
@@ -222,7 +221,7 @@ export class FieldBookingsService {
     ]);
     const dateToCalDiff = new Date().toISOString();
     // must paid and not refund request
-    // in time to refund
+    // in time to refund;
     const items = data.map((item) => ({
       ...item,
       canRequestRefund:
@@ -597,7 +596,7 @@ export class FieldBookingsService {
     dateToCalDiff: string,
   ) => {
     const bookingDateTime = bookingDate + ' ' + startTime + ':00';
-    const hoursDifference = getTimeDiff(bookingDateTime, dateToCalDiff, 'hour');
+    const hoursDifference = getTimeDiff(dateToCalDiff, bookingDateTime, 'hour');
     return hoursDifference;
   };
 }
