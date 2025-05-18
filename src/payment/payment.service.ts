@@ -32,8 +32,8 @@ export class PaymentService {
   ) {}
   private readonly config = {
     appid: Number(process.env.ZALOPAY_APP_ID),
-    key1: 'sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn',
-    key2: 'trMrHtvjo6myautxDUiAcYsVtaeQ8nhf',
+    key1: process.env.ZALOPAY_KEY1,
+    key2: process.env.ZALOPAY_KEY2,
     endpoint: process.env.ZALOPAY_CREATE_ORDER_ENDPOINT,
     queryEndpoint: process.env.ZALOPAY_QUERY_ENDPOINT,
     refundEndpoint: process.env.ZALOPAY_REFUND_ENDPOINT,
@@ -62,7 +62,7 @@ export class PaymentService {
       embed_data: JSON.stringify(embedData),
       amount,
       description: `Payment for booking ${bookingInfo[0].code} #${transID}`,
-      bank_code: '*',
+      bank_code: 'zalopayapp',
       callback_url:
         'https://develop-backend-on-the-pitch.vercel.app/payment/callback',
     };
@@ -389,13 +389,7 @@ export class PaymentService {
       throw error;
     }
   }
-  // ZaloPay refund response: {
-  //   return_code: 3,
-  //   return_message: 'Giao dịch đang refund!',
-  //   sub_return_code: 2,
-  //   sub_return_message: 'Giao dịch đang refund!',
-  //   refund_id: 250519000000207
-  // }
+
   async queryRefundStatus(appRefundId: string): Promise<any> {
     const timestamp = Date.now();
     const dataGetMac = `${this.config.appid}|${appRefundId}|${timestamp}`;
@@ -417,7 +411,7 @@ export class PaymentService {
 
     try {
       const response$ = this.httpService.post(
-        'https://sb-openapi.zalopay.vn/v2/query_refund',
+        this.config.queryRefundEndpoint,
         data,
         config,
       );
