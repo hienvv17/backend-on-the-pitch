@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import * as CryptoJS from 'crypto-js';
 import moment from 'moment';
 import { BookingDataInterface } from '../field-bookings/field-bookings.service';
@@ -18,7 +18,8 @@ import {
 import * as qs from 'qs';
 import { BookingMailService } from '../mail/mail.service';
 import { RefundsEntity } from '../entities/refund.entity';
-
+import { HttpService } from '@nestjs/axios';
+import { lastValueFrom } from 'rxjs';
 @Injectable()
 export class PaymentService {
   constructor(
@@ -27,6 +28,7 @@ export class PaymentService {
     @InjectRepository(FieldBookingsEntity)
     private fieldBookingsRepository: Repository<FieldBookingsEntity>,
     private readonly mailerService: BookingMailService,
+    private readonly httpService: HttpService,
   ) {}
   private readonly config = {
     appid: Number(process.env.ZALOPAY_APP_ID),
@@ -60,7 +62,7 @@ export class PaymentService {
       embed_data: JSON.stringify(embedData),
       amount,
       description: `Payment for booking ${bookingInfo[0].code} #${transID}`,
-      bank_code: 'zalopayapp',
+      bank_code: '*',
       callback_url:
         'https://develop-backend-on-the-pitch.vercel.app/payment/callback',
     };
@@ -346,71 +348,87 @@ export class PaymentService {
     description: string,
   ): Promise<any> {
     const timestamp = Date.now();
-    const uid = Math.floor(1e9 + Math.random() * 9e9).toString();
+    const uid = Math.random().toString().substr(2, 10); // exactly 10 characters
     const m_refund_id = `${moment().format('YYMMDD')}_${
       this.config.appid
     }_${uid}`;
-    const params: any = {
+
+    const rawData = [
+      this.config.appid,
+      transactionId,
+      amount,
+      description,
+      timestamp,
+    ].join('|');
+
+    const mac = CryptoJS.HmacSHA256(rawData, this.config.key1).toString();
+
+    const body = {
       app_id: this.config.appid,
       m_refund_id,
-      timestamp,
       zp_trans_id: transactionId,
-      amount: amount,
+      amount,
+      timestamp,
       description,
+      mac,
     };
 
-    // app_id|zp_trans_id|amount|description|timestamp
-    const dataToHash = `${params.app_id}|${params.zp_trans_id}|${params.amount}|${params.description}|${params.timestamp}`;
-    console.log('ZaloPay refund data to hash:', dataToHash);
-    params['mac'] = CryptoJS.HmacSHA256(
-      dataToHash,
-      this.config.key1,
-    ).toString();
-    console.log('ZaloPay refund params:', params);
-
+    const response$ = this.httpService.post(this.config.refundEndpoint, body, {
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      maxBodyLength: Infinity,
+    });
     try {
-      const response = await axios.post(
-        'https://sb-openapi.zalopay.vn/v2/refund',
-        null,
-        {
-          params,
-        },
-      );
+      const response = await lastValueFrom(response$);
       console.log('ZaloPay refund response:', response.data);
-      return response.data;
+      return { zaloResponse: response.data, appRefundId: m_refund_id };
     } catch (error) {
-      console.error(
-        'ZaloPay refund error:',
-        error.response?.data || error.message,
-      );
+      console.error('Refund failed:', error?.response?.data || error.message);
+      throw error;
     }
   }
-
-  async queryRefundStatus(transactionId: string): Promise<any> {
+  // ZaloPay refund response: {
+  //   return_code: 3,
+  //   return_message: 'Giao dịch đang refund!',
+  //   sub_return_code: 2,
+  //   sub_return_message: 'Giao dịch đang refund!',
+  //   refund_id: 250519000000207
+  // }
+  async queryRefundStatus(appRefundId: string): Promise<any> {
     const timestamp = Date.now();
-    const data = `${this.config.appid}|${transactionId}|${timestamp}`;
-    const mac = CryptoJS.HmacSHA256(data, this.config.key1).toString();
-
-    const params = {
+    const dataGetMac = `${this.config.appid}|${appRefundId}|${timestamp}`;
+    const mac = CryptoJS.HmacSHA256(dataGetMac, this.config.key1).toString();
+    const data = {
       app_id: this.config.appid,
-      m_refund_id: transactionId,
+      m_refund_id: appRefundId,
       timestamp,
       mac,
     };
 
+    const config: AxiosRequestConfig = {
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      maxBodyLength: Infinity,
+    };
+
     try {
-      const response = await axios.post(this.config.endpoint, null, { params });
+      const response$ = this.httpService.post(
+        'https://sb-openapi.zalopay.vn/v2/query_refund',
+        data,
+        config,
+      );
+      const response = await lastValueFrom(response$);
+      console.log(response.data);
       return response.data;
     } catch (error) {
       console.error(
-        'ZaloPay query refund error:',
-        error.response?.data || error.message,
+        'Query refund error:',
+        error?.response?.data || error.message,
       );
-      return {
-        return_code: 2,
-        return_message: 'Failed to query refund status',
-        data: null,
-      };
     }
   }
 

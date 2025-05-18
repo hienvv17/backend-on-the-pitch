@@ -8,7 +8,8 @@ import { PaymentsEntity } from '../entities/payment.entity';
 import { FieldBookingsEntity } from '../entities/field-bookings.entity';
 import { BookingMailService } from '../mail/mail.service';
 import { RefundsEntity } from '../entities/refund.entity';
-import { PaymentModule } from 'src/payment/payment.module';
+import { PaymentModule } from '../payment/payment.module';
+import { RefundsModule } from '../refunds/refunds.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PaymentModule } from 'src/payment/payment.module';
       RefundsEntity,
     ]),
     PaymentModule,
+    RefundsModule,
   ],
   providers: [CronJobService, BookingMailService],
 })

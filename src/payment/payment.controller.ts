@@ -28,4 +28,12 @@ export class PaymentController {
     );
     return this.responseService.successResponse({ paymentInfo });
   }
+
+  @Get('refund-checking')
+  async checkingRefund() {
+    const paymentInfo = await this.paymentService.queryRefundStatus(
+      '250519_2554_0796506847',
+    );
+    return this.responseService.successResponse({ paymentInfo });
+  }
 }

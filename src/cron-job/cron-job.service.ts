@@ -19,6 +19,7 @@ import constants from '../config/constants';
 import { BookingMailService } from '../mail/mail.service';
 import { RefundsEntity, RefundStatus } from '../entities/refund.entity';
 import { PaymentService } from '../payment/payment.service';
+import { RefundsService } from '../refunds/refunds.service';
 
 @Injectable()
 export class CronJobService {
@@ -37,6 +38,7 @@ export class CronJobService {
     private refundsRepo: Repository<RefundsEntity>,
     private readonly mailService: BookingMailService,
     private readonly paymentService: PaymentService,
+    private readonly refundService: RefundsService,
   ) {}
   // Cron job that runs every day at 3 AM
   //test
@@ -365,25 +367,11 @@ export class CronJobService {
     if (processRefundList.length > 0) {
       await Promise.all(
         processRefundList.map(async (refund) => {
-          let status = RefundStatus.PENDING,
-            failedReason = null;
-          const response = await this.paymentService.queryRefundStatus(
-            refund.transactionId,
-          );
-          if (response.return_code === 1) {
-            status = RefundStatus.COMPLETED;
-          }
-          if (response.return_code === 2) {
-            status = RefundStatus.FAILED;
-            failedReason = response.message;
-          }
-          await this.refundsRepo.update(
-            { id: refund.id },
-            { status: status, failedReason: failedReason },
-          );
+          await this.refundService.updateRefundProcess(refund.id);
         }),
       );
     }
+
     console.log(
       `[Cron] Cancelled ${
         expiredBookings.length

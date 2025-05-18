@@ -234,88 +234,6 @@ export class RefundsService {
     return this.findOne(id);
   }
 
-  async processRefund(req: any, id: number, dto: ProcessRefundDto) {
-    const staff = req.staff;
-    const bookingData = await this.refundRepo
-      .createQueryBuilder('rf')
-      .innerJoin('field_bookings', 'fb', 'rf.field_booking_id = fb.id')
-      .innerJoin('payments', 'p', 'p.field_booking_id = fb.id')
-      .innerJoin('users', 'u', 'fb.userId = u.id')
-      .where('fb.status = :status', {
-        status: FieldBookingStatus.PAID,
-      })
-      .andWhere('rf.id = :id', { id })
-      .andWhere('p.status = :paymentStatus', {
-        paymentStatus: PaymentStatus.SUCCESS,
-      })
-      // approve and not process , or failed when process
-      .andWhere('rf.status IN (:...acceptedStatatus)', {
-        acceptedStatatus: [RefundStatus.APPROVED, RefundStatus.FAILED],
-      })
-      .select([
-        'rf.id "refundId"',
-        'fb.totalPrice "totalPrice"',
-        'fb.code "bookingCode"',
-        'p.transactionId "transactionId"',
-        'u.email "userEmail"',
-        'u.fullName "userName"',
-      ])
-      .getRawOne();
-    console.log('bookingData', bookingData, id, dto);
-    if (!bookingData) {
-      throw new BadRequestException('Dữ liệu yêu cầu hoàn tiền không hợp lệ');
-    }
-
-    if (dto.amount > bookingData.totalPrice) {
-      throw new BadRequestException('Số tiền hoàn trả không hợp lệ');
-    }
-
-    // aprrove refund
-    await this.refundRepo.update(id, {
-      status: RefundStatus.APPROVED,
-      adminNote: dto.adminNote,
-      updatedAt: new Date(),
-      updatedBy: staff.email,
-    });
-
-    const refundResponse = await this.paymentService.refund(
-      bookingData.transactionId,
-      dto.amount,
-      `Refund for booking ${bookingData.bookingCode}`,
-    );
-
-    // failed
-    if (!refundResponse || refundResponse.return_code == 2) {
-      await this.refundRepo.update(id, {
-        status: RefundStatus.FAILED,
-        transactionId: refundResponse?.refund_id,
-        failedReason: refundResponse?.return_message,
-      });
-      throw new BadRequestException(
-        'Giao dịch hoàn tiền không thành công. Hãy thử lại sau.',
-      );
-    }
-    if (refundResponse.return_code == 3) {
-      await this.refundRepo.update(id, {
-        status: RefundStatus.PROCESSING,
-        transactionId: refundResponse?.refund_id,
-      });
-    }
-    if (refundResponse.return_code == 1) {
-      await this.refundRepo.update(id, {
-        status: RefundStatus.COMPLETED,
-        transactionId: refundResponse?.refund_id,
-      });
-
-      await this.mailService.sendRefundSuccessEmail(bookingData.userEmail, {
-        bookingCode: bookingData.bookingCode,
-        customerName: bookingData.userName,
-        refundAmount: dto.amount,
-        paymentMethod: 'ZaloPay',
-      });
-    }
-  }
-
   async acceptRefund(req: any, id: number, dto: ProcessRefundDto) {
     const staff = req.staff;
     const bookingData = await this.refundRepo
@@ -347,6 +265,7 @@ export class RefundsService {
         'u.fullName "userName"',
       ])
       .getRawOne();
+    console.log('bookingData', bookingData, id, dto);
     if (!bookingData) {
       throw new BadRequestException('Dữ liệu yêu cầu hoàn tiền không hợp lệ');
     }
@@ -361,6 +280,8 @@ export class RefundsService {
       adminNote: dto.adminNote,
       updatedAt: new Date(),
       updatedBy: staff.email,
+      amount: dto.amount,
+      paymentMethod: 'ZaloPay',
     });
 
     const refundResponse = await this.paymentService.refund(
@@ -368,28 +289,34 @@ export class RefundsService {
       dto.amount,
       `Refund for booking ${bookingData.bookingCode}`,
     );
-
+    const { zaloResponse, appRefundId } = refundResponse;
     // failed
-    if (!refundResponse || refundResponse.return_code == 2) {
+    if (!zaloResponse || zaloResponse.return_code == 2) {
       await this.refundRepo.update(id, {
         status: RefundStatus.FAILED,
-        transactionId: refundResponse?.refund_id,
-        failedReason: refundResponse?.return_message,
+        transactionId: zaloResponse?.refund_id,
+        failedReason: zaloResponse?.return_message,
+        appRefundId,
+        refundId: zaloResponse?.refund_id,
       });
       throw new BadRequestException(
         'Giao dịch hoàn tiền không thành công. Hãy thử lại sau.',
       );
     }
-    if (refundResponse.return_code == 3) {
+    if (zaloResponse.return_code == 3) {
       await this.refundRepo.update(id, {
         status: RefundStatus.PROCESSING,
-        transactionId: refundResponse?.refund_id,
+        transactionId: zaloResponse?.refund_id,
+        appRefundId,
+        refundId: zaloResponse?.refund_id,
       });
     }
-    if (refundResponse.return_code == 1) {
+    if (zaloResponse.return_code == 1) {
       await this.refundRepo.update(id, {
         status: RefundStatus.COMPLETED,
-        transactionId: refundResponse?.refund_id,
+        transactionId: zaloResponse?.refund_id,
+        appRefundId,
+        refundId: zaloResponse?.refund_id,
       });
 
       await this.mailService.sendRefundSuccessEmail(bookingData.userEmail, {
@@ -413,6 +340,65 @@ export class RefundsService {
       updatedBy: staff.email,
     });
     return;
+  }
+
+  // for cronJob call in
+  async updateRefundProcess(id: number) {
+    const refund = await this.refundRepo
+      .createQueryBuilder('rf')
+      .innerJoin('field_bookings', 'fb', 'rf.field_booking_id = fb.id')
+      .innerJoin('payments', 'p', 'p.field_booking_id = fb.id')
+      .where('rf.id = :id', { id })
+      .andWhere('rf.status = :status', {
+        status: RefundStatus.PROCESSING,
+      })
+      .andWhere('p.status = :paymentStatus', {
+        paymentStatus: PaymentStatus.SUCCESS,
+      })
+      .andWhere('fb.status = :bookingStatus', {
+        bookingStatus: FieldBookingStatus.PAID,
+      })
+      .select([
+        'rf.id "id"',
+        'rf.appRefundId "appRefundId"',
+        'rf.transactionId "transactionId"',
+        'rf.fieldBookingId "fieldBookingId"',
+      ])
+      .getRawOne();
+
+    if (!refund) {
+      console.error('Refund not found or not in PROCESSING status');
+    }
+
+    const refundStatus = await this.paymentService.queryRefundStatus(
+      refund.transactionId,
+    );
+
+    if (!refundStatus) {
+      console.error('Refund status not found');
+      return;
+    }
+
+    if (refundStatus.return_code == 3) {
+      return;
+    }
+    if (refundStatus.return_code == 1) {
+      await this.refundRepo.update(refund.id, {
+        status: RefundStatus.COMPLETED,
+      });
+      await this.fieldBookingRepo.update(refund.fieldBookingId, {
+        status: FieldBookingStatus.REFUND,
+      });
+
+      return;
+    }
+
+    if (refundStatus.return_code == 2) {
+      await this.refundRepo.update(refund.id, {
+        status: RefundStatus.FAILED,
+        failedReason: refundStatus.return_message,
+      });
+    }
   }
 
   getDiffTimeInHours = (
