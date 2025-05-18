@@ -7,10 +7,11 @@ import { VouchersEntity } from '../entities/vouchers.entity';
 import { VoucherConfig } from '../entities/voucher-config.entity';
 import { StaffsModule } from '../staffs/staffs.module';
 import { ResponseModule } from '../response/response.module';
+import { UsersEntity } from '../entities/users.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([VouchersEntity, VoucherConfig]),
+    TypeOrmModule.forFeature([VouchersEntity, VoucherConfig, UsersEntity]),
     StaffsModule,
     ResponseModule,
   ],

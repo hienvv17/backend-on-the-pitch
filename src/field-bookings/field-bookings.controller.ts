@@ -1,4 +1,11 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { ResponseService } from '../response/response.service';
 import { FieldBookingsService } from './field-bookings.service';
 import { CreateBookingDto } from './dto/create-booking-field.dto';
@@ -59,16 +66,14 @@ export class FieldBookingsController {
     });
   }
 
-  // @UseGuards(StaffJwtGuard)
-  @Post('check-booking')
-  async checkBooking(@Body() dto: CheckBookingDto) {
-    const bookingHistories = await this.fieldBookingsService.checkBooking(dto);
-    return this.responseService.successResponse({ bookingHistories });
+  // for staff checkin for user
+  @UseGuards(StaffJwtGuard)
+  @Post('check-in')
+  async checkBooking(@Request() req: any, @Body() body: { code: string }) {
+    const booking = await this.fieldBookingsService.checkBookingCode(
+      req,
+      body.code,
+    );
+    return this.responseService.successResponse({ booking });
   }
-
-  //to do
-  /**
-   * creat review endpoint
-   * think again that staff can see all booking history - or showing only today
-   */
 }

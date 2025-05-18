@@ -1,8 +1,18 @@
 import moment from 'moment-timezone';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 type TimeSlot = { startTime: string; endTime: string };
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(customParseFormat);
 
-export const getCurrentTimeInUTC7 = () => {
-  return moment().tz('Asia/Bangkok').format('YYYY-MM-DD HH:mm');
+export const getCurrentTimeInUTC7 = (format?: string) => {
+  if (!format) {
+    format = 'YYYY-MM-DD HH:mm:ss';
+  }
+  return moment().tz('Asia/Bangkok').format(format);
 };
 
 export const isValidDate = (dateStr: string): boolean => {
@@ -158,3 +168,37 @@ export const isTimeInRange = (
   // Check if the entire interval is within this slot
   return startMin >= slotStart && endMin <= slotEnd;
 };
+
+/**
+ * Convert UTC date string to Vietnam time zone and format it.
+ * @param dateStr - ISO date string from server (e.g., '2025-05-14T14:00:00.000Z')
+ * @param format - Desired format (default: 'YYYY-MM-DD HH:mm:ss')
+ * @returns Vietnam-localized formatted string
+ */
+export function formatToVietnamTime(
+  dateStr: string,
+  format = 'YYYY-MM-DD HH:mm:ss',
+): string {
+  return dayjs.utc(dateStr).tz('Asia/Ho_Chi_Minh').format(format);
+}
+
+/**
+ * Get the difference in minutes between two date strings.
+ * @param date1 First date string (format: 'YYYY-MM-DD HH:mm:ss')
+ * @param date2 Second date string (format: 'YYYY-MM-DD HH:mm:ss')
+ * @returns Difference in minutes (positive if date1 > date2)
+ */
+export function getTimeDiff(
+  date1: string,
+  date2: string,
+  unit: 'minute' | 'hour' | 'day',
+): number {
+  const d1 = dayjs(date1, 'YYYY-MM-DD HH:mm:ss');
+  const d2 = dayjs(date2, 'YYYY-MM-DD HH:mm:ss');
+
+  if (!d1.isValid() || !d2.isValid()) {
+    throw new Error('Invalid date format. Expected "YYYY-MM-DD HH:mm:ss".');
+  }
+
+  return d1.diff(d2, unit);
+}

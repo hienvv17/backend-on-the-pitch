@@ -8,6 +8,7 @@ import {
   Put,
   UseGuards,
   Query,
+  Request,
 } from '@nestjs/common';
 import { VouchersService } from './vouchers.service';
 import { CreateVoucherDto } from './dto/create-voucher.dto';
@@ -38,8 +39,8 @@ export class VouchersController {
 
   @UseGuards(AdminJwtGuard)
   @Post('manual-create')
-  async createManual(@Body() dto: CreateVoucherDto) {
-    await this.vouchersService.createManual(dto);
+  async createManual(@Request() req: any, @Body() dto: CreateVoucherDto) {
+    await this.vouchersService.createManual(req, dto);
     return this.responseService.successResponse();
   }
 
@@ -60,7 +61,7 @@ export class VouchersController {
     return this.responseService.successResponse({ items: config });
   }
 
-  @UseGuards(ManagerJwtGuard)
+  @UseGuards(AdminJwtGuard)
   @Get('manage')
   async findAllVoucher(
     @Query('limit') limit = 20,
@@ -114,5 +115,12 @@ export class VouchersController {
   @Delete('config/:id')
   async deleteConfig(@Param('id') id: string) {
     return this.vouchersService.removeConfig(+id);
+  }
+
+  @UseGuards(ManagerJwtGuard)
+  @Delete(':id')
+  async delete(@Param('id') id: string) {
+    await this.vouchersService.delete(+id);
+    return this.responseService.successResponse();
   }
 }
