@@ -91,7 +91,8 @@ export class RefundsService {
       );
     }
     const refund = this.refundRepo.create({
-      ...dto,
+      fieldBookingId: fieldBooking.id,
+      reason: dto.reason,
       userId: fieldBooking.userId,
       amount: fieldBooking.totalPrice,
     });
