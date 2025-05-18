@@ -371,7 +371,7 @@ export class RefundsService {
     }
 
     const refundStatus = await this.paymentService.queryRefundStatus(
-      refund.transactionId,
+      refund.appRefundId,
     );
 
     if (!refundStatus) {
@@ -382,6 +382,7 @@ export class RefundsService {
     if (refundStatus.return_code == 3) {
       return;
     }
+    console.log('refundStatus', refundStatus);
     if (refundStatus.return_code == 1) {
       await this.refundRepo.update(refund.id, {
         status: RefundStatus.COMPLETED,
