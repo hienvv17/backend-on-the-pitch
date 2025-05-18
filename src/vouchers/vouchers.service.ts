@@ -12,6 +12,7 @@ import {
 import { VoucherConfig } from '../entities/voucher-config.entity';
 import { CreateVoucherConfigDto } from './dto/create-voucher-config';
 import { UpdateVoucherConfigDto } from './dto/update-voucher-config';
+import { UsersEntity } from '../entities/users.entity';
 
 @Injectable()
 export class VouchersService {
@@ -20,6 +21,8 @@ export class VouchersService {
     private readonly voucherRepo: Repository<VouchersEntity>,
     @InjectRepository(VoucherConfig)
     private readonly voucherConfigRepo: Repository<VoucherConfig>,
+    @InjectRepository(UsersEntity)
+    private readonly userRepo: Repository<UsersEntity>,
   ) {}
 
   async create(dto: CreateVoucherDto) {
@@ -27,10 +30,19 @@ export class VouchersService {
     return this.voucherRepo.save(voucher);
   }
 
-  async createManual(dto: CreateVoucherDto) {
+  async createManual(req, dto: CreateVoucherDto) {
+    // check if user exists
+    const user = await this.userRepo.findOne({
+      where: { email: dto.email },
+    });
+    if (!user) {
+      throw new BadRequestException('Users không tồn tại');
+    }
     const voucher = this.voucherRepo.create({
       ...dto,
+      userId: user.id,
       type: VoucherType.MANUAL,
+      createdBy: req.staff.email,
     });
     return this.voucherRepo.save(voucher);
   }
@@ -71,7 +83,8 @@ export class VouchersService {
         'fb.code "bookingCode"',
         'fb.bookingDate "bookingDate"',
         'voucher.minBookingAmount "minBookingAmount"',
-      ]);
+      ])
+      .where('voucher.isDeleted = false');
 
     if (status) {
       query.andWhere('voucher.status = :status', { status });
@@ -202,5 +215,16 @@ export class VouchersService {
       { code: voucherCode },
       { status: VoucherStatus.ACTIVE },
     );
+  }
+
+  async delete(id: number) {
+    const voucher = await this.voucherRepo.findOneBy({ id });
+    if (!voucher) {
+      throw new BadRequestException('Voucher not found');
+    }
+    if (voucher.status !== VoucherStatus.ACTIVE) {
+      throw new BadRequestException('Voucher is not active');
+    }
+    return this.voucherRepo.update(id, { isDeleted: true });
   }
 }

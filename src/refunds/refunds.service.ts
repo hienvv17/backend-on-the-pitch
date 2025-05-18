@@ -16,6 +16,7 @@ import { ProcessRefundDto } from './dto/process-refund.dto';
 import { PaymentStatus } from '../entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { BookingMailService } from '../mail/mail.service';
+import { STAFF_ROLE } from 'src/entities/staffs.entity';
 
 @Injectable()
 export class RefundsService {
@@ -98,6 +99,7 @@ export class RefundsService {
   }
 
   async findAll(
+    req: any,
     limit: number,
     offset: number,
     order: string,
@@ -106,6 +108,8 @@ export class RefundsService {
     bracnhId?: number,
     search?: string,
   ) {
+    const staff = req.staff;
+
     let query = this.refundRepo
       .createQueryBuilder('refund')
       .innerJoin(
@@ -150,6 +154,11 @@ export class RefundsService {
         '(u.email ILIKE :search OR u.fullName ILIKE :search OR fb.code ILIKE :search)',
         { search: `%${search}%` },
       );
+    }
+    if (staff.role !== STAFF_ROLE.ADMIN) {
+      query = query.andWhere('br.id = :branchId', {
+        branchId: staff.branchId.map(Number),
+      });
     }
     const sortBy = sortKey ?? 'refund.createdAt';
     const [items, count] = await Promise.all([

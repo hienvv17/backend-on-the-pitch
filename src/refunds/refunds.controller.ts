@@ -42,6 +42,7 @@ export class RefundsController {
   @UseGuards(ManagerJwtGuard)
   @Get('manage')
   async findAll(
+    @Request() req: any,
     @Query('limit') limit: number = 10,
     @Query('offset') offset: number = 0,
     @Query('order') order: string = 'DESC',
@@ -51,6 +52,7 @@ export class RefundsController {
     @Query('search') search?: string,
   ) {
     const { items, count } = await this.refundsService.findAll(
+      req,
       limit,
       offset,
       order,

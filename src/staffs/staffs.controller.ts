@@ -52,9 +52,8 @@ export class StaffsController {
     @Query('search') search?: string,
     @Query('branchId') branchId?: number,
   ) {
-    const manager = req.staff;
     const { items, count } = await this.staffsService.getAll(
-      manager,
+      req,
       limit,
       offset,
       order,

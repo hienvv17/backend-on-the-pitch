@@ -19,6 +19,7 @@ export const FieldBookingStatus = {
   PENDING_PAYMENT: 'PENDING_PAYMENT',
   PAID: 'PAID',
   REFUND: 'REFUND',
+  CHECK_IN: 'CHECK_IN',
 } as const;
 
 @Entity('field_bookings')
@@ -84,9 +85,20 @@ export class FieldBookingsEntity {
   @OneToMany(() => RefundsEntity, (refund) => refund.fieldBooking)
   refunds: RefundsEntity[];
 
-  @CreateDateColumn({ name: 'created_at' })
+  @Column({ type: 'varchar', name: 'check_in_by', nullable: true })
+  checkInBy: boolean;
+
+  @CreateDateColumn({
+    name: 'created_at',
+    default: () => 'CURRENT_TIMESTAMP',
+    type: 'timestamp',
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    default: () => 'CURRENT_TIMESTAMP',
+    type: 'timestamp',
+  })
   updatedAt: Date;
 }

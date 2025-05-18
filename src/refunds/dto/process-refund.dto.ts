@@ -1,4 +1,11 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+} from 'class-validator';
 import { RefundStatus } from '../../entities/refund.entity';
 
 export class ProcessRefundDto {
@@ -9,5 +16,5 @@ export class ProcessRefundDto {
   @IsPositive()
   @IsNumber()
   @IsNotEmpty()
-  amount: number;  // null will full amount
+  amount: number; // null will full amount
 }

@@ -138,7 +138,7 @@ export class StaffsService {
   }
 
   async getAll(
-    manager: Partial<StaffsEntity>,
+    req: any,
     limit: number,
     offset: number,
     order: string,
@@ -146,7 +146,6 @@ export class StaffsService {
     branchId?: number,
     search: string = '',
   ) {
-    const role = manager.role;
     let query = this.staffRepository
       .createQueryBuilder('staff')
       .leftJoin(
@@ -182,8 +181,13 @@ export class StaffsService {
       .groupBy('staff.id');
     const sortBy = sortKey || 'staff.createdAt';
     query = query.orderBy(sortBy, order as any);
+    const staff = req.staff;
+    const { role, branchIds } = staff;
     if (role !== STAFF_ROLE.ADMIN) {
       query = query.andWhere('s.role != :role', { role: STAFF_ROLE.ADMIN });
+      query = query.andWhere('sb.branch_id IN (:...branchIds)', {
+        branchIds: branchIds.map(Number),
+      });
     }
     const count = await query.getCount();
 

@@ -13,7 +13,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { CreateBookingDto } from './dto/create-booking-field.dto';
 import { GetBookingHistoryDto } from './dto/get-booking-history.dto';
 import {
+  formatToVietnamTime,
   getCurrentTimeInUTC7,
+  getTimeDiff,
   isInServiceTime,
 } from '../utils/helper/date-time.helper';
 import { GetPersonalBookingHistoryDto } from './dto/get-personal-booking-history.dto';
@@ -21,7 +23,7 @@ import { CheckBookingDto } from './dto/check-booking.dto';
 import { STAFF_ROLE } from '../entities/staffs.entity';
 import { VouchersService } from '../vouchers/vouchers.service';
 import { PaymentService } from '../payment/payment.service';
-import moment from 'moment';
+import moment, { now } from 'moment';
 import constants from '../config/constants';
 import { PayNowDto } from './dto/pay-now.dto';
 
@@ -218,7 +220,9 @@ export class FieldBookingsService {
       query.getRawMany(),
       query.getCount(),
     ]);
-    const dateToCalDiff = new Date(getCurrentTimeInUTC7());
+    const dateToCalDiff = new Date().toISOString();
+    // must paid and not refund request
+    // in time to refund
     const items = data.map((item) => ({
       ...item,
       canRequestRefund:
@@ -226,9 +230,8 @@ export class FieldBookingsService {
         item.status === FieldBookingStatus.PAID &&
         this.getDiffTimeInHours(
           item.bookingDate,
-          dateToCalDiff,
           item.startTime,
-          item.endTime,
+          dateToCalDiff,
         ) < minRefundTime,
     }));
     return { items, count };
@@ -510,6 +513,71 @@ export class FieldBookingsService {
   //    */
   // }
 
+  async checkBookingCode(req: any, code: string) {
+    const now = new Date().toISOString();
+    const currentTime = formatToVietnamTime(now, 'YYYY-MM-DD HH:mm:ss');
+    const staff = req.staff;
+    let query = this.getBookingQuery();
+
+    if (staff.role !== STAFF_ROLE.ADMIN) {
+      console.log('staff role', staff);
+      query = query.where('br.id = :branchId', {
+        branchId: staff.branchids.map(Number),
+      });
+    }
+    const booking = await query
+      .where('fb.code = :code', { code })
+      .andWhere('fb.status IN (:...status)', {
+        status: [FieldBookingStatus.PAID, FieldBookingStatus.CHECK_IN],
+      })
+      .select([
+        'fb.id "id"',
+        'fb.code "code"',
+        'fb.userId "userId"',
+        'fb.sportFieldId "sportFieldId"',
+        'sf.name "sportFieldName"',
+        `TO_CHAR(fb.bookingDate, 'YYYY-MM-DD') "bookingDate"`,
+        'fb.status "status"',
+        'fb.startTime "startTime"',
+        'fb.endTime "endTime"',
+        'fb.status "status"',
+        'u.email  "userEmail"',
+        'u.phoneNumber "phoneNumber"',
+        'fb.updatedAt "updatedAt"',
+      ])
+      .getRawOne();
+
+    if (!booking) {
+      throw new BadRequestException('Booking code is not valid');
+    }
+    // checking valid is before max 30 minutes
+    // and after 30 minutes
+    const bookingStart = booking.bookingDate + ' ' + booking.startTime + ':00';
+    const bookingEnd = booking.bookingDate + ' ' + booking.endTime + ':00';
+
+    const diffStartTime = getTimeDiff(currentTime, bookingStart, 'minute');
+    const diffEndTime = getTimeDiff(currentTime, bookingEnd, 'minute');
+    if (diffStartTime < 30) {
+      throw new BadRequestException(
+        'Chưa đến thời gian check in sân, vui lòng quay lại sau',
+      );
+    }
+    if (diffEndTime > 30) {
+      throw new BadRequestException(
+        'Thời gian check in sân đã hết, vui lòng liên hệ với quản lý',
+      );
+    }
+    // return booking if already check in and not update
+    if (booking.status === FieldBookingStatus.CHECK_IN) {
+      return booking;
+    }
+
+    await this.fieldBookingRepo.update(
+      { code: booking.code },
+      { status: FieldBookingStatus.CHECK_IN, checkInBy: staff.email },
+    );
+    return booking;
+  }
   generateBookingCode(): string {
     return 'OTP-' + uuidv4().split('-')[0].toUpperCase();
   }
@@ -525,24 +593,11 @@ export class FieldBookingsService {
 
   getDiffTimeInHours = (
     bookingDate: string,
-    dateToCalDiff: Date,
     startTime: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    endTime: string,
+    dateToCalDiff: string,
   ) => {
-    const base = moment.utc(bookingDate).tz('Asia/Bangkok');
-    // Combine the time
-    const [hours, minutes] = startTime.split(':').map(Number);
-    const _bookingDate = base
-      .set({
-        hour: hours,
-        minute: minutes,
-        second: 0,
-        millisecond: 0,
-      })
-      .toDate();
-    const timeDifference = dateToCalDiff.getTime() - _bookingDate.getTime();
-    const hoursDifference = timeDifference / (1000 * 60 * 60);
+    const bookingDateTime = bookingDate + ' ' + startTime + ':00';
+    const hoursDifference = getTimeDiff(bookingDateTime, dateToCalDiff, 'hour');
     return hoursDifference;
   };
 }
