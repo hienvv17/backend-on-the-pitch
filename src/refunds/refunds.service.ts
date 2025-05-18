@@ -239,14 +239,14 @@ export class RefundsService {
     const bookingData = await this.refundRepo
       .createQueryBuilder('rf')
       .innerJoin('field_bookings', 'fb', 'rf.field_booking_id = fb.id')
-      .innerJoin('payments', 'p', 'p.field_booking_id = b.id')
+      .innerJoin('payments', 'p', 'p.field_booking_id = fb.id')
       .innerJoin('users', 'u', 'fb.userId = u.id')
-      .where('b.status = :status', {
+      .where('fb.status = :status', {
         status: FieldBookingStatus.PAID,
       })
       .andWhere('rf.id = :id', { id })
-      .andWhere('p.status = :status', {
-        status: PaymentStatus.SUCCESS,
+      .andWhere('p.status = :paymentStatus', {
+        paymentStatus: PaymentStatus.SUCCESS,
       })
       // approve and not process , or failed when process
       .andWhere('rf.status IN (:...acceptedStatatus)', {
@@ -254,19 +254,19 @@ export class RefundsService {
       })
       .select([
         'rf.id "refundId"',
-        'fb.totalAmount "totalAmount"',
+        'fb.totalPrice "totalPrice"',
         'fb.code "bookingCode"',
         'p.transactionId "transactionId"',
         'u.email "userEmail"',
         'u.fullName "userName"',
       ])
       .getRawOne();
-
+    console.log('bookingData', bookingData, id, dto);
     if (!bookingData) {
       throw new BadRequestException('Dữ liệu yêu cầu hoàn tiền không hợp lệ');
     }
 
-    if (dto.amount > bookingData.totalAmount) {
+    if (dto.amount > bookingData.totalPrice) {
       throw new BadRequestException('Số tiền hoàn trả không hợp lệ');
     }
 
@@ -316,6 +316,90 @@ export class RefundsService {
     }
   }
 
+  async acceptRefund(req: any, id: number, dto: ProcessRefundDto) {
+    const staff = req.staff;
+    const bookingData = await this.refundRepo
+      .createQueryBuilder('rf')
+      .innerJoin('field_bookings', 'fb', 'rf.field_booking_id = fb.id')
+      .innerJoin('payments', 'p', 'p.field_booking_id = fb.id')
+      .innerJoin('users', 'u', 'fb.userId = u.id')
+      .where('fb.status = :status', {
+        status: FieldBookingStatus.PAID,
+      })
+      .andWhere('rf.id = :id', { id })
+      .andWhere('p.status = :paymentStatus', {
+        paymentStatus: PaymentStatus.SUCCESS,
+      })
+      // approve and not process , or failed when process
+      .andWhere('rf.status IN (:...acceptedStatatus)', {
+        acceptedStatatus: [
+          RefundStatus.APPROVED,
+          RefundStatus.FAILED,
+          RefundStatus.PENDING,
+        ],
+      })
+      .select([
+        'rf.id "refundId"',
+        'fb.totalPrice "totalPrice"',
+        'fb.code "bookingCode"',
+        'p.transactionId "transactionId"',
+        'u.email "userEmail"',
+        'u.fullName "userName"',
+      ])
+      .getRawOne();
+    if (!bookingData) {
+      throw new BadRequestException('Dữ liệu yêu cầu hoàn tiền không hợp lệ');
+    }
+
+    if (dto.amount > bookingData.totalPrice) {
+      throw new BadRequestException('Số tiền hoàn trả không hợp lệ');
+    }
+
+    // aprrove refund
+    await this.refundRepo.update(id, {
+      status: RefundStatus.APPROVED,
+      adminNote: dto.adminNote,
+      updatedAt: new Date(),
+      updatedBy: staff.email,
+    });
+
+    const refundResponse = await this.paymentService.refund(
+      bookingData.transactionId,
+      dto.amount,
+      `Refund for booking ${bookingData.bookingCode}`,
+    );
+
+    // failed
+    if (!refundResponse || refundResponse.return_code == 2) {
+      await this.refundRepo.update(id, {
+        status: RefundStatus.FAILED,
+        transactionId: refundResponse?.refund_id,
+        failedReason: refundResponse?.return_message,
+      });
+      throw new BadRequestException(
+        'Giao dịch hoàn tiền không thành công. Hãy thử lại sau.',
+      );
+    }
+    if (refundResponse.return_code == 3) {
+      await this.refundRepo.update(id, {
+        status: RefundStatus.PROCESSING,
+        transactionId: refundResponse?.refund_id,
+      });
+    }
+    if (refundResponse.return_code == 1) {
+      await this.refundRepo.update(id, {
+        status: RefundStatus.COMPLETED,
+        transactionId: refundResponse?.refund_id,
+      });
+
+      await this.mailService.sendRefundSuccessEmail(bookingData.userEmail, {
+        bookingCode: bookingData.bookingCode,
+        customerName: bookingData.userName,
+        refundAmount: dto.amount,
+        paymentMethod: 'ZaloPay',
+      });
+    }
+  }
   async remove(id: number): Promise<void> {
     await this.refundRepo.delete(id);
   }

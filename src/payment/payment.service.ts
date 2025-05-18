@@ -30,8 +30,8 @@ export class PaymentService {
   ) {}
   private readonly config = {
     appid: Number(process.env.ZALOPAY_APP_ID),
-    key1: process.env.ZALOPAY_KEY1,
-    key2: process.env.ZALOPAY_KEY2,
+    key1: 'sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn',
+    key2: 'trMrHtvjo6myautxDUiAcYsVtaeQ8nhf',
     endpoint: process.env.ZALOPAY_CREATE_ORDER_ENDPOINT,
     queryEndpoint: process.env.ZALOPAY_QUERY_ENDPOINT,
     refundEndpoint: process.env.ZALOPAY_REFUND_ENDPOINT,
@@ -114,6 +114,7 @@ export class PaymentService {
         result['returnmessage'] = 'mac not equal';
       } else {
         const data = JSON.parse(dataStr);
+        console.log('ZaloPay callback data:', data);
         const apptransid = data.apptransid;
         // TODO: Update payment status in DB using `apptransid`
         const payment = await this.paymentsRepository
@@ -255,6 +256,7 @@ export class PaymentService {
         },
       );
       const data = response.data;
+      console.log('ZaloPay query response:', data);
       if (data.return_code !== 1) {
         // update payment status before
         if (payment.status !== PaymentStatus.PENDING) {
@@ -344,35 +346,43 @@ export class PaymentService {
     description: string,
   ): Promise<any> {
     const timestamp = Date.now();
-    const uid = `${timestamp}${Math.floor(111 + Math.random() * 999)}`;
-
-    const apprRefundId = `${moment().format('YYMMDD')}_${
+    const uid = Math.floor(1e9 + Math.random() * 9e9).toString();
+    const m_refund_id = `${moment().format('YYMMDD')}_${
       this.config.appid
     }_${uid}`;
-
-    const data = `${this.config.appid}|${transactionId}|${amount}|${description}|${timestamp}`;
-    const mac = CryptoJS.HmacSHA256(data, this.config.key1).toString();
-
-    const params = {
+    const params: any = {
       app_id: this.config.appid,
-      apprRefundId,
-      zp_trans_id: transactionId,
-      amount,
-      description,
+      m_refund_id,
       timestamp,
-      mac,
+      zp_trans_id: transactionId,
+      amount: amount,
+      description,
     };
+
+    // app_id|zp_trans_id|amount|description|timestamp
+    const dataToHash = `${params.app_id}|${params.zp_trans_id}|${params.amount}|${params.description}|${params.timestamp}`;
+    console.log('ZaloPay refund data to hash:', dataToHash);
+    params['mac'] = CryptoJS.HmacSHA256(
+      dataToHash,
+      this.config.key1,
+    ).toString();
+    console.log('ZaloPay refund params:', params);
+
     try {
-      const response = await axios.post(this.config.refundEndpoint, null, {
-        params,
-      });
+      const response = await axios.post(
+        'https://sb-openapi.zalopay.vn/v2/refund',
+        null,
+        {
+          params,
+        },
+      );
+      console.log('ZaloPay refund response:', response.data);
       return response.data;
     } catch (error) {
       console.error(
         'ZaloPay refund error:',
         error.response?.data || error.message,
       );
-      throw new Error('Failed to request ZaloPay refund');
     }
   }
 

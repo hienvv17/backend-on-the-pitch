@@ -95,7 +95,7 @@ export class RefundsController {
     @Param('id') id: string,
     @Body() body: ProcessRefundDto,
   ) {
-    await this.refundsService.processRefund(req, +id, body);
+    await this.refundsService.acceptRefund(req, +id, body);
     return this.responseService.successResponse({
       message: 'Yêu cầu hoàn tiền đã được xử lý thành công',
     });
