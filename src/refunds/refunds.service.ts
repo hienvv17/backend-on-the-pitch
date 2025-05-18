@@ -8,7 +8,10 @@ import {
   FieldBookingStatus,
 } from '../entities/field-bookings.entity';
 import { UsersEntity } from '../entities/users.entity';
-import { getCurrentTimeInUTC7 } from '../utils/helper/date-time.helper';
+import {
+  getCurrentTimeInUTC7,
+  getTimeDiff,
+} from '../utils/helper/date-time.helper';
 import constants from '../config/constants';
 import { UpdateRefundDto } from './dto/update-refund-request.dto';
 import moment from 'moment-timezone';
@@ -60,23 +63,14 @@ export class RefundsService {
       throw new BadRequestException('Yêu cầu hoàn tiền không hợp lệ.');
     }
     // Check if bookingDate is within refund time configuration
-    const currentDate = new Date(getCurrentTimeInUTC7());
-
-    const base = moment.utc(fieldBooking.bookingDate).tz('Asia/Bangkok');
-    // Combine the time
-    const [hours, minutes] = fieldBooking.startTime.split(':').map(Number);
-    const bookingDate = base
-      .set({
-        hour: hours,
-        minute: minutes,
-        second: 0,
-        millisecond: 0,
-      })
-      .toDate();
-    const timeDifference = currentDate.getTime() - bookingDate.getTime();
-    const hoursDifference = timeDifference / (1000 * 60 * 60);
-
-    if (hoursDifference > minRefundTime) {
+    // Combine the times
+    const dateToCalDiff = new Date().toISOString();
+    const difference = this.getDiffTimeInHours(
+      fieldBooking.bookingDate,
+      fieldBooking.startTime,
+      dateToCalDiff,
+    );
+    if (difference > minRefundTime) {
       throw new BadRequestException(
         `Bạn chỉ có thể yêu cầu hoàn tiền trễ nhất sau ${minRefundTime} giờ so với thời gian đã đặt.`,
       );
@@ -91,10 +85,9 @@ export class RefundsService {
       );
     }
     const refund = this.refundRepo.create({
-      fieldBookingId: fieldBooking.id,
+      fieldBookingId: dto.fieldBookingId,
       reason: dto.reason,
       userId: fieldBooking.userId,
-      amount: fieldBooking.totalPrice,
     });
     return await this.refundRepo.save(refund);
   }
@@ -337,4 +330,14 @@ export class RefundsService {
     });
     return;
   }
+
+  getDiffTimeInHours = (
+    bookingDate: string,
+    startTime: string,
+    dateToCalDiff: string,
+  ) => {
+    const bookingDateTime = bookingDate + ' ' + startTime + ':00';
+    const hoursDifference = getTimeDiff(dateToCalDiff, bookingDateTime, 'hour');
+    return hoursDifference;
+  };
 }

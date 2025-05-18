@@ -23,13 +23,13 @@ export class RefundsEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'field_booking_id' })
+  @Column({ name: 'field_booking_id', type: 'int', nullable: false })
   fieldBookingId: number;
 
   @Column({ name: 'app_refund_id', nullable: true, type: 'varchar' })
   appRefundId: string;
 
-  @Column({ name: 'app_refund_id', nullable: true, type: 'varchar' })
+  @Column({ name: 'refund_id', nullable: true, type: 'varchar' })
   refundId: string; // return from zaloPay to call back checking
 
   @Column({ name: 'user_id' })
