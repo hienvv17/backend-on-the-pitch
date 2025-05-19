@@ -32,7 +32,7 @@ export class RefundsService {
     private usersRepo: Repository<UsersEntity>,
     private paymentService: PaymentService,
     private readonly mailService: BookingMailService,
-  ) {}
+  ) { }
 
   async create(uid: string, dto: CreateRefundDto) {
     // Check if the field booking exists with PAID status
@@ -319,13 +319,6 @@ export class RefundsService {
         appRefundId,
         refundId: zaloResponse?.refund_id,
       });
-
-      await this.mailService.sendRefundSuccessEmail(bookingData.userEmail, {
-        bookingCode: bookingData.bookingCode,
-        customerName: bookingData.userName,
-        refundAmount: dto.amount,
-        paymentMethod: 'ZaloPay',
-      });
     }
   }
   async remove(id: number): Promise<void> {
@@ -334,11 +327,38 @@ export class RefundsService {
 
   async rejectRefund(req: any, id: number, dto: UpdateRefundDto) {
     const staff = req.staff;
+    const refund = await this.refundRepo.createQueryBuilder('rf')
+      .innerJoin('field_bookings', 'fb', 'rf.field_booking_id = fb.id')
+      .innerJoin('users', 'u', 'fb.userId = u.id')
+      .where('rf.id = :id', { id })
+      .where('rf.status = :status', {
+        status: RefundStatus.PENDING,
+      })
+      .select([
+        'rf.id "refundId"',
+        'fb.totalPrice "totalPrice"',
+        'fb.code "bookingCode"',
+        'u.email "userEmail"',
+        'u.fullName "userName"',
+      ])
+      .getRawOne();
+    if (!refund) {
+      throw new BadRequestException('Yêu cầu hoàn tiền không hợp lệ, hoặc đã được xử lý.');
+    }
     await this.refundRepo.update(id, {
       status: RefundStatus.REJECTED,
       adminNote: dto.adminNote,
       updatedAt: new Date(),
       updatedBy: staff.email,
+    });
+    await this.mailService.sendRefundRejectEmail(refund.userEmail, {
+      bookingCode: refund.bookingCode,
+      customerName: refund.userName ?? refund.userEmail,
+      reason: dto.adminNote,
+    }).then(() => {
+      this.refundRepo.update(id, {
+        sentMail: true,
+      });
     });
     return;
   }
@@ -364,6 +384,13 @@ export class RefundsService {
         'rf.appRefundId "appRefundId"',
         'rf.transactionId "transactionId"',
         'rf.fieldBookingId "fieldBookingId"',
+        'rf.userId "userId"',
+        'rf.amount "amount"',
+        'rf.reason "reason"',
+        'fb.code "bookingCode"',
+        'fb.totalPrice "totalPrice"',
+        'u.email "userEmail"',
+        'u.fullName "userName"',
       ])
       .getRawOne();
 
@@ -390,6 +417,18 @@ export class RefundsService {
       });
       await this.fieldBookingRepo.update(refund.fieldBookingId, {
         status: FieldBookingStatus.REFUND,
+      });
+      // sent mail to customer
+
+      await this.mailService.sendRefundSuccessEmail(refund.userEmail, {
+        bookingCode: refund.bookingCode,
+        customerName: refund.userName ?? refund.userEmail,
+        refundAmount: refund.amount,
+        paymentMethod: 'ZaloPay',
+      }).then(() => {
+        this.refundRepo.update(refund.id, {
+          sentMail: true,
+        });
       });
 
       return;

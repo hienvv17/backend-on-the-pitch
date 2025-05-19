@@ -66,6 +66,9 @@ export class RefundsEntity {
   @Column({ type: 'varchar', nullable: true, name: 'updated_by' })
   updatedBy: string;
 
+  @Column({ type: 'boolean', name: 'sent_mail', default: false })
+  sentMail: boolean;
+
   @CreateDateColumn({
     name: 'created_at',
     type: 'timestamp',
