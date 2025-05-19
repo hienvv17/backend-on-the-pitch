@@ -205,9 +205,9 @@ export class CronJobService {
     // Generate loyalty vouchers for users who have made total amount bookings last month
   }
 
-  @Cron('*/10 * * * *')
-  async handleEveryTenMinCron() {
-    console.log('Start cron job every 10 minutes');
+  @Cron('*/3 * * * *')
+  async handleEveryThreeMinutesCron() {
+    console.log('Start cron job every 3 minutes');
     const now = new Date();
     const fifteenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
