@@ -19,7 +19,7 @@ import { ProcessRefundDto } from './dto/process-refund.dto';
 import { PaymentStatus } from '../entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { BookingMailService } from '../mail/mail.service';
-import { STAFF_ROLE } from 'src/entities/staffs.entity';
+import { STAFF_ROLE } from '../entities/staffs.entity';
 
 @Injectable()
 export class RefundsService {
