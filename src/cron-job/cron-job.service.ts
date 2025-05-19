@@ -17,8 +17,7 @@ import {
 import { PaymentsEntity, PaymentStatus } from '../entities/payment.entity';
 import constants from '../config/constants';
 import { BookingMailService } from '../mail/mail.service';
-import { RefundsEntity, RefundStatus } from '../entities/refund.entity';
-import { PaymentService } from '../payment/payment.service';
+import { RefundsEntity } from '../entities/refund.entity';
 import { RefundsService } from '../refunds/refunds.service';
 
 @Injectable()
@@ -35,9 +34,7 @@ export class CronJobService {
     @InjectRepository(PaymentsEntity)
     private paymentRepo: Repository<PaymentsEntity>,
     @InjectRepository(RefundsEntity)
-    private refundsRepo: Repository<RefundsEntity>,
     private readonly mailService: BookingMailService,
-    private readonly paymentService: PaymentService,
     private readonly refundService: RefundsService,
   ) {}
   // Cron job that runs every day at 3 AM
@@ -358,21 +355,7 @@ export class CronJobService {
         ),
       );
     }
-    // check refund if is processing update status
-    const processRefundList = await this.refundsRepo.find({
-      where: {
-        status: RefundStatus.PROCESSING,
-      },
-    });
-
-    if (processRefundList.length > 0) {
-      await Promise.allSettled(
-        processRefundList.map((refund) => {
-          this.refundService.updateRefundProcess(refund.id);
-        }),
-      );
-    }
-
+    await this.refundService.updateRefundProcess();
     console.log(
       `[Cron] Cancelled ${
         expiredBookings.length

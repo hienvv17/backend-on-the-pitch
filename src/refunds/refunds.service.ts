@@ -8,13 +8,9 @@ import {
   FieldBookingStatus,
 } from '../entities/field-bookings.entity';
 import { UsersEntity } from '../entities/users.entity';
-import {
-  getCurrentTimeInUTC7,
-  getTimeDiff,
-} from '../utils/helper/date-time.helper';
+import { getTimeDiff } from '../utils/helper/date-time.helper';
 import constants from '../config/constants';
 import { UpdateRefundDto } from './dto/update-refund-request.dto';
-import moment from 'moment-timezone';
 import { ProcessRefundDto } from './dto/process-refund.dto';
 import { PaymentStatus } from '../entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
@@ -32,7 +28,7 @@ export class RefundsService {
     private usersRepo: Repository<UsersEntity>,
     private paymentService: PaymentService,
     private readonly mailService: BookingMailService,
-  ) { }
+  ) {}
 
   async create(uid: string, dto: CreateRefundDto) {
     // Check if the field booking exists with PAID status
@@ -320,7 +316,7 @@ export class RefundsService {
         refundId: zaloResponse?.refund_id,
       });
     }
-    
+
     return;
   }
   async remove(id: number): Promise<void> {
@@ -329,7 +325,8 @@ export class RefundsService {
 
   async rejectRefund(req: any, id: number, dto: UpdateRefundDto) {
     const staff = req.staff;
-    const refund = await this.refundRepo.createQueryBuilder('rf')
+    const refund = await this.refundRepo
+      .createQueryBuilder('rf')
       .innerJoin('field_bookings', 'fb', 'rf.field_booking_id = fb.id')
       .innerJoin('users', 'u', 'fb.userId = u.id')
       .where('rf.id = :id', { id })
@@ -345,7 +342,9 @@ export class RefundsService {
       ])
       .getRawOne();
     if (!refund) {
-      throw new BadRequestException('Yêu cầu hoàn tiền không hợp lệ, hoặc đã được xử lý.');
+      throw new BadRequestException(
+        'Yêu cầu hoàn tiền không hợp lệ, hoặc đã được xử lý.',
+      );
     }
     await this.refundRepo.update(id, {
       status: RefundStatus.REJECTED,
@@ -354,31 +353,31 @@ export class RefundsService {
       updatedBy: staff.email,
     });
     try {
-      await this.mailService.sendRefundRejectEmail(refund.userEmail, {
-        bookingCode: refund.bookingCode,
-        customerName: refund.userName ?? refund.userEmail,
-        rejectReason: dto.adminNote,
-      }).then(() => {
-        this.refundRepo.update(id, {
-          sentMail: true,
+      await this.mailService
+        .sendRefundRejectEmail(refund.userEmail, {
+          bookingCode: refund.bookingCode,
+          customerName: refund.userName ?? refund.userEmail,
+          rejectReason: dto.adminNote,
+        })
+        .then(() => {
+          this.refundRepo.update(id, {
+            sentMail: true,
+          });
         });
-      });
-    }
-    catch (error) {
+    } catch (error) {
       console.error('Error sending refund rejection email:', error);
     }
     return;
   }
 
   // for cronJob call in
-  async updateRefundProcess(id: number) {
-    const refund = await this.refundRepo
+  async updateRefundProcess() {
+    const refunds = await this.refundRepo
       .createQueryBuilder('rf')
       .innerJoin('field_bookings', 'fb', 'rf.field_booking_id = fb.id')
       .innerJoin('payments', 'p', 'p.field_booking_id = fb.id')
       .innerJoin('users', 'u', 'fb.userId = u.id')
-      .where('rf.id = :id', { id })
-      .andWhere('rf.status = :status', {
+      .where('rf.status = :status', {
         status: RefundStatus.PROCESSING,
       })
       .andWhere('p.status = :paymentStatus', {
@@ -400,62 +399,78 @@ export class RefundsService {
         'u.email "userEmail"',
         'u.fullName "userName"',
       ])
-      .getRawOne();
+      .getRawMany();
 
-    if (!refund) {
-      console.error('Refund not found or not in PROCESSING status');
+    if (!refunds || refunds?.length === 0) {
+      return;
     }
 
-    const refundStatus = await this.paymentService.queryRefundStatus(
-      refund.appRefundId,
+    await Promise.allSettled(
+      refunds.map(async (refund) => {
+        try {
+          const refundStatus = await this.paymentService.queryRefundStatus(
+            refund.appRefundId,
+          );
+
+          if (!refundStatus) {
+            console.error('Refund status not found for', refund.appRefundId);
+            return;
+          }
+
+          if (refundStatus.return_code == 3) {
+            return;
+          }
+
+          // console.log('refundStatus', refundStatus);
+
+          if (refundStatus.return_code == 1) {
+            await this.refundRepo.update(refund.id, {
+              status: RefundStatus.COMPLETED,
+            });
+            await this.fieldBookingRepo.update(refund.fieldBookingId, {
+              status: FieldBookingStatus.REFUND,
+            });
+
+            try {
+              await this.mailService
+                .sendRefundSuccessEmail(refund.userEmail, {
+                  bookingCode: refund.bookingCode,
+                  customerName: refund.userName ?? refund.userEmail,
+                  refundAmount: refund.amount,
+                  paymentMethod: 'ZaloPay',
+                })
+                .then(() => {
+                  this.refundRepo.update(refund.id, {
+                    sentMail: true,
+                  });
+                });
+              // console.log('Refund success email sent to', refund.userEmail);
+
+              // await this.refundRepo.update(refund.id, {
+              //   sentMail: true,
+              // });
+            } catch (error) {
+              console.error('Error sending refund success email:', error);
+            }
+
+            return;
+          }
+
+          if (refundStatus.return_code == 2) {
+            await this.refundRepo.update(refund.id, {
+              status: RefundStatus.FAILED,
+              failedReason: refundStatus.return_message,
+            });
+          }
+        } catch (error) {
+          console.error(
+            'Error processing refund for',
+            refund.appRefundId,
+            error,
+          );
+        }
+      }),
     );
-
-    if (!refundStatus) {
-      console.error('Refund status not found');
-      return;
-    }
-
-    if (refundStatus.return_code == 3) {
-      return;
-    }
-    console.log('refundStatus', refundStatus);
-    if (refundStatus.return_code == 1) {
-      await this.refundRepo.update(refund.id, {
-        status: RefundStatus.COMPLETED,
-      });
-      await this.fieldBookingRepo.update(refund.fieldBookingId, {
-        status: FieldBookingStatus.REFUND,
-      });
-      // sent mail to customer
-
-      try {
-        await this.mailService.sendRefundSuccessEmail(refund.userEmail, {
-          bookingCode: refund.bookingCode,
-          customerName: refund.userName ?? refund.userEmail,
-          refundAmount: refund.amount,
-          paymentMethod: 'ZaloPay',
-        });
-        console.log('Refund success email sent to', refund.userEmail);
-
-        await this.refundRepo.update(refund.id, {
-          sentMail: true,
-        });
-      }
-      catch (error) {
-        console.error('Error sending refund success email:', error);
-      }
-
-      return;
-    }
-
-    if (refundStatus.return_code == 2) {
-      await this.refundRepo.update(refund.id, {
-        status: RefundStatus.FAILED,
-        failedReason: refundStatus.return_message,
-      });
-    }
-
-    return;
   }
 
   getDiffTimeInHours = (
