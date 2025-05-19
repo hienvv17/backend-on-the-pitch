@@ -136,6 +136,7 @@ export class RefundsService {
         'sf.id "sportFieldId"',
         'br.name "branchName"',
         'br.id "branchId"',
+        'refund.updatedBy "updatedBy"',
       ]);
     if (status) {
       query = query.andWhere('refund.status = :status', { status });
