@@ -320,6 +320,8 @@ export class RefundsService {
         refundId: zaloResponse?.refund_id,
       });
     }
+    
+    return;
   }
   async remove(id: number): Promise<void> {
     await this.refundRepo.delete(id);
@@ -351,15 +353,20 @@ export class RefundsService {
       updatedAt: new Date(),
       updatedBy: staff.email,
     });
-    await this.mailService.sendRefundRejectEmail(refund.userEmail, {
-      bookingCode: refund.bookingCode,
-      customerName: refund.userName ?? refund.userEmail,
-      reason: dto.adminNote,
-    }).then(() => {
-      this.refundRepo.update(id, {
-        sentMail: true,
+    try {
+      await this.mailService.sendRefundRejectEmail(refund.userEmail, {
+        bookingCode: refund.bookingCode,
+        customerName: refund.userName ?? refund.userEmail,
+        rejectReason: dto.adminNote,
+      }).then(() => {
+        this.refundRepo.update(id, {
+          sentMail: true,
+        });
       });
-    });
+    }
+    catch (error) {
+      console.error('Error sending refund rejection email:', error);
+    }
     return;
   }
 
@@ -369,6 +376,7 @@ export class RefundsService {
       .createQueryBuilder('rf')
       .innerJoin('field_bookings', 'fb', 'rf.field_booking_id = fb.id')
       .innerJoin('payments', 'p', 'p.field_booking_id = fb.id')
+      .innerJoin('users', 'u', 'fb.userId = u.id')
       .where('rf.id = :id', { id })
       .andWhere('rf.status = :status', {
         status: RefundStatus.PROCESSING,
@@ -420,16 +428,22 @@ export class RefundsService {
       });
       // sent mail to customer
 
-      await this.mailService.sendRefundSuccessEmail(refund.userEmail, {
-        bookingCode: refund.bookingCode,
-        customerName: refund.userName ?? refund.userEmail,
-        refundAmount: refund.amount,
-        paymentMethod: 'ZaloPay',
-      }).then(() => {
-        this.refundRepo.update(refund.id, {
+      try {
+        await this.mailService.sendRefundSuccessEmail(refund.userEmail, {
+          bookingCode: refund.bookingCode,
+          customerName: refund.userName ?? refund.userEmail,
+          refundAmount: refund.amount,
+          paymentMethod: 'ZaloPay',
+        });
+        console.log('Refund success email sent to', refund.userEmail);
+
+        await this.refundRepo.update(refund.id, {
           sentMail: true,
         });
-      });
+      }
+      catch (error) {
+        console.error('Error sending refund success email:', error);
+      }
 
       return;
     }
@@ -440,6 +454,8 @@ export class RefundsService {
         failedReason: refundStatus.return_message,
       });
     }
+
+    return;
   }
 
   getDiffTimeInHours = (

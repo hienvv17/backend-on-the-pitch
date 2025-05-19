@@ -415,9 +415,9 @@ export class PaymentService {
         data,
         config,
       );
-      const response = await lastValueFrom(response$);
-      console.log(response.data);
-      return response.data;
+      const response = await lastValueFrom(response$) as any;
+      console.log('Zalo responde check refund', response.data as any);
+      return response.data as any;
     } catch (error) {
       console.error(
         'Query refund error:',

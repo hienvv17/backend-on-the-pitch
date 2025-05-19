@@ -44,14 +44,8 @@ import { FixedBookingRequestModule } from './fixed-booking-request/fixed-booking
         transport: {
           host: configService.get<string>('MAILER_HOST'),
           port: +configService.get<number>('MAILER_PORT'),
-          ignoreTLS:
-            configService.get<string>('MAILER_IGNORE_TLS') === 'true'
-              ? true
-              : false,
-          secure:
-            configService.get<string>('MAILER_SECURE') === 'true'
-              ? true
-              : false,
+          requireTLS: true,
+          secure: false,
           auth: {
             user: configService.get<string>('MAILER_USER'),
             pass: configService.get<string>('MAILER_PASSWORD'),
@@ -87,4 +81,4 @@ import { FixedBookingRequestModule } from './fixed-booking-request/fixed-booking
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

@@ -3,7 +3,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class BookingMailService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(private readonly mailerService: MailerService) { }
 
   async sendBookingSuccessEmail(to: string, bookingData: any) {
     //todo updat template that can not show
@@ -30,10 +30,11 @@ export class BookingMailService {
   }
 
   async sendRefundSuccessEmail(to: string, bookingData: any) {
+    console.log('sendRefundSuccessEmail', to, bookingData);
     await this.mailerService.sendMail({
       to,
       subject: `Hoàn tiền thành công - ${bookingData.bookingCode}`,
-      template: 'refund-success',
+      template: 'refund-approve',
       context: {
         customerName: bookingData.customerName,
         bookingCode: bookingData.bookingCode,
@@ -41,7 +42,6 @@ export class BookingMailService {
         paymentMethod: 'ZaloPay',
       },
     });
-
     return;
   }
 
@@ -57,7 +57,6 @@ export class BookingMailService {
           bookingData.rejectReason ?? 'Không đáp ứng điều kiện hoàn tiền.',
       },
     });
-
     return;
   }
 }

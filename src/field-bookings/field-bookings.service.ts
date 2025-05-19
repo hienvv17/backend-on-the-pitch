@@ -54,7 +54,7 @@ export class FieldBookingsService {
     private userService: UsersService,
     private voucherService: VouchersService,
     private paymentService: PaymentService,
-  ) {}
+  ) { }
 
   async getBookingHistory(
     dto: GetBookingHistoryDto,
@@ -556,7 +556,8 @@ export class FieldBookingsService {
 
     const diffStartTime = getTimeDiff(currentTime, bookingStart, 'minute');
     const diffEndTime = getTimeDiff(currentTime, bookingEnd, 'minute');
-    if (diffStartTime < 30) {
+
+    if (diffStartTime < -30) {
       throw new BadRequestException(
         'Chưa đến thời gian check in sân, vui lòng quay lại sau',
       );

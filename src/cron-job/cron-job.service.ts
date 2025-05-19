@@ -39,7 +39,7 @@ export class CronJobService {
     private readonly mailService: BookingMailService,
     private readonly paymentService: PaymentService,
     private readonly refundService: RefundsService,
-  ) {}
+  ) { }
   // Cron job that runs every day at 3 AM
   //test
   @Cron('0 7 * * *')
@@ -208,8 +208,10 @@ export class CronJobService {
     // Generate loyalty vouchers for users who have made total amount bookings last month
   }
 
-  @Cron('*/10 * * * *')
+  @Cron('*/1 * * * *')
   async handleEveryTenMinCron() {
+
+    console.log('Start cron job every 10 minutes');
     const now = new Date();
     const fifteenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
 
@@ -373,8 +375,7 @@ export class CronJobService {
     }
 
     console.log(
-      `[Cron] Cancelled ${
-        expiredBookings.length
+      `[Cron] Cancelled ${expiredBookings.length
       } expired bookings at ${now.toISOString()}`,
     );
   }
