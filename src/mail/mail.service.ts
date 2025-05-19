@@ -3,7 +3,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class BookingMailService {
-  constructor(private readonly mailerService: MailerService) { }
+  constructor(private readonly mailerService: MailerService) {}
 
   async sendBookingSuccessEmail(to: string, bookingData: any) {
     //todo updat template that can not show
@@ -43,8 +43,10 @@ export class BookingMailService {
           paymentMethod: 'ZaloPay',
         },
       });
+      console.log('[sendRefundSuccessEmail] Mail sent successfully');
     } catch (error) {
-      console.error('ErrorSedningMail:', error);  
+      console.error('[sendRefundSuccessEmail] Error sending mail:', error);
+      throw error; // rethrow to be caught outside if needed
     }
   }
 

@@ -361,5 +361,9 @@ export class CronJobService {
         expiredBookings.length
       } expired bookings at ${now.toISOString()}`,
     );
+
+    console.log(
+      `[Cron] Resent ${successResendMailList.length} booking success emails`,
+    );
   }
 }

@@ -471,6 +471,8 @@ export class RefundsService {
         }
       }),
     );
+
+    return;
   }
 
   getDiffTimeInHours = (
