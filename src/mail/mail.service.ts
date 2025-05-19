@@ -31,18 +31,21 @@ export class BookingMailService {
 
   async sendRefundSuccessEmail(to: string, bookingData: any) {
     console.log('sendRefundSuccessEmail', to, bookingData);
-    await this.mailerService.sendMail({
-      to,
-      subject: `Hoàn tiền thành công - ${bookingData.bookingCode}`,
-      template: 'refund-approve',
-      context: {
-        customerName: bookingData.customerName,
-        bookingCode: bookingData.bookingCode,
-        refundAmount: bookingData.refundAmount,
-        paymentMethod: 'ZaloPay',
-      },
-    });
-    return;
+    try {
+      await this.mailerService.sendMail({
+        to,
+        subject: `Hoàn tiền thành công - ${bookingData.bookingCode}`,
+        template: 'refund-approve',
+        context: {
+          customerName: bookingData.customerName,
+          bookingCode: bookingData.bookingCode,
+          refundAmount: bookingData.refundAmount,
+          paymentMethod: 'ZaloPay',
+        },
+      });
+    } catch (error) {
+      console.error('ErrorSedningMail:', error);  
+    }
   }
 
   async sendRefundRejectEmail(to: string, bookingData: any) {
