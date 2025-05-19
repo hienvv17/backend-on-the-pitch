@@ -39,7 +39,7 @@ export class CronJobService {
     private readonly mailService: BookingMailService,
     private readonly paymentService: PaymentService,
     private readonly refundService: RefundsService,
-  ) { }
+  ) {}
   // Cron job that runs every day at 3 AM
   //test
   @Cron('0 7 * * *')
@@ -210,7 +210,6 @@ export class CronJobService {
 
   @Cron('*/1 * * * *')
   async handleEveryTenMinCron() {
-
     console.log('Start cron job every 10 minutes');
     const now = new Date();
     const fifteenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
@@ -367,15 +366,16 @@ export class CronJobService {
     });
 
     if (processRefundList.length > 0) {
-      await Promise.all(
-        processRefundList.map(async (refund) => {
-          await this.refundService.updateRefundProcess(refund.id);
+      await Promise.allSettled(
+        processRefundList.map((refund) => {
+          this.refundService.updateRefundProcess(refund.id);
         }),
       );
     }
 
     console.log(
-      `[Cron] Cancelled ${expiredBookings.length
+      `[Cron] Cancelled ${
+        expiredBookings.length
       } expired bookings at ${now.toISOString()}`,
     );
   }
