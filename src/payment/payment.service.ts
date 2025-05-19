@@ -411,7 +411,7 @@ export class PaymentService {
 
     try {
       const response$ = this.httpService.post(
-        this.config.queryRefundEndpoint,
+        'https://sb-openapi.zalopay.vn/v2/query_refund',
         data,
         config,
       );

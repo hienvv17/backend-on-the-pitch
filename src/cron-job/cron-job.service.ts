@@ -208,7 +208,7 @@ export class CronJobService {
     // Generate loyalty vouchers for users who have made total amount bookings last month
   }
 
-  @Cron('*/10 * * * *')
+  @Cron('*/2 * * * *')
   async handleEveryTenMinCron() {
     const now = new Date();
     const fifteenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
