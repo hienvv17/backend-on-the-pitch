@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
 import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 import { ResponseService } from '../response/response.service';
@@ -7,12 +7,19 @@ import { ResponseService } from '../response/response.service';
 export class DashboardController {
   constructor(
     private readonly dashboardService: DashboardService,
-    private readonly responseService: ResponseService) { }
+    private readonly responseService: ResponseService,
+  ) {}
 
-  // @UseGuards(AdminJwtGuard)
+  @UseGuards(AdminJwtGuard)
   @Get()
-  async getDashboard(@Param('year') year?: number, @Param('month') month?: number) {
-    const data = await this.dashboardService.getDashboardData();
-    return this.responseService.successResponse({ data }, 'Dashboard data retrieved successfully');
+  async getDashboard(
+    @Query('year') year?: number,
+    @Query('month') month?: number,
+  ) {
+    const data = await this.dashboardService.getDashboardData(year, month);
+    return this.responseService.successResponse(
+      { data },
+      'Dashboard data retrieved successfully',
+    );
   }
 }

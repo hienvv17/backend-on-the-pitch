@@ -9,8 +9,12 @@ import { FirebaseAdmin } from '../firebase/firebase.service';
 import { ResponseModule } from '../response/response.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UsersEntity, FieldBookingsEntity]), StaffsModule, ResponseModule],
+  imports: [
+    TypeOrmModule.forFeature([UsersEntity, FieldBookingsEntity]),
+    StaffsModule,
+    ResponseModule,
+  ],
   controllers: [DashboardController],
   providers: [DashboardService, FirebaseAdmin],
 })
-export class DashboardModule { }
+export class DashboardModule {}
