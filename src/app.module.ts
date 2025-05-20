@@ -23,6 +23,7 @@ import { CronJobModule } from './cron-job/cron-job.module';
 import { VouchersModule } from './vouchers/vouchers.module';
 import { PaymentModule } from './payment/payment.module';
 import { FixedBookingRequestModule } from './fixed-booking-request/fixed-booking-request.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { FixedBookingRequestModule } from './fixed-booking-request/fixed-booking
     VouchersModule,
     FixedBookingRequestModule,
     PaymentModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
