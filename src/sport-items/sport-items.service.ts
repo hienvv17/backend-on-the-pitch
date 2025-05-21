@@ -64,7 +64,7 @@ export class SportItemsService {
     const query = this.sportItemRepo
       .createQueryBuilder('sportItem')
       .where('sportItem.isDelete = :isDelete', { isDelete: false })
-      .andWhere('sportItem.isImport = :isActive', { isActive: true });
+      .andWhere('sportItem.isActive = :isActive', { isActive: true });
     if (search) {
       query.andWhere('LOWER(sportItem.name) LIKE :search', {
         search: `%${search.toLowerCase()}%`,
@@ -75,6 +75,52 @@ export class SportItemsService {
 
     const [items, count] = await Promise.all([
       query.skip(offset).take(limit).getMany(),
+      query.getCount(),
+    ]);
+
+    return { items, count };
+  }
+
+  async getImportHistory(
+    limit: number,
+    offset: number,
+    order: string,
+    sortKey?: string,
+    search?: string,
+  ) {
+    const query = this.itemImportHistoryRepo
+      .createQueryBuilder('importHistory')
+      .leftJoin('branches', 'branch', 'branch.id = importHistory.branchId')
+      .leftJoin(
+        'sport_items',
+        'sportItem',
+        'sportItem.id = importHistory.sportItemId',
+      )
+      .select([
+        'importHistory.id "id"',
+        'importHistory.branchId "branchId"',
+        'importHistory.sportItemId "sportItemId"',
+        'importHistory.quantity "quantity"',
+        'importHistory.note "note"',
+        'importHistory.createdAt "createdAt"',
+        'importHistory.createdBy "createdBy"',
+        'branch.name "branchName"',
+        'sportItem.name "sportItemName"',
+      ]);
+
+    if (search) {
+      query.andWhere(
+        'LOWER(branch.name) LIKE :search OR LOWER(sportItem.name) LIKE :search',
+        {
+          search: `%${search.toLowerCase()}%`,
+        },
+      );
+    }
+    const sortBy = sortKey ? sortKey : 'importHistory.id';
+    query.orderBy(sortBy, order ? 'ASC' : 'DESC');
+
+    const [items, count] = await Promise.all([
+      query.limit(limit).offset(offset).getRawMany(),
       query.getCount(),
     ]);
 

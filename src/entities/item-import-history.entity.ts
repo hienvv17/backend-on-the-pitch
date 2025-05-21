@@ -14,14 +14,14 @@ export class ItemImportHistory {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'branch_id' })
+  @Column({ name: 'branch_id', type: 'bigint' })
   branchId: number;
 
   @ManyToOne(() => BranchsEntity)
   @JoinColumn({ name: 'branch_id' })
   branch: BranchsEntity;
 
-  @Column({ name: 'sport_item_id' })
+  @Column({ name: 'sport_item_id', type: 'bigint' })
   sportItemId: number;
 
   @ManyToOne(() => SportItemsEntity)

@@ -70,11 +70,11 @@ export class SportItemsController {
     return this.responseService.successResponse({ items, count });
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: number) {
-    const item = await this.sportItemsService.findOne(+id);
-    return this.responseService.successResponse({ item });
-  }
+  // @Get(':id')
+  // async findOne(@Param('id') id: number) {
+  //   const item = await this.sportItemsService.findOne(+id);
+  //   return this.responseService.successResponse({ item });
+  // }
 
   @UseGuards(AdminJwtGuard)
   @Put(':id')
@@ -96,5 +96,24 @@ export class SportItemsController {
   async importItem(@Request() req: any, @Body() importDto: ImportItemDto) {
     await this.sportItemsService.importItem(req, importDto);
     return this.responseService.successResponse();
+  }
+
+  @UseGuards(AdminJwtGuard)
+  @Get('history-import')
+  async getImportHistory(
+    @Query('limit') limit: number = 10,
+    @Query('offset') offset: number = 0,
+    @Query('order') order: string = 'ASC',
+    @Query('sortKey') sortKey?: string,
+    @Query('search') search?: string,
+  ) {
+    const { items, count } = await this.sportItemsService.getImportHistory(
+      limit,
+      offset,
+      order,
+      sortKey,
+      search,
+    );
+    return this.responseService.successResponse({ items, count });
   }
 }
