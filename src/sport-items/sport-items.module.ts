@@ -6,10 +6,16 @@ import { SportItemsEntity } from '../entities/sport-items.entity';
 import { FirebaseAdmin } from '../firebase/firebase.service';
 import { StaffsModule } from '../staffs/staffs.module';
 import { ResponseModule } from '../response/response.module';
+import { SportItemBranchEntity } from '../entities/sport-item-branch.entity';
+import { ItemImportHistory } from '../entities/item-import-history.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([SportItemsEntity]),
+    TypeOrmModule.forFeature([
+      SportItemsEntity,
+      SportItemBranchEntity,
+      ItemImportHistory,
+    ]),
     StaffsModule,
     ResponseModule,
   ],

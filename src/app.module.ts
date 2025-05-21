@@ -79,6 +79,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     FixedBookingRequestModule,
     PaymentModule,
     DashboardModule,
+    SportItemsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

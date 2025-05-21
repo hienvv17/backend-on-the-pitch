@@ -2,24 +2,28 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
   IsOptional,
-  IsNotEmpty,
   IsNumber,
   IsPositive,
-  IsArray,
   IsBoolean,
+  IsArray,
 } from 'class-validator';
 
-export class CreateSportItemDto {
+export class UpdateSportItemDto {
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  @IsOptional()
+  name?: string;
+
+  @ApiProperty()
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 
   @ApiProperty()
   @IsPositive()
   @IsNumber()
-  @IsNotEmpty()
-  price: number;
+  @IsOptional()
+  price?: number;
 
   @ApiProperty({ nullable: true })
   @IsOptional()
@@ -30,9 +34,4 @@ export class CreateSportItemDto {
   @IsArray()
   @IsOptional()
   images?: string[];
-
-  @ApiProperty({ nullable: true })
-  @IsBoolean()
-  @IsOptional()
-  isActive?: boolean;
 }

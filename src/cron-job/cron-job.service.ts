@@ -205,7 +205,7 @@ export class CronJobService {
     // Generate loyalty vouchers for users who have made total amount bookings last month
   }
 
-  @Cron('*/3 * * * *')
+  // @Cron('*/3 * * * *')
   async handleEveryThreeMinutesCron() {
     console.log('Start cron job every 3 minutes');
     const now = new Date();
