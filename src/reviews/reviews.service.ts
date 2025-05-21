@@ -26,11 +26,11 @@ export class ReviewsService {
   async create(uid: string, dto: CreateReviewDto) {
     const user = await this.usersRepo.findOne({ where: { uid: uid } });
     if (!user) throw new BadRequestException('You are not login');
-    // Booked and paid by user success
+    // CHECK_IN status required
     const fieldBooking = await this.fieldBookingsRepo.findOne({
       where: {
         id: dto.fieldBookingId,
-        status: FieldBookingStatus.PAID,
+        status: FieldBookingStatus.CHECK_IN,
         userId: user.id,
       },
     });
