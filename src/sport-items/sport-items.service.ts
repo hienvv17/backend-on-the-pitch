@@ -11,8 +11,8 @@ import { UpdateSportItemDto } from './dto/update-sport-item.dto';
 import { ImportItemDto } from './dto/import-item.dto';
 import { SportItemBranchEntity } from '../entities/sport-item-branch.entity';
 import { ItemImportHistory } from '../entities/item-import-history.entity';
-import { Orders } from 'src/entities/order.entity';
-import { OrderDetail } from 'src/entities/order-detail.entity';
+import { Orders } from '../entities/order.entity';
+import { OrderDetail } from '../entities/order-detail.entity';
 
 @Injectable()
 export class SportItemsService {

@@ -16,9 +16,9 @@ import { AdminJwtGuard } from '../auth/guard/admin-jwt.guard';
 import { ResponseService } from '../response/response.service';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateSportItemDto } from './dto/update-sport-item.dto';
-import { ManagerJwtGuard } from 'src/auth/guard/manager-jwt.guard';
+import { ManagerJwtGuard } from '../auth/guard/manager-jwt.guard';
 import { ImportItemDto } from './dto/import-item.dto';
-import { StaffJwtGuard } from 'src/auth/guard/staff-jwt.guard';
+import { StaffJwtGuard } from '../auth/guard/staff-jwt.guard';
 
 @ApiTags('Sport Item')
 @Controller('sport-items')

@@ -8,8 +8,8 @@ import { StaffsModule } from '../staffs/staffs.module';
 import { ResponseModule } from '../response/response.module';
 import { SportItemBranchEntity } from '../entities/sport-item-branch.entity';
 import { ItemImportHistory } from '../entities/item-import-history.entity';
-import { Orders } from 'src/entities/order.entity';
-import { OrderDetail } from 'src/entities/order-detail.entity';
+import { Orders } from '../entities/order.entity';
+import { OrderDetail } from '../entities/order-detail.entity';
 
 @Module({
   imports: [
