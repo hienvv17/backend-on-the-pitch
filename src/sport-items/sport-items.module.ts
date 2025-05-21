@@ -8,6 +8,8 @@ import { StaffsModule } from '../staffs/staffs.module';
 import { ResponseModule } from '../response/response.module';
 import { SportItemBranchEntity } from '../entities/sport-item-branch.entity';
 import { ItemImportHistory } from '../entities/item-import-history.entity';
+import { Orders } from 'src/entities/order.entity';
+import { OrderDetail } from 'src/entities/order-detail.entity';
 
 @Module({
   imports: [
@@ -15,6 +17,8 @@ import { ItemImportHistory } from '../entities/item-import-history.entity';
       SportItemsEntity,
       SportItemBranchEntity,
       ItemImportHistory,
+      Orders,
+      OrderDetail,
     ]),
     StaffsModule,
     ResponseModule,

@@ -18,6 +18,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { UpdateSportItemDto } from './dto/update-sport-item.dto';
 import { ManagerJwtGuard } from 'src/auth/guard/manager-jwt.guard';
 import { ImportItemDto } from './dto/import-item.dto';
+import { StaffJwtGuard } from 'src/auth/guard/staff-jwt.guard';
 
 @ApiTags('Sport Item')
 @Controller('sport-items')
@@ -115,5 +116,42 @@ export class SportItemsController {
       search,
     );
     return this.responseService.successResponse({ items, count });
+  }
+
+  @UseGuards(StaffJwtGuard)
+  @Get('get-item-to-sold')
+  async getItemToSold(
+    @Query('limit') limit: number = 10,
+    @Query('offset') offset: number = 0,
+    @Query('order') order: string = 'ASC',
+    @Query('branchId') branchId?: number,
+    @Query('sortKey') sortKey?: string,
+    @Query('search') search?: string,
+  ) {
+    const { items, count } = await this.sportItemsService.getItemToSold(
+      limit,
+      offset,
+      order,
+      branchId,
+      sortKey,
+      search,
+    );
+    return this.responseService.successResponse({ items, count });
+  }
+
+  @UseGuards(StaffJwtGuard)
+  @Post('order-create')
+  async orderCreate(
+    @Request() req: any,
+    @Body()
+    data: {
+      sportItemId: number;
+      branchId: number;
+      quantityChoosen: number;
+      price: number;
+    }[],
+  ) {
+    await this.sportItemsService.orderCreate(req, data);
+    return this.responseService.successResponse();
   }
 }

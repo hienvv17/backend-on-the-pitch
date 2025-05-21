@@ -11,6 +11,8 @@ import { UpdateSportItemDto } from './dto/update-sport-item.dto';
 import { ImportItemDto } from './dto/import-item.dto';
 import { SportItemBranchEntity } from '../entities/sport-item-branch.entity';
 import { ItemImportHistory } from '../entities/item-import-history.entity';
+import { Orders } from 'src/entities/order.entity';
+import { OrderDetail } from 'src/entities/order-detail.entity';
 
 @Injectable()
 export class SportItemsService {
@@ -21,6 +23,10 @@ export class SportItemsService {
     private readonly sportItemBranchRepo: Repository<SportItemBranchEntity>,
     @InjectRepository(ItemImportHistory)
     private readonly itemImportHistoryRepo: Repository<ItemImportHistory>,
+    @InjectRepository(Orders)
+    private readonly orderRepo: Repository<Orders>,
+    @InjectRepository(OrderDetail)
+    private readonly orderDetailRepo: Repository<OrderDetail>,
   ) {}
 
   async create(dto: CreateSportItemDto) {
@@ -185,5 +191,107 @@ export class SportItemsService {
     });
     await this.itemImportHistoryRepo.save(history);
     return;
+  }
+
+  async getItemToSold(
+    limit: number,
+    offset: number,
+    order: string,
+    branchId?: number,
+    sortKey?: string,
+    search?: string,
+  ) {
+    // prevent calling this function if branchId is not provided
+    if (!branchId) {
+      return { items: [], count: 0 };
+    }
+
+    const query = this.sportItemBranchRepo
+      .createQueryBuilder('itemBranch')
+      .leftJoin(
+        'sport_items',
+        'sportItem',
+        'sportItem.id = itemBranch.sportItemId',
+      )
+      .where('itemBranch.quantity > 0')
+      .andWhere('itemBranch.branchId = :branchId', { branchId })
+      .select([
+        'itemBranch.id "id"',
+        'itemBranch.sportItemId "sportItemId"',
+        'itemBranch.branchId "branchId"',
+        'itemBranch.quantity "quantity"',
+        'sportItem.name "sportItemName"',
+        'sportItem.images "images"',
+        'sportItem.price "price"',
+      ]);
+
+    if (search) {
+      query.andWhere('LOWER(sportItem.name) LIKE :search', {
+        search: `%${search.toLowerCase()}%`,
+      });
+    }
+    const sortBy = sortKey ? sortKey : 'itemBranch.id';
+    query.orderBy(sortBy, order ? 'ASC' : 'DESC');
+
+    const [items, count] = await Promise.all([
+      query.limit(limit).offset(offset).getRawMany(),
+      query.getCount(),
+    ]);
+
+    return { items, count };
+  }
+  // create order, and update item branch quantity
+  //  const data = bill.map((item) => ({
+  //           sportItemId: item.sportItemId,
+  //           branchId: item.branchId,
+  //           quantityChoosen: item.quantityChoosen,
+  //       }));
+
+  async orderCreate(
+    req: any,
+    data: {
+      sportItemId: number;
+      branchId: number;
+      quantityChoosen: number;
+      price: number;
+    }[],
+  ) {
+    //update item branch with array of data
+    const newOrder = this.orderRepo.create({
+      branchId: data[0].branchId,
+      totalPrice: data.reduce(
+        (acc, item) => acc + item.quantityChoosen * item.price,
+        0,
+      ),
+      createdBy: req.staff.email,
+    });
+    await this.orderRepo.save(newOrder);
+    return await Promise.all(
+      data.map(async (item) => {
+        const itemBranch = await this.sportItemBranchRepo.findOne({
+          where: {
+            sportItemId: item.sportItemId,
+            branchId: item.branchId,
+          },
+        });
+        if (!itemBranch) {
+          throw new NotFoundException('Sport item not found');
+        }
+
+        const newQuantity = itemBranch.quantity - item.quantityChoosen;
+        await this.sportItemBranchRepo.update(itemBranch.id, {
+          quantity: newQuantity,
+          lastModifiedBy: req.staff.email,
+        });
+        // insert into order-detail
+        await this.orderDetailRepo.save({
+          orderId: newOrder.id,
+          sportItemId: item.sportItemId,
+          quantity: item.quantityChoosen,
+          price: item.price,
+          total: item.quantityChoosen * item.price,
+        });
+      }),
+    );
   }
 }
