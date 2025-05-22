@@ -69,7 +69,7 @@ export class SportFieldsController {
 
   @UseGuards(AdminJwtGuard)
   @Delete(':id')
-  async delete(@Param(':id') id: number) {
+  async delete(@Param('id') id: number) {
     await this.sportFieldsService.deleteSportField(id);
     return this.responseService.successResponse();
   }
