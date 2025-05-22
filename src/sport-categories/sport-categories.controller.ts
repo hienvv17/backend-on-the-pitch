@@ -6,6 +6,7 @@ import {
   Param,
   UseGuards,
   Put,
+  Delete,
 } from '@nestjs/common';
 import { SportCategoriesService } from './sport-categories.service';
 import { ResponseService } from '../response/response.service';
@@ -52,5 +53,11 @@ export class SportCategoriesController {
   async update(@Param('id') id: number, @Body() dto: UpdateSportCategoryDto) {
     const sportCategory = await this.sportCategoriesService.update(id, dto);
     return this.responseService.successResponse({ sportCategory });
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: number) {
+    await this.sportCategoriesService.delete(id);
+    return this.responseService.successResponse();
   }
 }
