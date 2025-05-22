@@ -63,7 +63,7 @@ export class BranchesService {
       .orderBy('branch.id', 'ASC')
       .getMany();
 
-    return branches.map((branch) => ({
+    return branches?.map((branch) => ({
       ...branch,
       totalField: branch.fieldBranches.length,
       sports: [

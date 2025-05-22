@@ -63,7 +63,7 @@ export class ReviewsService {
     search?: string,
   ) {
     const role = staff.role;
-    const branchIds = staff.branchids.map(Number);
+    const branchIds = staff.branchids?.map(Number);
     const queryBuilder = this.reviewRepo
       .createQueryBuilder('review')
       .leftJoin('users', 'user', 'user.id = review.userId')

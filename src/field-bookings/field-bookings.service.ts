@@ -521,7 +521,7 @@ export class FieldBookingsService {
     if (staff.role !== STAFF_ROLE.ADMIN) {
       console.log('staff role', staff);
       query = query.where('br.id = :branchId', {
-        branchId: staff.branchids.map(Number),
+        branchId: staff.branchids?.map(Number),
       });
     }
     const booking = await query
